@@ -1,58 +1,70 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><title>폰트 임계값 실측</title>
+<head><meta charset="utf-8"><title>Mona 폰트 실측</title>
 <style>
-  body { background:#0b1020; color:#9fb4d8; font:12px monospace; margin:0; padding:8px; }
-  canvas { image-rendering: pixelated; display:block; margin:2px 0 10px; }
-  h3 { color:#ffe066; margin:8px 0 2px; font-size:12px; }
+  @font-face { font-family: 'Mona10';    src: url('../src/font/Mona10.ttf')    format('truetype'); }
+  @font-face { font-family: 'Mona12';    src: url('../src/font/Mona12.ttf')    format('truetype'); }
+  @font-face { font-family: 'Mona8x12';  src: url('../src/font/Mona8x12.ttf')  format('truetype'); }
+  @font-face { font-family: 'Mona10x12'; src: url('../src/font/Mona10x12.ttf') format('truetype'); }
+  body { background:#0b1020; color:#9fb4d8; font:12px monospace; margin:0; padding:10px; }
+  canvas { image-rendering: pixelated; display:block; margin:2px 0 8px; }
+  h3 { color:#ffe066; margin:10px 0 2px; font-size:12px; }
 </style></head>
 <body>
-<div id="out"></div>
+<div id="out">폰트 로딩 중…</div>
 
 <script src="../src/core/const.js"></script>
 <script src="../src/core/font.js"></script>
 <script>
-/* 문제가 된 실제 문자열들을 임계값 x 크기 조합으로 뽑아 눈으로 비교한다 */
+/* 문제가 됐던 실제 문자열로 폰트 x 크기 x 이진화 조합을 비교한다 */
 var SAMPLES = [
-  'A 모터 0.3초  SPIKE',
+  'A 모터 0.3초 ↻   SPIKE',
   '포트는 아무 데나 꽂아도 되지만',
-  '4번 반복하기  3 / 4',
-  '노랑 서랍 → 맨 위 첫 블록'
+  '4번 반복하기        3 / 4',
+  '노랑 서랍 → 맨 위 첫 블록',
+  '빔 7칸의 끝 구멍을 커넥터에'
 ];
-var SIZES = [10, 11, 12];
-var THRESHOLDS = [48, 72, 96, 128];
+var CASES = [
+  ['Mona10',    10, true ], ['Mona10',    10, false],
+  ['Mona12',    12, true ], ['Mona12',    12, false],
+  ['Mona8x12',  12, false], ['Mona10x12', 12, false],
+  ['Mona12',    11, false], ['Mona12',    13, false]
+];
 var SCALE = 3;
 
-var out = document.getElementById('out');
+function draw() {
+  var out = document.getElementById('out');
+  out.innerHTML = '';
+  CASES.forEach(function (c) {
+    var fam = c[0], size = c[1], bin = c[2];
+    var h3 = document.createElement('h3');
+    h3.textContent = fam + '  ' + size + 'px  이진화=' + (bin ? 'ON(th96)' : 'OFF');
+    out.appendChild(h3);
 
-function block(title, draw) {
-  var h = document.createElement('h3'); h.textContent = title; out.appendChild(h);
-  var cv = document.createElement('canvas');
-  cv.width = 1150; cv.height = SAMPLES.length * 22 * SCALE / SCALE + 8;
-  out.appendChild(cv);
-  draw(cv);
-}
+    var w = 300, h = SAMPLES.length * (size + 6) + 8;
+    var cv = document.createElement('canvas');
+    cv.width = w * SCALE; cv.height = h * SCALE;
+    out.appendChild(cv);
+    var ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#12306a'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.scale(SCALE, SCALE);
 
-SIZES.forEach(function (size) {
-  THRESHOLDS.forEach(function (th) {
-    block('size=' + size + '  threshold=' + th, function (cv) {
-      var w = 380, h = SAMPLES.length * 20 + 6;
-      cv.width = w * SCALE; cv.height = h * SCALE;
-      cv.style.width = (w * SCALE) + 'px';
-      var ctx = cv.getContext('2d');
-      ctx.imageSmoothingEnabled = false;
-      ctx.fillStyle = '#12306a'; ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.scale(SCALE, SCALE);
-      SPIKE.Font.threshold = th;
-      SPIKE.Font.cache.clear();
-      SAMPLES.forEach(function (s, i) {
-        var g = SPIKE.Font.get(s, size, '#ffffff', true);
-        ctx.drawImage(g, 4, 4 + i * 20);
-      });
+    SPIKE.Font.family = '"' + fam + '", monospace';
+    SPIKE.Font.binarize = bin;
+    SPIKE.Font.threshold = 96;
+    SPIKE.Font.cache.clear();
+    SAMPLES.forEach(function (s, i) {
+      ctx.drawImage(SPIKE.Font.get(s, size, '#ffffff', true), 4, 4 + i * (size + 6));
     });
   });
-});
-document.title = 'READY';
+  document.title = 'READY';
+}
+
+/* 폰트가 실제로 로드된 뒤에 그려야 한다 */
+Promise.all(['Mona10', 'Mona12', 'Mona8x12', 'Mona10x12'].map(function (f) {
+  return document.fonts.load('12px "' + f + '"');
+})).then(function () { return document.fonts.ready; }).then(draw);
 </script>
 </body>
 </html>

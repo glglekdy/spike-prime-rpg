@@ -7,15 +7,24 @@
   },
 
   "font": {
-    "family": "\"DungGeunMo\",\"NeoDunggeunmo\",\"Galmuri11\",\"Galmuri9\",Dotum,\"돋움\",\"Malgun Gothic\",\"맑은 고딕\",monospace",
+    "binarize": false,
     "threshold": 96,
-    "_note": "픽셀 폰트를 설치하거나 임베드했다면 family 맨 앞에 이름을 넣고 threshold 를 조절하세요. binarize:false 로 이진화를 끌 수 있습니다."
+    "fallback": "Dotum,'돋움',monospace",
+    "_note": "Mona 는 비트맵 폰트라 설계 크기(10/12px)와 정수배에서만 선명하다. ladder 가 요청 크기를 선명한 크기로 스냅한다. max=이 크기 이하일 때 / family=@font-face 이름 / px=실제로 그릴 크기.",
+    "ladder": [
+      { "max": 11,   "family": "Mona10", "px": 10 },
+      { "max": 17,   "family": "Mona12", "px": 12 },
+      { "max": 25,   "family": "Mona10", "px": 20 },
+      { "max": 33,   "family": "Mona12", "px": 24 },
+      { "max": 45,   "family": "Mona10", "px": 40 },
+      { "max": 9999, "family": "Mona12", "px": 48 }
+    ]
   },
 
   "common": {
-    "next": "다음 ▶",
-    "prev": "◀ 이전",
-    "done": "완료 ▣",
+    "next": "다음 →",
+    "prev": "← 이전",
+    "done": "완료 ■",
     "doneAlready": "완료됨",
     "yes": "도전한다",
     "no": "조금만 더 준비",
@@ -28,7 +37,7 @@
   "title": {
     "name": "SPIKE 마스터",
     "sub": "~잠든 허브 왕~",
-    "press": "▶  PRESS ENTER  ◀",
+    "press": "◆  PRESS ENTER  ◆",
     "footer": "중학생 학과체험 · SPIKE Prime 조립 & 블록코딩   |   F1 조작법",
     "attract": "다음 도전자를 기다립니다"
   },
@@ -46,13 +55,13 @@
   "guide": {
     "find": {
       "title": "부품 찾기",
-      "goal": "트레이에서 부품 7종을 꺼내자",
+      "goal": "부품 7종을 꺼내자",
       "body": ["트레이에서 일곱 가지를 꺼내자.", "빔은 구멍을 세어라 — 7개짜리다."],
       "warn": "모터는 작은 쪽. 큰 것은 라지 모터다"
     },
     "motor": {
       "title": "모터 + 커넥터",
-      "goal": "모터 축에 십자 커넥터를 꽂자",
+      "goal": "모터 축에 커넥터를 꽂자",
       "body": ["모터 가운데 튀어나온 십자 축에", "커넥터의 십자 구멍을 끼운다.", "끝까지 눌러 넣는다."],
       "warn": "안 들어가면 힘이 아니라 방향. 90도 돌려보자",
       "labelConnector": "커넥터",
@@ -79,7 +88,7 @@
     },
     "cable": {
       "title": "케이블 · 포트 A",
-      "goal": "모터를 허브 A 포트에 연결하자",
+      "goal": "허브 A 포트에 연결하자",
       "body": ["케이블 한쪽을 모터에,", "반대쪽을 허브의 A 포트에 꽂는다.", "딸깍 소리가 나야 끝까지 들어간 것."],
       "warn": "프로그램이 A라면 반드시 A. 최다 실수 지점",
       "labelMotor": "모터",
@@ -88,7 +97,7 @@
     },
     "code": {
       "title": "주문서",
-      "goal": "주문서를 보고 SPIKE 앱에 옮겨 적자",
+      "goal": "주문서를 앱에 옮겨 적자",
       "body": [],
       "warn": ""
     },

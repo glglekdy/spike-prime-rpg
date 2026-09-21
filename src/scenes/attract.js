@@ -64,7 +64,7 @@
 
       // 아래 안내
       if ((this.t % 1.2) < 0.75) {
-        r.text('▶  P R E S S   E N T E R  ◀', S.W / 2, 186,
+        r.text('◆  P R E S S   E N T E R  ◆', S.W / 2, 186,
           { size: 13, color: '#ffffff', align: 'center' });
       }
 

@@ -12,25 +12,90 @@
 (function (S) {
   'use strict';
 
-  var FAMILY = '"DungGeunMo","NeoDunggeunmo","Galmuri11","Galmuri9",' +
-               'Dotum,"돋움","Malgun Gothic","맑은 고딕",monospace';
+  /* ------------------------------------------------------------
+   *  크기 사다리
+   *
+   *  Mona 는 비트맵 폰트라 **설계 크기와 그 정수배에서만** 선명하다.
+   *  11px·13px 로 그리면 브라우저가 외곽선을 보간해 뭉개진다 (실측 확인).
+   *  그래서 코드가 요청한 크기를 가장 가까운 "선명한 크기"로 스냅한다.
+   *
+   *    9~11  → Mona10 @10      12~17 → Mona12 @12
+   *    18~25 → Mona10 @20      26~33 → Mona12 @24
+   *    34~45 → Mona10 @40      46~   → Mona12 @48
+   *
+   *  ui.ko.json 의 font.ladder 로 통째로 갈아끼울 수 있다.
+   * ---------------------------------------------------------- */
+  var LADDER = [
+    { max: 11,   family: 'Mona10', px: 10 },
+    { max: 17,   family: 'Mona12', px: 12 },
+    { max: 25,   family: 'Mona10', px: 20 },
+    { max: 33,   family: 'Mona12', px: 24 },
+    { max: 45,   family: 'Mona10', px: 40 },
+    { max: 9999, family: 'Mona12', px: 48 }
+  ];
+  var FALLBACK = "Dotum,'돋움',monospace";
 
   var Font = S.Font = {
-    family: FAMILY,
-    threshold: 96,      // 이 값보다 진한 픽셀만 살린다 (낮을수록 획이 두꺼워짐)
-    binarize: true,     // 진짜 픽셀 폰트를 넣었다면 false — 이진화가 오히려 획을 망친다
-                        //   ui.ko.json 의 font.{family,threshold,binarize} 로 바꾼다
+    ladder: LADDER,
+    fallback: FALLBACK,
+    threshold: 96,      // binarize 가 켜졌을 때만 쓰인다
+    binarize: false,    // 진짜 픽셀 폰트라 이진화하면 오히려 획이 깨진다 (실측)
+                        //   ui.ko.json 의 font.{ladder,fallback,threshold,binarize} 로 바꾼다
     cache: new Map(),
     _measureCtx: null,
 
-    /* 문자열 픽셀 폭 (그림자 1px 포함) */
+    /* ------------------------------------------------------------
+     *  웹폰트 선로딩
+     *
+     *  canvas 의 ctx.font 는 웹폰트 로드를 유발하지 않는다. 그래서 아무 처리 없이
+     *  게임을 띄우면 첫 화면이 fallback(돋움)으로 그려지고, 그 결과가 글자 캐시에
+     *  영구히 박힌다. 실제로 배포본에서 타이틀이 깨진 채 굳는 것을 확인했다.
+     *
+     *  그래서 사다리에 등장하는 폰트를 명시적으로 로드하고, 끝나면 캐시를 비운다.
+     *  폰트가 없거나 느려도 부스가 멈추면 안 되므로 3초 뒤에는 그냥 진행한다.
+     * ---------------------------------------------------------- */
+    preload: function () {
+      var self = this;
+      if (typeof document === 'undefined' || !document.fonts || !document.fonts.load) {
+        return Promise.resolve();
+      }
+      var want = {};
+      this.ladder.forEach(function (L) { want[L.family] = L.px; });
+
+      var jobs = Object.keys(want).map(function (fam) {
+        return document.fonts.load(want[fam] + 'px "' + fam + '"')
+          .catch(function () { /* 폰트가 없으면 fallback 으로 간다 */ });
+      });
+
+      var loaded = Promise.all(jobs)
+        .then(function () { return document.fonts.ready; })
+        .then(function () { self.cache.clear(); });
+
+      var timeout = new Promise(function (res) { setTimeout(res, 3000); });
+      return Promise.race([loaded, timeout]).then(function () { self.cache.clear(); });
+    },
+
+    /* 요청 크기 → { css, px } */
+    snap: function (size) {
+      var L = this.ladder;
+      for (var i = 0; i < L.length; i++) {
+        if (size <= L[i].max) {
+          return { css: "'" + L[i].family + "'," + this.fallback, px: L[i].px };
+        }
+      }
+      var last = L[L.length - 1];
+      return { css: "'" + last.family + "'," + this.fallback, px: last.px };
+    },
+
+    /* 문자열 픽셀 폭 (그림자 1px 포함). 스냅된 실제 크기로 잰다 */
     measure: function (text, size) {
       if (!this._measureCtx) {
         var c = document.createElement('canvas');
         this._measureCtx = c.getContext('2d');
       }
+      var f = this.snap(size);
       var ctx = this._measureCtx;
-      ctx.font = size + 'px ' + this.family;
+      ctx.font = f.px + 'px ' + f.css;
       return Math.ceil(ctx.measureText(text).width) + 1;
     },
 
@@ -53,14 +118,15 @@
 
     _render: function (text, size, color, shadow) {
       var pad = 2;
+      var f = this.snap(size);
       var w = this.measure(text, size) + pad * 2;
-      var h = size + pad * 2 + 4;
+      var h = f.px + pad * 2 + 4;
 
       // --- 1) 흰색으로 글자만 그린다 ---
       var src = document.createElement('canvas');
       src.width = w; src.height = h;
       var sctx = src.getContext('2d', { willReadFrequently: true });
-      sctx.font = size + 'px ' + this.family;
+      sctx.font = f.px + 'px ' + f.css;
       sctx.textBaseline = 'top';
       sctx.fillStyle = '#ffffff';
       sctx.fillText(text, pad, pad);

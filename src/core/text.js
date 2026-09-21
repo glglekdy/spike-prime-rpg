@@ -82,7 +82,8 @@
     /* ui.json 의 font 설정을 반영 (폰트 교체용 훅) */
     _applyFont: function (f) {
       if (!f || !S.Font) return;
-      if (f.family) S.Font.family = f.family;
+      if (Array.isArray(f.ladder) && f.ladder.length) S.Font.ladder = f.ladder;
+      if (f.fallback) S.Font.fallback = f.fallback;
       if (typeof f.threshold === 'number') S.Font.threshold = f.threshold;
       if (typeof f.binarize === 'boolean') S.Font.binarize = f.binarize;
       S.Font.cache.clear();

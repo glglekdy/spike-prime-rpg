@@ -35,7 +35,17 @@ ${safe}
 </script>`;
     })
   .replace(/<link\s+rel="stylesheet"\s+href="([^"]+)"\s*>/gi, (_m, href) => {
-    const css = readFileSync(join(ROOT, href), 'utf8');
+    let css = readFileSync(join(ROOT, href), 'utf8');
+    /* @font-face 의 url(...) 을 base64 data URI 로 바꾼다.
+       file:// 에서는 상대경로 폰트를 못 읽으므로 반드시 구워 넣어야 한다. */
+    const cssDir = dirname(join(ROOT, href));
+    css = css.replace(/url\(['"]?([^'")]+\.woff2)['"]?\)\s*format\(['"]woff2['"]\)/gi,
+      (_u, fp) => {
+        const buf = readFileSync(join(cssDir, fp));
+        total += buf.length;
+        inlined.push(fp);
+        return `url(data:font/woff2;base64,${buf.toString('base64')}) format('woff2')`;
+      });
     total += Buffer.byteLength(css);
     inlined.push(href);
     return `<style>\n${css}\n</style>`;

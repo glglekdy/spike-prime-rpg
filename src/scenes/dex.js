@@ -63,7 +63,7 @@
           r.ctx.drawImage(sp, 0, 0, 32, 32, 11, y - 1, 16, 16);
           r.ctx.restore();
         }
-        r.text(known ? p.title : '？？？', 32, y + 1,
+        r.text(known ? p.title : '???', 32, y + 1,
           { size: 11, color: sel ? C.textHi : (known ? C.text : C.textDim) });
       }
       if (S.PARTS.length > rows) {

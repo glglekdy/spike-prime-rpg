@@ -2,3 +2,7 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
+
+# Mona 원본 TTF (합계 30MB) — 저장소에는 서브셋 woff2 만 넣는다.
+# 원본이 필요하면 src/font/README.md 참조.
+src/font/*.ttf

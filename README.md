@@ -48,6 +48,7 @@ content/               ★ 텍스트 리소스 — 대사·UI를 JSON으로 직�
   ui.ko.json             화면 텍스트 (버튼 · 라벨 · 가이드 문구 · 폰트)
   dialogue.ko.json       대사 (NPC가 말하는 것)
   README.md              수정 방법
+src/font/subset/       Mona 비트맵 폰트 서브셋 (배포본에 임베드)
 index.dev.html         개발용 (개별 스크립트 로드)
 build.mjs              단일 HTML 병합 빌드
 scripts/smoke.mjs      헤드리스 테스트
@@ -64,8 +65,9 @@ src/ui/                메시지 윈도우
 (`file://` 배포본에서도 된다). 영구 반영은 `npm test && npm run build`.
 자세한 건 [content/README.md](content/README.md).
 
-외부 이미지·폰트·사운드 파일이 **하나도 없다.** 도트 그래픽은 코드로 생성하고,
-한글은 시스템 폰트를 알파 이진화해서 도트화하며, 음악은 WebAudio로 합성한다.
+외부 이미지·사운드 파일이 **하나도 없다.** 도트 그래픽은 코드로 생성하고,
+음악은 WebAudio로 합성한다.
+한글 도트 글꼴만 Mona 비트맵 폰트 서브셋(228KB)을 배포본에 임베드한다.
 
 ## 진행 상황
 
@@ -76,6 +78,7 @@ src/ui/                메시지 윈도우
 - [x] S5 조립 가이드 패널 (좌우 분할 · 조립도 6장 · 페이지 넘김)
 - [x] S6 코드 가이드 (주문서 카드 · SPIKE 앱 대응표)
 - [x] 텍스트 JSON 분리 (대사 / UI) — [content/README.md](content/README.md)
+- [x] Mona 비트맵 폰트 (소형 글자 깨짐 해결) — [src/font/README.md](src/font/README.md)
 - [x] S7 보스 · 엔딩 · 어트랙트 · 강사 단축키
 - [ ] S8 폴리싱
 

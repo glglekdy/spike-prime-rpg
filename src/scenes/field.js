@@ -321,10 +321,17 @@
       var C = S.C;
       var obj = S.Quest.current();
 
-      // 좌측 목표
-      var ow = r.textWidth(obj, 10) + 18;
-      r.window(4, 4, Math.min(ow, this.viewW - 8), 20, { alpha: 0.85 });
-      r.text('◆ ' + obj, 11, 9, { size: 10, color: C.textHi });
+      // 좌측 목표 — 분할 맵에서는 폭이 좁으므로 넘치면 잘라낸다
+      var maxW = this.viewW - 8;
+      var label = '◆ ' + obj;
+      if (r.textWidth(label, 10) + 18 > maxW) {
+        while (label.length > 4 && r.textWidth(label + '…', 10) + 18 > maxW) {
+          label = label.slice(0, -1);
+        }
+        label += '…';
+      }
+      r.window(4, 4, Math.min(r.textWidth(label, 10) + 18, maxW), 20, { alpha: 0.85 });
+      r.text(label, 11, 9, { size: 10, color: C.textHi });
 
       // 우측 타이머 (분할 맵에서는 패널이 담당)
       if (!this.map.split) {
@@ -332,7 +339,7 @@
         var late = S.State.remaining() < 120;
         var tw = 54;
         r.window(S.W - tw - 4, 4, tw, 20, { alpha: 0.85 });
-        r.text('⏱ ' + t, S.W - tw + 4, 9,
+        r.text(t, S.W - tw + 4, 9,
           { size: 10, color: S.State.paused ? C.textDim : (late ? C.textNg : C.text) });
       }
     }

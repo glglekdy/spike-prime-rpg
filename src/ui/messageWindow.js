@@ -189,7 +189,7 @@
         var sel = j === this.choiceIndex;
         if (sel) {
           r.rect(boxX + 4, yy - 1, boxW - 8, LINE, '#ffffff22');
-          r.text('▶', boxX + 6, yy + 1, { size: FONT, color: C.textHi });
+          r.text('→', boxX + 6, yy + 1, { size: FONT, color: C.textHi });
         }
         r.text(this.choiceList[j], boxX + 20, yy + 1,
           { size: FONT, color: sel ? C.textHi : C.text });

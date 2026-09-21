@@ -232,7 +232,7 @@
 
           r.rect(b[0], b[1], b[2], b[3], bg || '#141c38');
           r.frame(b[0], b[1], b[2], b[3], sel && !reveal ? C.winEdge : C.winEdge2, 1);
-          if (sel && !reveal) r.text('▶', b[0] + 4, b[1] + 5, { size: 10, color: C.textHi });
+          if (sel && !reveal) r.text('→', b[0] + 4, b[1] + 5, { size: 10, color: C.textHi });
           r.text(q.choices[c], b[0] + 16, b[1] + 5, { size: 10, color: col });
         }
 

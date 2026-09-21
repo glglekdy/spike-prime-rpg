@@ -88,24 +88,29 @@ FAIL 텍스트 키 전수 검사
 
 ## 폰트
 
-`ui.ko.json` 의 `font` 블록으로 바꾼다.
+**Mona** 비트맵 폰트를 씁니다. 배포본 HTML 에 임베드돼 있어 학교 PC 에 설치할 필요가 없습니다.
+
+`ui.ko.json` 의 `font` 블록으로 조절합니다.
 
 ```jsonc
 "font": {
-  "family": "\"내가받은픽셀폰트\", DungGeunMo, Dotum, monospace",
-  "threshold": 96,      // 알파 이진화 기준 (낮을수록 획이 두꺼워짐)
-  "binarize": true      // 진짜 픽셀 폰트를 넣었다면 false 권장
+  "binarize": false,          // 픽셀 폰트라 이진화는 끈다 (켜면 획이 깨진다)
+  "fallback": "Dotum,'돋움',monospace",
+  "ladder": [                 // 요청 크기 → 실제로 그릴 크기
+    { "max": 11, "family": "Mona10", "px": 10 },
+    { "max": 17, "family": "Mona12", "px": 12 }
+    // ...
+  ]
 }
 ```
 
-시스템 폰트를 이진화하는 현재 방식은 **10px 이하에서 획이 뭉개진다**
-(예: `0.3초` → `D.5초`). 제대로 된 픽셀 폰트를 설치하거나 임베드한 뒤
-`binarize: false` 로 끄는 것이 정석이다.
+비트맵 폰트는 **설계 크기와 정수배에서만** 선명합니다. 11px·13px 로 그리면
+뭉개지므로 `ladder` 가 요청 크기를 가장 가까운 선명한 크기로 스냅합니다.
+자세한 건 [src/font/README.md](../src/font/README.md).
 
-`scripts/fonttest.html` 을 `npm run serve` 로 열면
-크기 × 임계값 조합을 한눈에 비교할 수 있다.
-
----
+> 글자가 □ 로 나온다면 서브셋에 없는 문자입니다. 한글 음절 전체가 들어 있으므로
+> 한자·특수기호를 새로 쓴 경우입니다. `scripts/subset-font.py` 의 기호 목록에
+> 추가하고 다시 실행하세요.
 
 ## 다른 언어 만들기
 

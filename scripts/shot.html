@@ -249,8 +249,19 @@
   }
   window.addEventListener('error', function (e) { window.__err = e.message; });
 
-  while (n < FRAMES) step();
-  document.title = 'READY';            // 캡처 준비 완료 신호
+  /* 폰트가 로드된 뒤에 그려야 한다 (비트맵 폰트가 fallback 으로 나오면 무의미) */
+  function runAll() {
+    while (n < FRAMES) step();
+    document.title = 'READY';
+  }
+  if (document.fonts && document.fonts.load) {
+    Promise.all([
+      document.fonts.load('10px "Mona10"'),
+      document.fonts.load('12px "Mona12"')
+    ]).then(function () { return document.fonts.ready; }).then(runAll, runAll);
+  } else {
+    runAll();
+  }
 })(SPIKE);
 </script>
 </body>

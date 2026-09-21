@@ -25,10 +25,13 @@
     if (loading) loading.remove();
   }
 
-  /* 텍스트 JSON 을 먼저 읽고 게임을 띄운다 (실패해도 fallback 으로 진행) */
+  /* 텍스트 JSON → 폰트 순으로 준비한 뒤 게임을 띄운다.
+     순서가 중요하다: JSON 이 폰트 사다리를 정하고, 그 사다리로 폰트를 로드한다.
+     어느 쪽이 실패해도 부스가 멈추면 안 되므로 전부 fallback 으로 진행한다. */
   function start() {
-    if (S.Text) S.Text.boot().then(boot, boot);
-    else boot();
+    var p = S.Text ? S.Text.boot() : Promise.resolve();
+    p.then(function () { return S.Font.preload(); }, function () { return S.Font.preload(); })
+     .then(boot, boot);
   }
 
   if (document.readyState === 'loading') {
