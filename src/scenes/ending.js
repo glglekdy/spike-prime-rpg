@@ -91,7 +91,7 @@
       }
 
       if (this.ready && (this.t % 1.2) < 0.7) {
-        r.text('아무 키나 누르면 처음 화면으로', S.W / 2, S.H - 24,
+        r.text(S.T('ending.press', ''), S.W / 2, S.H - 24,
           { size: 10, color: '#cfe0ff', align: 'center' });
       }
     }

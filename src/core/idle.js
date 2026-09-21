@@ -30,11 +30,11 @@
       r.fade(0.6);
       var bw = 260, bh = 78, bx = (S.W - bw) / 2, by = (S.H - bh) / 2;
       r.window(bx, by, bw, bh);
-      r.text('자리를 비우셨나요?', bx + bw / 2, by + 12,
+      r.text(S.T('idle.title', ''), bx + bw / 2, by + 12,
         { size: 13, color: S.C.textHi, align: 'center' });
       r.text(left + '초 후 처음 화면으로 돌아갑니다', bx + bw / 2, by + 34,
         { size: 10, color: S.C.text, align: 'center' });
-      r.text('아무 키나 누르면 계속합니다', bx + bw / 2, by + 54,
+      r.text(S.T('idle.hint', ''), bx + bw / 2, by + 54,
         { size: 10, color: S.C.textDim, align: 'center' });
     }
   };

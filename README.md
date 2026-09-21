@@ -62,6 +62,7 @@ npm run serve # http://localhost:5173 (index.dev.html)
 | `F3` | 타이머 일시정지 |
 | `F4` | 텍스트 JSON 불러오기 |
 | `M` | 음소거 |
+| `L` | 언어 전환 (타이틀 화면) |
 
 90초 무입력 시 자동으로 타이틀로 돌아가고 진행 상태가 완전히 초기화된다 (반복 순환형 부스 대응).
 
@@ -69,10 +70,12 @@ npm run serve # http://localhost:5173 (index.dev.html)
 
 ```
 DESIGN.md              기획서 (확정 사항 · 교육 내용 · 개발 순서)
-content/               ★ 텍스트 리소스 — 대사·UI를 JSON으로 직접 수정
-  ui.ko.json             화면 텍스트 (버튼 · 라벨 · 가이드 문구 · 폰트)
-  dialogue.ko.json       대사 (NPC가 말하는 것)
-  README.md              수정 방법
+content/               ★ 텍스트 리소스 — 코드 수정 없이 JSON으로 고친다
+  ui.{ko,en}.json        화면 텍스트 (버튼 · 라벨 · 가이드 문구 · 폰트)
+  dialogue.{ko,en}.json  대사 (NPC · 오프닝 내레이션)
+  parts.{ko,en}.json     부품 도감 15종
+  quiz.{ko,en}.json      퀴즈 9문제 + 해설
+  README.md              수정 방법 · 언어 추가
 src/font/subset/       Mona 비트맵 폰트 서브셋 (배포본에 임베드)
 index.dev.html         개발용 (개별 스크립트 로드)
 build.mjs              단일 HTML 병합 빌드
@@ -104,6 +107,7 @@ src/ui/                메시지 윈도우
 - [x] S6 코드 가이드 (주문서 카드 · SPIKE 앱 대응표)
 - [x] 텍스트 JSON 분리 (대사 / UI) — [content/README.md](content/README.md)
 - [x] Mona 비트맵 폰트 (소형 글자 깨짐 해결) — [src/font/README.md](src/font/README.md)
+- [x] 한국어 / English 전환 (타이틀 화면 버튼 또는 `L`)
 - [x] S7 보스 · 엔딩 · 어트랙트 · 강사 단축키
 - [ ] S8 폴리싱
 

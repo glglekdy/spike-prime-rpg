@@ -1,8 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"><title>overflow</title>
 <link rel="stylesheet" href="../src/style.css"></head><body><pre id="r">scanning</pre>
 <canvas id="game" style="display:none"></canvas>
-<script type="application/json" id="spike-ui" data-src="../content/ui.ko.json"></script>
-<script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
+
 <script src="../src/core/const.js"></script><script src="../src/core/font.js"></script>
 <script src="../src/core/text.js"></script>
 <script src="../src/core/renderer.js"></script><script src="../src/core/input.js"></script>
@@ -19,18 +18,30 @@ var bad0 = [];     // 줄 수로 잡은 넘침
 function add(label, text, size, limit) {
   if (text == null || text === '') return;
   String(text).split('\n').forEach(function (ln) {
-    CHECKS.push({ label: label, text: ln, size: size, limit: limit });
+    CHECKS.push({ label: PRE + label, text: ln, size: size, limit: limit });
   });
 }
 
-Promise.all([
-  fetch('../content/ui.ko.json').then(function(r){return r.json()}),
-  fetch('../content/dialogue.ko.json').then(function(r){return r.json()}),
-  document.fonts.load('10px "Mona10"'), document.fonts.load('12px "Mona12"')
-]).then(function (a) {
-  var ui = a[0], dlg = a[1];
-  SPIKE.Text.apply('ui', ui); SPIKE.Text.apply('dialogue', dlg);
+var LANGS = ['ko', 'en'];
+var KINDS = ['ui', 'dialogue', 'parts', 'quiz'];
+var DATA = {}, PRE = '';
+var jobs = [document.fonts.load('10px "Mona10"'), document.fonts.load('12px "Mona12"')];
+LANGS.forEach(function (lg) {
+  DATA[lg] = {};
+  KINDS.forEach(function (kd) {
+    jobs.push(fetch('../content/' + kd + '.' + lg + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (j) { DATA[lg][kd] = j; }));
+  });
+});
+Promise.all(jobs).then(function () {
   return document.fonts.ready.then(function () {
+  LANGS.forEach(function (LG) {
+  var ui = DATA[LG].ui, dlg = DATA[LG].dialogue;
+  SPIKE.Text.store[LG] = DATA[LG];
+  SPIKE.Text.lang = LG;
+  SPIKE.rebuildParts(); SPIKE.rebuildQuiz();
+  PRE = LG + ' ';
 
     /* --- 가이드 패널 ---
        warn 과 body 는 줄바꿈되므로 폭이 아니라 "몇 줄이 되는가"를 본다.
@@ -43,15 +54,22 @@ Promise.all([
 
       if (g.warn) {
         var wl = lines(g.warn, 10, 192 - 42);
-        if (wl > 2) bad0.push('guide.'+id+'.warn  ' + wl + '줄 > 2줄   「' + g.warn + '」');
+        if (wl > 2) bad0.push(PRE + 'guide.'+id+'.warn  ' + wl + '줄 > 2줄   「' + g.warn + '」');
       }
       var bl = 0;
-      (g.body||[]).forEach(function (b) { bl += lines(b, 10, 192 - 20); });
+      (g.body||[]).forEach(function (b, bi) {
+        var n = lines(b, 10, 192 - 20);
+        if (n > 1) bad0.push(PRE + 'guide.'+id+'.body['+bi+'] 가 '+n+'줄로 접힘   「'+b+'」');
+        bl += n;
+      });
       var room = g.warn ? 3 : 4;
-      if (bl > room) bad0.push('guide.'+id+'.body  ' + bl + '줄 > ' + room + '줄');
+      if (bl > room) bad0.push(PRE + 'guide.'+id+'.body  ' + bl + '줄 > ' + room + '줄');
 
       ['labelConnector','labelMotor','labelAxle','labelBeam','labelHub','labelHere','labelDone','caption']
         .forEach(function(k){ if(g[k]) add('guide.'+id+'.'+k, g[k], 10, 100); });
+      if (id === 'find') Object.keys(ui.guide.parts).forEach(function (k) {
+        add('guide.parts.' + k + '(셀42)', ui.guide.parts[k], 10, 40);
+      });
     });
 
     /* --- 버튼 (54px 안쪽) --- */
@@ -109,10 +127,11 @@ Promise.all([
       add('도감 '+p.id+'.real',   p.real,   9, DW - 88 - 10);
       add('도감 '+p.id+'.one',    p.one,   10, DW - 88 - 10);
       var dl = 0;
-      p.lines.forEach(function (ln) { dl += lines(ln, 10, DW - 24); });
-      if (dl > 6) bad0.push('도감 '+p.id+'.lines  ' + dl + '줄 > 6줄');
+      /* 도감 설명은 문단으로 이어 붙여 줄바꿈되므로 총 줄 수만 본다 */
+      dl = lines(p.lines.join(' '), 10, DW - 24);
+      if (dl > 6) bad0.push(PRE + '도감 '+p.id+'.lines  ' + dl + '줄 > 6줄');
       var tl = lines(p.tip, 9, DW - 56);
-      if (tl > 3) bad0.push('도감 '+p.id+'.tip  ' + tl + '줄 > 3줄');
+      if (tl > 3) bad0.push(PRE + '도감 '+p.id+'.tip  ' + tl + '줄 > 3줄');
     });
 
     /* --- 퀴즈 (src/data/quiz.js) ---
@@ -120,13 +139,15 @@ Promise.all([
     Object.keys(SPIKE.QUIZ).forEach(function (set) {
       SPIKE.QUIZ[set].forEach(function (q, qi) {
         var tag = '퀴즈 '+set+'['+qi+']';
-        if (lines(q.q, 11, 384 - 40) > 2) bad0.push(tag+'.q  2줄 초과   「'+q.q+'」');
+        if (lines(q.q, 11, 384 - 40) > 2) bad0.push(PRE + tag+'.q  2줄 초과   「'+q.q+'」');
         q.choices.forEach(function (c, ci) {
           add(tag+'.choices['+ci+']', c, 10, ((384 - 24) / 2 | 0) - 16);
         });
         if (q.act) add(tag+'.act', q.act, 12, 384 - 60);
       });
     });
+
+    }); /* LANGS 끝 */
 
     /* --- 판정 --- */
     var bad = bad0.slice();

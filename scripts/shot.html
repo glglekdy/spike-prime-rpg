@@ -12,8 +12,14 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<script type="application/json" id="spike-ui" data-src="../content/ui.ko.json"></script>
-<script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
+<script type="application/json" id="spike-ui-ko" data-kind="ui" data-lang="ko" data-src="../content/ui.ko.json"></script>
+<script type="application/json" id="spike-dialogue-ko" data-kind="dialogue" data-lang="ko" data-src="../content/dialogue.ko.json"></script>
+<script type="application/json" id="spike-parts-ko" data-kind="parts" data-lang="ko" data-src="../content/parts.ko.json"></script>
+<script type="application/json" id="spike-quiz-ko" data-kind="quiz" data-lang="ko" data-src="../content/quiz.ko.json"></script>
+<script type="application/json" id="spike-ui-en" data-kind="ui" data-lang="en" data-src="../content/ui.en.json"></script>
+<script type="application/json" id="spike-dialogue-en" data-kind="dialogue" data-lang="en" data-src="../content/dialogue.en.json"></script>
+<script type="application/json" id="spike-parts-en" data-kind="parts" data-lang="en" data-src="../content/parts.en.json"></script>
+<script type="application/json" id="spike-quiz-en" data-kind="quiz" data-lang="en" data-src="../content/quiz.en.json"></script>
 
 <!-- core -->
 <script src="../src/core/const.js"></script>
@@ -78,14 +84,15 @@
   window.setTimeout = function (fn, ms) { return _st(function () { try { fn(); } catch (e) {} }, ms); };
 
   /* 캡처용: 텍스트 JSON 을 동기로 읽어 적용 (비동기면 첫 프레임에 안 맞는다) */
-  ['ui', 'dialogue'].forEach(function (kind) {
-    var el = document.getElementById('spike-' + kind);
-    if (!el) return;
+  [].slice.call(document.querySelectorAll('script[data-kind]')).forEach(function (el) {
     var x = new XMLHttpRequest();
     x.open('GET', el.getAttribute('data-src'), false);
     x.send(null);
-    S.Text.apply(kind, JSON.parse(x.responseText));
+    S.Text.apply(el.getAttribute('data-kind'), JSON.parse(x.responseText), el.getAttribute('data-lang'));
   });
+  S.Text.lang = qs.get('lang') || 'ko';
+  S.Text.langs = ['en', 'ko'];
+  S.rebuildParts(); S.rebuildQuiz();
 
   var canvas = document.getElementById('game');
   var r = new S.Renderer(canvas);

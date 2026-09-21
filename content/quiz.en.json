@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "kind": "quiz",
+    "lang": "en",
+    "name": "English",
+    "note": "The FIRST entry in 'choices' is the correct answer — the game shuffles them at run time. 'why' is the explanation; 'act' is the real teardown step shown on a correct boss answer."
+  },
+  "sets": {
+    "gate": [
+      {
+        "q": "How many ports does the hub have for parts?",
+        "choices": ["6 (A-F)", "4 (A-D)", "8 (A-H)", "2 (A, B)"],
+        "why": "The Large Hub has six ports, A through F. Any port works, but it must match the one written in your program."
+      },
+      {
+        "q": "Which pin colour do you use to lock something firmly?",
+        "choices": ["Black (rough surface)", "Light grey (smooth)", "Beige (smooth)", "Colour doesn't matter"],
+        "why": "Black and blue friction pins have a rough surface and grip = locking. Light grey and beige frictionless pins are smooth and turn = rotation."
+      },
+      {
+        "q": "What is this part called?",
+        "choices": ["Distance Sensor", "Colour Sensor", "Force Sensor", "Medium Motor"],
+        "why": "The Distance Sensor measures how far away an object is using ultrasound. The two eye-like holes are also LEDs you can switch on and off."
+      }
+    ],
+    "mission": [
+      {
+        "q": "Your program says \"motor A\". Which port takes the cable?",
+        "choices": ["Port A", "Port B", "Any port is fine", "Plug into both"],
+        "why": "The port in the program and the port you actually used must match. If nothing moves, check this first!"
+      },
+      {
+        "q": "The build is done but the motor won't move. What do you check first?",
+        "choices": ["The cable and the port letter", "Shake the hub hard", "Remove the battery", "Rebuild from scratch"],
+        "why": "Nine times out of ten the cable is loose or the port is wrong. The run button is the next thing to check."
+      }
+    ],
+    "boss": [
+      {
+        "q": "Time to take it apart. What comes off first?",
+        "choices": ["The cable", "The flag", "The 7-hole beam", "The motor"],
+        "why": "Start with the cable, the part carrying electricity. Go ahead and unplug it now!",
+        "act": "1) Unplug the cable"
+      },
+      {
+        "q": "What is the right way to unplug a cable?",
+        "choices": ["Hold the hard plug and pull", "Grab the wire and yank", "Shake the hub loose", "Twist it out"],
+        "why": "Pulling the wire snaps the strands inside. Always hold the plug.",
+        "act": "2) Remove the flag and beam"
+      },
+      {
+        "q": "A black friction pin is stuck fast. What do you do?",
+        "choices": ["Lever it out with the separator", "Pick at it with your nails", "Bite it", "Hit it with a hammer"],
+        "why": "Friction pins are meant to be hard to remove. The separator saves your fingers and the parts.",
+        "act": "3) Split the connector and pins"
+      },
+      {
+        "q": "What is the correct teardown order?",
+        "choices": ["The reverse of how you built it", "Wherever it feels loose", "Twist the whole thing apart", "Take the motor off first"],
+        "why": "Reverse order is fastest and safest. Finally, sort the parts back into their trays — that's courtesy to the next person.",
+        "act": "4) Sort the parts into trays"
+      }
+    ]
+  }
+}

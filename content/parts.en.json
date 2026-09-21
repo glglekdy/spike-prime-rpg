@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "kind": "parts",
+    "lang": "en",
+    "name": "English",
+    "note": "Part codex. Keep the item keys; translate the values. 'lines' is the description, 'tip' is a one-line hint."
+  },
+  "items": {
+    "hub": {
+      "title": "The Hub King",
+      "real": "Large Hub",
+      "one": "Brain and heart in one.",
+      "lines": [
+        "Six ports, labelled A through F.",
+        "A 5x5 light matrix shows pictures and letters.",
+        "Centre button = power on / run program.",
+        "A gyro that senses tilt, a speaker,",
+        "and a rechargeable battery are all inside."
+      ],
+      "tip": "Any port works, but it must match the port in your program."
+    },
+    "motorL": {
+      "title": "The Steel Giant",
+      "real": "Large Motor",
+      "one": "The strongest motor.",
+      "lines": [
+        "Use it to push heavy things or turn big wheels.",
+        "It has a rotation sensor inside, so it knows",
+        "exactly how many degrees it has turned.",
+        "That is how \"exactly one turn\" is possible."
+      ],
+      "tip": "Large for power, Medium for light and fast."
+    },
+    "motorM": {
+      "title": "The Twin Runners",
+      "real": "Medium Motor",
+      "one": "Small, fast. Two in set.",
+      "lines": [
+        "For arms, grippers, steering — light, fast moves.",
+        "It has a rotation sensor, same as the Large Motor.",
+        "It stars in today's build, the flag-waving arm."
+      ],
+      "tip": "The two look identical. Tell them apart by port."
+    },
+    "color": {
+      "title": "The Rainbow Eye",
+      "real": "Colour Sensor",
+      "one": "An eye that reads colour.",
+      "lines": [
+        "It tells red, blue, yellow and more apart.",
+        "It also measures how much light bounces back.",
+        "Line following is its classic use."
+      ],
+      "tip": "Too close to the floor or too far and it misreads."
+    },
+    "dist": {
+      "title": "The Owl Eye",
+      "real": "Distance Sensor",
+      "one": "An eye that uses sound.",
+      "lines": [
+        "The two eye-like holes send out sound and time",
+        "the echo to know how far the object ahead is.",
+        "Those eyes are also LEDs you can switch on and off."
+      ],
+      "tip": "Soft cloth or slanted surfaces absorb sound and confuse it."
+    },
+    "force": {
+      "title": "The Fist Sentinel",
+      "real": "Force Sensor",
+      "one": "A hand that feels how hard.",
+      "lines": [
+        "It knows not only that it was pressed,",
+        "but how hard, as a number.",
+        "You can tell a light press from a firm one."
+      ],
+      "tip": "Often used as a bumper to detect collisions."
+    },
+    "cable": {
+      "title": "The Joining Thread",
+      "real": "Connector Cable (LPF2)",
+      "one": "The wire to the hub.",
+      "lines": [
+        "Sensor or motor, the plug is always the same.",
+        "Only the length differs. Short ones keep it tidy.",
+        "Pull the hard plug, never the wire."
+      ],
+      "tip": "Pulling the wire breaks it. Unplug cables first when taking apart."
+    },
+    "beam": {
+      "title": "The Bone Piece",
+      "real": "Technic Beam",
+      "one": "The robot's skeleton.",
+      "lines": [
+        "The hole count is the length. 7 holes = a 7-beam.",
+        "They come straight, L-shaped, and as frames.",
+        "Beams join to each other with pins."
+      ],
+      "tip": "Count the holes to find the beam you need. Colour means nothing."
+    },
+    "pinBlack": {
+      "title": "The Black Locking Nail",
+      "real": "Black Friction Pin (2-long)",
+      "one": "Grips tight, never turns.",
+      "lines": [
+        "Rough surface = friction = for locking.",
+        "The longer 3-length friction pin is blue.",
+        "Use this pin to join the frame firmly."
+      ],
+      "tip": "\"It won't come out\" is not a fault — that's the job. Use the separator."
+    },
+    "pinGray": {
+      "title": "The Pale Turning Nail",
+      "real": "Frictionless Pin (grey)",
+      "one": "Smooth — it turns freely.",
+      "lines": [
+        "Shiny surface = no friction = for turning.",
+        "Use it for wheels, joints and swinging arms.",
+        "Use it where you needed a lock and the robot wobbles."
+      ],
+      "tip": "Judge by colour. Black/blue lock, light grey/beige turn."
+    },
+    "connector": {
+      "title": "The Key of Direction",
+      "real": "Cross Connector Block",
+      "one": "Turns the build a corner.",
+      "lines": [
+        "It turns a horizontal structure into a vertical one.",
+        "The cross hole takes an axle, the round hole a pin.",
+        "It often bridges a motor's output axle and a beam."
+      ],
+      "tip": "Look at the hole shape. Cross = axle, circle = pin."
+    },
+    "axle": {
+      "title": "The Turning Core",
+      "real": "Axle",
+      "one": "A rod, cross in section.",
+      "lines": [
+        "What you fit on it turns with it. It carries force.",
+        "You can memorise the length by colour:",
+        "odd = light grey, even = black, and 2-long is red."
+      ],
+      "tip": "Unsure of the length? Hold it against beam holes and count."
+    },
+    "bush": {
+      "title": "The Stopper",
+      "real": "Bush",
+      "one": "A ring that locks an axle.",
+      "lines": [
+        "The 1-length one is grey, the half-length one yellow.",
+        "Fit them at both ends so the axle cannot drift."
+      ],
+      "tip": "If the robot keeps going loose, check for a missing bush."
+    },
+    "separator": {
+      "title": "The Teardown Tool",
+      "real": "Brick Separator",
+      "one": "The safe way to pry parts.",
+      "lines": [
+        "It levers pins and bricks out for you.",
+        "Nails and teeth hurt you and damage the parts.",
+        "It halves the time a teardown takes."
+      ],
+      "tip": "Slip the pointed end under the pin head and press up slowly."
+    },
+    "flag": {
+      "title": "The Victory Flag",
+      "real": "Decoration Brick / Flag",
+      "one": "Goes on the robot's tip.",
+      "lines": [
+        "It does nothing, but it makes the motion visible.",
+        "You can see at a glance how far the motor turned."
+      ],
+      "tip": "Keep it light so the motor has an easy time."
+    }
+  }
+}

@@ -3,7 +3,7 @@
   SPIKE 마스터 ~잠든 허브 왕~
   중학생 학과체험용 SPIKE Prime 안내 RPG
   단일 파일 배포본 — 인터넷 없이 더블클릭으로 실행됩니다.
-  빌드: 2026-09-21 15:12
+  빌드: 2026-09-21 15:19
 -->
 <html lang="ko">
 <head>
@@ -73,30 +73,53 @@ body {
 <canvas id="game"></canvas>
 
 <!-- 텍스트 리소스 (빌드 시 내용이 인라인된다. 개발 서버에서는 data-src 를 fetch) -->
-<script type="application/json" id="spike-ui">
+<script type="application/json" id="spike-ui-ko" data-kind="ui" data-lang="ko">
 {
   "meta": {
     "kind": "ui",
     "lang": "ko",
     "name": "한국어 (기본)",
+    "short": "한국어",
     "note": "화면에 표시되는 텍스트. 버튼·라벨·가이드 문구. 대사는 dialogue.ko.json 에 있다."
   },
-
   "font": {
     "binarize": false,
     "threshold": 96,
     "fallback": "Dotum,'돋움',monospace",
     "_note": "Mona 는 비트맵 폰트라 설계 크기(10/12px)와 정수배에서만 선명하다. ladder 가 요청 크기를 선명한 크기로 스냅한다. max=이 크기 이하일 때 / family=@font-face 이름 / px=실제로 그릴 크기.",
     "ladder": [
-      { "max": 11,   "family": "Mona10", "px": 10 },
-      { "max": 17,   "family": "Mona12", "px": 12 },
-      { "max": 25,   "family": "Mona10", "px": 20 },
-      { "max": 33,   "family": "Mona12", "px": 24 },
-      { "max": 45,   "family": "Mona10", "px": 40 },
-      { "max": 9999, "family": "Mona12", "px": 48 }
+      {
+        "max": 11,
+        "family": "Mona10",
+        "px": 10
+      },
+      {
+        "max": 17,
+        "family": "Mona12",
+        "px": 12
+      },
+      {
+        "max": 25,
+        "family": "Mona10",
+        "px": 20
+      },
+      {
+        "max": 33,
+        "family": "Mona12",
+        "px": 24
+      },
+      {
+        "max": 45,
+        "family": "Mona10",
+        "px": 40
+      },
+      {
+        "max": 9999,
+        "family": "Mona12",
+        "px": 48
+      }
     ]
   },
-
   "common": {
     "next": "다음 →",
     "prev": "← 이전",
@@ -109,15 +132,13 @@ body {
     "keyNext": "Z — 다음",
     "keySkip": "X — 건너뛰기"
   },
-
   "title": {
-    "name": "SPIKE 마스터",
-    "sub": "~잠든 허브 왕~",
+    "name": "SPIKE  마 스 터",
+    "sub": "~ 잠 든  허 브  왕 ~",
     "press": "◆  PRESS ENTER  ◆",
     "footer": "중학생 학과체험 · SPIKE Prime 조립 & 블록코딩   |   F1 조작법",
     "attract": "다음 도전자를 기다립니다"
   },
-
   "quest": {
     "gran": "도감 할머니에게 말을 걸자",
     "smith": "대장장이에게 연결의 법칙을 배우자",
@@ -127,18 +148,24 @@ body {
     "bossReady": "해체의 순서를 증명하라",
     "bossDone": "허브 왕을 깨워라!"
   },
-
   "guide": {
     "find": {
       "title": "부품 찾기",
       "goal": "부품 7종을 꺼내자",
-      "body": ["트레이에서 일곱 가지를 꺼내자.", "빔은 구멍을 세어라 — 7개짜리다."],
+      "body": [
+        "트레이에서 일곱 가지를 꺼내자.",
+        "빔은 구멍을 세어라 — 7개짜리다."
+      ],
       "warn": "모터는 작은 쪽. 큰 것은 라지 모터다"
     },
     "motor": {
       "title": "모터 + 커넥터",
       "goal": "모터 축에 커넥터를 꽂자",
-      "body": ["모터 가운데 튀어나온 십자 축에", "커넥터의 십자 구멍을 끼운다.", "끝까지 눌러 넣는다."],
+      "body": [
+        "모터 가운데 튀어나온 십자 축에",
+        "커넥터의 십자 구멍을 끼운다.",
+        "끝까지 눌러 넣는다."
+      ],
       "warn": "안 들어가면 힘이 아니라 방향. 90도 돌려보자",
       "labelConnector": "커넥터",
       "labelMotor": "중형 모터",
@@ -147,7 +174,10 @@ body {
     "beam": {
       "title": "빔 고정",
       "goal": "검정 핀 2개로 빔을 고정하자",
-      "body": ["빔 7칸의 끝 구멍을 커넥터에 맞추고", "검정 핀 두 개로 고정한다."],
+      "body": [
+        "빔 7칸의 끝 구멍을 커넥터에 맞추고",
+        "검정 핀 두 개로 고정한다."
+      ],
       "warn": "핀이 하나면 관절이 된다. 반드시 두 개",
       "labelBeam": "빔 7칸",
       "labelConnector": "커넥터",
@@ -156,7 +186,10 @@ body {
     "flag": {
       "title": "깃발 달기",
       "goal": "빔 끝에 장식을 달자",
-      "body": ["빔의 반대쪽 끝, 모터에서 먼 곳에", "장식 브릭을 붙인다."],
+      "body": [
+        "빔의 반대쪽 끝, 모터에서 먼 곳에",
+        "장식 브릭을 붙인다."
+      ],
       "warn": "가볍게. 무거우면 모터가 힘들어한다",
       "labelHere": "여기",
       "labelDone": "완성!",
@@ -165,7 +198,11 @@ body {
     "cable": {
       "title": "케이블 · 포트 A",
       "goal": "허브 A 포트에 연결하자",
-      "body": ["케이블 한쪽을 모터에,", "반대쪽을 허브의 A 포트에 꽂는다.", "딸깍 소리가 나야 끝까지 들어간 것."],
+      "body": [
+        "케이블 한쪽을 모터에,",
+        "반대쪽을 허브의 A 포트에 꽂는다.",
+        "딸깍 소리가 나야 끝까지 들어간 것."
+      ],
       "warn": "프로그램이 A라면 반드시 A. 최다 실수 지점",
       "labelMotor": "모터",
       "labelHub": "허브",
@@ -188,7 +225,6 @@ body {
     },
     "finishToast": "첫 번째 골렘, 완성!"
   },
-
   "code": {
     "cardTitle": "【 주문서 】",
     "findTitle": "SPIKE 앱에서 찾는 법",
@@ -200,26 +236,41 @@ body {
       "ccw": "A 모터 0.3초 ↺"
     },
     "findIt": [
-      { "cat": "event", "name": "노랑 서랍", "text": "맨 위 첫 블록" },
-      { "cat": "ctrl",  "name": "주황 서랍", "text": "반복하기 (숫자 4)" },
-      { "cat": "motor", "name": "민트 서랍", "text": "_초 동안 _방향" }
+      {
+        "cat": "event",
+        "name": "노랑 서랍",
+        "text": "맨 위 첫 블록"
+      },
+      {
+        "cat": "ctrl",
+        "name": "주황 서랍",
+        "text": "반복하기 (숫자 4)"
+      },
+      {
+        "cat": "motor",
+        "name": "민트 서랍",
+        "text": "_초 동안 _방향"
+      }
     ]
   },
-
   "battle": {
     "question": "문제 {n}/{total}",
     "correct": "정답!",
     "wrong": "아깝다!",
-    "why": "해설"
+    "why": "해설",
+    "hint": "↑↓ 또는 마우스로 고르고  Z/클릭",
+    "skip": "X — 건너뛰기"
   },
-
   "dex": {
     "title": "부 품 도 감",
     "collected": "수집 {n} / {total}",
     "new": "NEW",
-    "tip": "TIP"
+    "tip": "TIP",
+    "move": "↑↓ 이동    X 닫기",
+    "unknown": "아직 만나지 못한 부품",
+    "core": "전자 부품",
+    "tech": "구조 부품"
   },
-
   "ending": {
     "header": "M I S S I O N   C O M P L E T E",
     "rank": "R A N K",
@@ -230,13 +281,24 @@ body {
     "dexFmt": "{n} / {total} 종",
     "press": "아무 키나 누르면 처음 화면으로",
     "ranks": {
-      "S": { "word": "완벽한 메카닉!", "sub": "부품도 순서도 전부 정확했다." },
-      "A": { "word": "훌륭한 메카닉!", "sub": "거의 다 맞혔다. 실전에서도 잘하겠다." },
-      "B": { "word": "좋은 출발!",     "sub": "핵심은 잡았다. 도감을 다시 보면 완벽!" },
-      "C": { "word": "수고했다!",       "sub": "오늘 만져본 감각이 진짜 실력이 된다." }
+      "S": {
+        "word": "완벽한 메카닉!",
+        "sub": "부품도 순서도 전부 정확했다."
+      },
+      "A": {
+        "word": "훌륭한 메카닉!",
+        "sub": "거의 다 맞혔다. 실전에서도 잘하겠다."
+      },
+      "B": {
+        "word": "좋은 출발!",
+        "sub": "핵심은 잡았다. 도감을 다시 보면 완벽!"
+      },
+      "C": {
+        "word": "수고했다!",
+        "sub": "오늘 만져본 감각이 진짜 실력이 된다."
+      }
     }
   },
-
   "hotkeys": {
     "title": "조작법",
     "reset": "Ctrl+R  즉시 초기화",
@@ -244,12 +306,83 @@ body {
     "jump": "F2  챕터 점프",
     "pause": "F3  타이머 일시정지",
     "text": "F4  텍스트 JSON 불러오기",
-    "mute": "M  음소거"
+    "mute": "M  음소거",
+    "jumpTitle": "챕터 점프",
+    "jump1": "1 — 허브 마을",
+    "jump2": "2 — 조립 공방",
+    "jump3": "3 — 해체의 방",
+    "closeHint": "아무 키나 눌러 닫기",
+    "toastReset": "초기화 — 다음 학생을 기다립니다",
+    "toastPause": "타이머 일시정지",
+    "toastResume": "타이머 재개",
+    "toastText": "텍스트 JSON 선택",
+    "toastMuteOn": "음소거 ON",
+    "toastMuteOff": "음소거 OFF",
+    "toastJump": "챕터 {n}로 이동",
+    "toastLang": "언어: {name}",
+    "rows": [
+      [
+        "방향키 / WASD",
+        "이동"
+      ],
+      [
+        "Z · Space · Enter",
+        "말 걸기 / 확인"
+      ],
+      [
+        "X · Esc",
+        "취소 / 메뉴"
+      ],
+      [
+        "마우스",
+        "선택 · 버튼"
+      ],
+      [
+        "Q / E",
+        "가이드 이전 / 다음"
+      ],
+      [
+        "",
+        ""
+      ],
+      [
+        "Ctrl+R",
+        "다음 학생 (초기화)"
+      ],
+      [
+        "F2",
+        "챕터 점프"
+      ],
+      [
+        "F3",
+        "타이머 일시정지"
+      ],
+      [
+        "F4",
+        "텍스트 JSON 불러오기"
+      ],
+      [
+        "M",
+        "음소거"
+      ]
+    ]
+  },
+  "cards": {
+    "hint": "Z — 다음     X — 건너뛰기"
+  },
+  "idle": {
+    "title": "자리를 비우셨나요?",
+    "hint": "아무 키나 누르면 계속합니다",
+    "countdown": "{n}초 후 처음 화면으로"
+  },
+  "lang": {
+    "button": "{name}",
+    "hint": "L — 언어"
   }
 }
 
 </script>
-<script type="application/json" id="spike-dialogue">
+<script type="application/json" id="spike-dialogue-ko" data-kind="dialogue" data-lang="ko">
 {
   "meta": {
     "kind": "dialogue",
@@ -263,7 +396,6 @@ body {
       "{name}": "치환 변수"
     }
   },
-
   "names": {
     "gran": "도감 할머니",
     "smith": "대장장이",
@@ -272,7 +404,6 @@ body {
     "hub": "허브 왕",
     "altar": "허브 제단"
   },
-
   "village": {
     "gran": {
       "intro": [
@@ -286,7 +417,6 @@ body {
       "repeat": "도감은 X 키.\n모르는 게 생기면 언제든 펼쳐 보렴.",
       "cardsTitle": "6대 정령 — 전자 부품"
     },
-
     "smith": {
       "intro": [
         "로봇의 뼈대는 「빔」,\n그 뼈대를 붙이는 못이 「핀」이다.",
@@ -301,7 +431,6 @@ body {
       "repeat": "검정·파랑은 고정.\n연회색·베이지는 회전. 잊지 마라.",
       "cardsTitle": "연결의 법칙 — 구조 부품"
     },
-
     "guard": {
       "passed": "통과다. 남쪽 문으로 가라.\n조립 공방에서 장인이 기다린다.",
       "notReady": "아직 배움이 부족하다.\n할머니와 대장장이를 먼저 만나고 오너라.",
@@ -309,59 +438,1019 @@ body {
       "declined": "언제든 다시 오너라.",
       "enemyName": "핀 도둑"
     },
-
     "altar": [
       "커다란 허브가 잠들어 있다.\n5×5 매트릭스가 모두 꺼져 있다.",
       "포트 A부터 F까지 여섯 개.\n하나도 연결되어 있지 않다…"
     ],
-
     "sign": [
       "『 허브 마을 』\n방향키 — 이동 / Z·Enter — 말 걸기 / X — 도감",
       "남쪽 문 → 조립 공방\n먼저 마을 사람들에게 배우자."
     ]
   },
-
   "workshop": {
     "maker": {
-      "find":  "필요한 건 일곱 가지다.\n오른쪽 그림과 같은 걸 꺼내라.",
+      "find": "필요한 건 일곱 가지다.\n오른쪽 그림과 같은 걸 꺼내라.",
       "motor": "구멍이 두 종류다 — 십자와 동그라미.\n축은 십자에만 들어간다.",
-      "beam":  "검정은 거칠거칠 — 안 돌아간다.\n잘 안 들어가는 게 정상이다.",
-      "flag":  "모양은 자유다. 네 골렘이니까.",
+      "beam": "검정은 거칠거칠 — 안 돌아간다.\n잘 안 들어가는 게 정상이다.",
+      "flag": "모양은 자유다. 네 골렘이니까.",
       "cable": "몸은 됐다. 이제 생명선이다.\n포트는 A. 눈으로 글자를 확인해라.",
-      "code":  "오른쪽 주문서를 보고\nSPIKE 앱에 똑같이 옮겨 적어라.",
+      "code": "오른쪽 주문서를 보고\nSPIKE 앱에 똑같이 옮겨 적어라.",
       "afterDone": "북쪽 문이 열렸다.\n해체의 방으로 가라.",
       "finish": [
         "해냈구나.\n네 주문대로 골렘이 깃발을 흔든다!",
         "하지만 마지막 관문이 남았다.\n북쪽 문으로 가라 — 해체의 방이다."
       ]
     },
-
     "late": {
-      "find":  "부품 찾기부터 오래 걸리면 뒤가 빡빡해진다.\n못 찾겠으면 나를 불러라.",
+      "find": "부품 찾기부터 오래 걸리면 뒤가 빡빡해진다.\n못 찾겠으면 나를 불러라.",
       "motor": "억지로 밀지 마라. 방향을 바꿔 보는 게 빠르다.",
-      "beam":  "딸깍 소리가 날 때까지 엄지로 눌러라.",
-      "flag":  "모양은 자유다. 넘어가자.",
+      "beam": "딸깍 소리가 날 때까지 엄지로 눌러라.",
+      "flag": "모양은 자유다. 넘어가자.",
       "cable": "포트 글자를 눈으로 확인했나? A다.",
-      "code":  "블록 색을 보면 어느 서랍인지 바로 안다."
+      "code": "블록 색을 보면 어느 서랍인지 바로 안다."
     },
-
     "bench": "작업대다. 부품이 가지런히 놓여 있다.\n여기서 실제 로봇을 조립한다.",
     "quizEnemyName": "꼬인 케이블"
   },
-
   "hubroom": {
     "altarLocked": "허브 왕이 아직 잠들어 있다.\n뒤엉킨 케이블이 왕을 감고 있다…",
     "altarAwake": "…고맙다, 견습 메카닉.\n브릭시티가 다시 움직인다!",
     "bossName": "혼선 케이블"
   },
-
   "battle": {
     "appear": "{name}이(가) 나타났다!\n문제를 맞혀서 물리쳐라!",
     "revive": "정령이 힘을 빌려준다!\n다시 도전하자."
   },
-
   "common": {
     "nothing": "아무 일도 일어나지 않았다."
+  },
+  "opening": [
+    "로봇 왕국 「브릭시티」.\n이 나라의 모든 기계는 중앙의 허브 왕이 움직였다.",
+    "그러나 어느 날, 뒤엉킨 케이블이 왕을 감쌌고\n5×5의 눈은 빛을 잃었다.",
+    "멈춰버린 왕국. 남은 희망은 단 하나 —\n오늘 부임한 견습 메카닉, 바로 당신이다.",
+    "부품을 익히고, 직접 손으로 조립하고,\n주문(코드)을 엮어 왕을 깨워라.",
+    "제한 시간은 10분.\n…시작하자."
+  ]
+}
+
+</script>
+<script type="application/json" id="spike-parts-ko" data-kind="parts" data-lang="ko">
+{
+  "meta": {
+    "kind": "parts",
+    "lang": "ko",
+    "name": "한국어 (기본)",
+    "note": "부품 도감. 키(id)는 바꾸지 말고 값만 고치세요. lines 는 설명 줄 배열, tip 은 한 줄 요령."
+  },
+  "items": {
+    "hub": {
+      "title": "허브 왕",
+      "real": "라지 허브 (Large Hub)",
+      "one": "로봇의 두뇌이자 심장.",
+      "lines": [
+        "포트가 A부터 F까지 여섯 개 있다.",
+        "앞면 5×5 LED 매트릭스로 그림·글자를 보여준다.",
+        "가운데 버튼 = 전원 켜기 / 프로그램 실행.",
+        "기울기를 아는 자이로, 소리를 내는 스피커,",
+        "충전식 배터리가 전부 안에 들어 있다."
+      ],
+      "tip": "포트는 아무 데나 꽂아도 되지만, 프로그램에 적은 포트와 반드시 같아야 한다."
+    },
+    "motorL": {
+      "title": "강철 거인",
+      "real": "라지 모터 (Large Motor)",
+      "one": "힘이 가장 센 모터.",
+      "lines": [
+        "무거운 것을 밀거나 큰 바퀴를 굴릴 때 쓴다.",
+        "안에 회전각 센서가 있어서 \"몇 도 돌렸는지\"를",
+        "스스로 알고 있다.",
+        "그래서 \"정확히 1회전\" 같은 명령이 가능하다."
+      ],
+      "tip": "힘이 필요하면 라지, 빠르고 가벼우면 미디엄."
+    },
+    "motorM": {
+      "title": "쌍둥이 러너",
+      "real": "미디엄 모터 (Medium Motor)",
+      "one": "작고 빠른 모터. 세트에 두 개.",
+      "lines": [
+        "팔, 집게, 방향 조절처럼 가볍고 빠른 동작 담당.",
+        "라지 모터와 마찬가지로 회전각 센서 내장.",
+        "오늘 만들 \"깃발 흔드는 팔\"의 주인공이다."
+      ],
+      "tip": "두 개가 똑같이 생겼다. 왼쪽·오른쪽 구분이 필요하면 포트로 구분한다."
+    },
+    "color": {
+      "title": "무지개 눈",
+      "real": "컬러 센서 (Color Sensor)",
+      "one": "색을 알아보는 눈.",
+      "lines": [
+        "빨강·파랑·노랑 같은 색을 구분한다.",
+        "빛이 얼마나 반사되는지(밝기)도 잴 수 있다.",
+        "검은 선을 따라가는 라인트레이싱이 대표 활용."
+      ],
+      "tip": "센서를 바닥에 너무 붙이거나 너무 띄우면 색을 잘못 읽는다."
+    },
+    "dist": {
+      "title": "올빼미 눈",
+      "real": "거리 센서 (Distance Sensor)",
+      "one": "초음파로 거리를 재는 눈.",
+      "lines": [
+        "눈처럼 생긴 두 구멍으로 소리를 쏘고 되돌아오는",
+        "시간을 재서 앞에 있는 물체까지의 거리를 안다.",
+        "두 눈은 프로그램으로 켜고 끌 수 있는 LED이기도 하다."
+      ],
+      "tip": "푹신한 천이나 비스듬한 면은 소리를 흡수·반사해서 잘 못 잰다."
+    },
+    "force": {
+      "title": "주먹 파수꾼",
+      "real": "포스 센서 (Force Sensor)",
+      "one": "눌림과 \"세기\"를 아는 손.",
+      "lines": [
+        "버튼처럼 눌렸는지 알 뿐 아니라,",
+        "얼마나 세게 눌렀는지까지 숫자로 알려준다.",
+        "살짝 누름 / 꽉 누름을 구분하는 프로그램이 가능."
+      ],
+      "tip": "충돌 감지용 범퍼로도 자주 쓴다."
+    },
+    "cable": {
+      "title": "이어주는 실",
+      "real": "연결 케이블 (LPF2)",
+      "one": "모든 부품과 허브를 잇는 선.",
+      "lines": [
+        "센서든 모터든 케이블 모양은 전부 똑같다.",
+        "길이만 여러 가지다. 짧은 걸 쓰면 깔끔하다.",
+        "뽑을 때는 선이 아니라 커넥터(딱딱한 부분)를 잡는다."
+      ],
+      "tip": "선을 잡아당기면 끊어진다. 해체할 때 케이블을 가장 먼저 뺀다."
+    },
+    "beam": {
+      "title": "뼈대 조각",
+      "real": "테크닉 빔 (Beam)",
+      "one": "로봇의 뼈대.",
+      "lines": [
+        "구멍 개수가 곧 길이다. 구멍 7개 = 7칸 빔.",
+        "직선형, ㄱ자형, 사각 프레임 등이 있다.",
+        "빔끼리는 핀으로 이어 붙인다."
+      ],
+      "tip": "필요한 빔을 찾을 땐 구멍을 세어라. 색은 길이와 상관없다."
+    },
+    "pinBlack": {
+      "title": "고정의 검은 못",
+      "real": "검정 마찰핀 (2칸)",
+      "one": "꽉 물려서 안 돌아가는 핀.",
+      "lines": [
+        "표면이 거칠거칠하다 = 마찰이 있다 = 고정용.",
+        "3칸짜리 긴 마찰핀은 파란색이다.",
+        "뼈대를 단단히 붙일 때 이 핀을 쓴다."
+      ],
+      "tip": "\"잘 안 빠져요\"는 고장이 아니라 정상. 분리 도구를 쓴다."
+    },
+    "pinGray": {
+      "title": "회전의 흰 못",
+      "real": "무마찰핀 (연회색·베이지)",
+      "one": "매끈해서 잘 도는 핀.",
+      "lines": [
+        "표면이 반질반질하다 = 마찰이 없다 = 회전용.",
+        "바퀴, 관절, 회전하는 팔에 쓴다.",
+        "고정해야 할 곳에 쓰면 로봇이 흐물거린다."
+      ],
+      "tip": "색으로 구분하라. 검정·파랑=고정, 연회색·베이지=회전."
+    },
+    "connector": {
+      "title": "방향의 열쇠",
+      "real": "십자 커넥터 / 커넥터 블록",
+      "one": "방향을 꺾어주는 이음쇠.",
+      "lines": [
+        "가로로 가던 구조를 세로로 바꿔준다.",
+        "가운데 십자 구멍에는 축이, 둥근 구멍에는 핀이 들어간다.",
+        "모터 출력축과 빔을 잇는 다리 역할을 자주 한다."
+      ],
+      "tip": "구멍 모양을 보라. 십자 = 축, 동그라미 = 핀."
+    },
+    "axle": {
+      "title": "회전의 심",
+      "real": "축 (Axle)",
+      "one": "단면이 십자인 막대.",
+      "lines": [
+        "끼우면 같이 돈다. 힘을 전달하는 부품.",
+        "길이를 색으로 외울 수 있다.",
+        "홀수 길이 = 연회색 / 짝수 길이 = 검정 / 2칸만 빨강."
+      ],
+      "tip": "길이를 모르겠으면 빔 구멍에 대보고 몇 칸인지 센다."
+    },
+    "bush": {
+      "title": "멈춤쇠",
+      "real": "부시 (Bush)",
+      "one": "축이 빠지지 않게 잠그는 고리.",
+      "lines": [
+        "1칸짜리는 회색, 절반(½)짜리는 노란색이다.",
+        "축 양 끝에 끼워서 좌우로 흘러내리지 않게 한다."
+      ],
+      "tip": "로봇이 자꾸 헐거워지면 부시가 빠졌는지 본다."
+    },
+    "separator": {
+      "title": "해체의 도구",
+      "real": "분리 도구 (브릭 세퍼레이터)",
+      "one": "안전하게 뜯는 유일한 방법.",
+      "lines": [
+        "핀이나 블록을 지렛대처럼 눌러서 떼어낸다.",
+        "손톱이나 이빨로 뜯으면 다치고 부품도 상한다.",
+        "해체 시간의 절반을 줄여주는 물건."
+      ],
+      "tip": "뾰족한 쪽을 핀 머리 밑에 넣고 천천히 눌러 올린다."
+    },
+    "flag": {
+      "title": "승리의 깃발",
+      "real": "장식 브릭 / 깃발",
+      "one": "오늘 만들 로봇의 끝에 달릴 것.",
+      "lines": [
+        "기능은 없지만, 움직임이 눈에 보이게 해준다.",
+        "모터가 얼마나 돌았는지 한눈에 알 수 있다."
+      ],
+      "tip": "가볍게 만들어야 모터가 편하다."
+    }
+  }
+}
+
+</script>
+<script type="application/json" id="spike-quiz-ko" data-kind="quiz" data-lang="ko">
+{
+  "meta": {
+    "kind": "quiz",
+    "lang": "ko",
+    "name": "한국어 (기본)",
+    "note": "퀴즈. choices 의 첫 번째가 정답입니다 — 게임이 실행할 때 보기 순서를 섞습니다. why 는 해설, act 는 보스전에서 정답 시 나오는 실제 해체 지시입니다."
+  },
+  "sets": {
+    "gate": [
+      {
+        "q": "허브에 부품을 꽂는 포트는 모두 몇 개일까?",
+        "choices": [
+          "6개 (A~F)",
+          "4개 (A~D)",
+          "8개 (A~H)",
+          "2개 (A, B)"
+        ],
+        "why": "라지 허브의 포트는 A부터 F까지 여섯 개. 아무 포트나 써도 되지만 프로그램에 적은 포트와 같아야 한다."
+      },
+      {
+        "q": "단단히 고정해야 하는 곳에 쓰는 핀의 색은?",
+        "choices": [
+          "검정 (거친 표면)",
+          "연회색 (매끈)",
+          "베이지 (매끈)",
+          "색은 상관없다"
+        ],
+        "why": "검정·파랑 마찰핀은 표면이 거칠어 꽉 물린다 = 고정. 연회색·베이지 무마찰핀은 매끈해서 잘 돈다 = 회전."
+      },
+      {
+        "q": "이 부품의 이름은 무엇일까?",
+        "choices": [
+          "거리 센서",
+          "컬러 센서",
+          "포스 센서",
+          "미디엄 모터"
+        ],
+        "why": "초음파로 앞 물체까지의 거리를 재는 거리 센서. 눈처럼 보이는 두 구멍은 켜고 끌 수 있는 LED이기도 하다."
+      }
+    ],
+    "mission": [
+      {
+        "q": "프로그램에 「A 모터」라고 썼다. 모터 케이블은 어느 포트에 꽂아야 할까?",
+        "choices": [
+          "A 포트",
+          "B 포트",
+          "아무 포트나 상관없다",
+          "두 개 다 꽂는다"
+        ],
+        "why": "프로그램이 가리키는 포트와 실제로 꽂은 포트가 같아야 움직인다. 안 움직이면 여기부터 확인!"
+      },
+      {
+        "q": "조립은 끝났는데 모터가 전혀 안 움직인다. 가장 먼저 확인할 것은?",
+        "choices": [
+          "케이블 연결과 포트 번호",
+          "허브를 세게 흔든다",
+          "배터리를 빼 본다",
+          "처음부터 다시 조립"
+        ],
+        "why": "90%는 케이블이 덜 꽂혔거나 포트가 다른 경우다. 그다음이 프로그램 실행 버튼."
+      }
+    ],
+    "boss": [
+      {
+        "q": "해체를 시작한다. 가장 먼저 분리할 것은?",
+        "choices": [
+          "연결 케이블",
+          "깃발 장식",
+          "빔 7칸",
+          "모터"
+        ],
+        "why": "전기가 흐르는 케이블부터 분리한다. 실제로 지금 케이블을 빼자!",
+        "act": "1) 케이블을 뽑는다"
+      },
+      {
+        "q": "케이블을 뽑는 올바른 방법은?",
+        "choices": [
+          "커넥터(딱딱한 부분)를 잡고 뺀다",
+          "선을 잡고 힘껏 당긴다",
+          "허브를 흔들어 뺀다",
+          "비틀어서 돌려 뺀다"
+        ],
+        "why": "선을 당기면 안쪽 전선이 끊어진다. 항상 커넥터를 잡는다.",
+        "act": "2) 깃발과 빔을 뗀다"
+      },
+      {
+        "q": "검정 마찰핀이 꽉 껴서 안 빠진다. 어떻게 할까?",
+        "choices": [
+          "분리 도구로 지렛대처럼 민다",
+          "손톱으로 뜯는다",
+          "이빨로 문다",
+          "망치로 친다"
+        ],
+        "why": "마찰핀은 원래 잘 안 빠지는 게 정상. 분리 도구를 쓰면 안 다치고 부품도 안 상한다.",
+        "act": "3) 커넥터와 핀을 분리한다"
+      },
+      {
+        "q": "해체 순서로 올바른 것은?",
+        "choices": [
+          "조립의 역순으로 분해한다",
+          "아무 데나 힘이 들어가는 곳부터",
+          "한 번에 비틀어 통째로",
+          "모터를 가장 먼저 뗀다"
+        ],
+        "why": "조립 역순이 가장 빠르고 안전하다. 마지막은 부품을 종류별 칸에 정리 — 다음 사람을 위한 예의다.",
+        "act": "4) 부품을 칸에 분류해 정리한다"
+      }
+    ]
+  }
+}
+
+</script>
+<script type="application/json" id="spike-ui-en" data-kind="ui" data-lang="en">
+{
+  "meta": {
+    "kind": "ui",
+    "lang": "en",
+    "name": "English",
+    "short": "EN",
+    "note": "On-screen text: buttons, labels, guide copy. Character speech lives in dialogue.en.json."
+  },
+  "font": {
+    "binarize": false,
+    "threshold": 96,
+    "fallback": "Dotum,monospace",
+    "_note": "Mona is a bitmap font — crisp only at its design sizes (10/12px) and integer multiples. The ladder snaps a requested size to a crisp one.",
+    "ladder": [
+      {
+        "max": 11,
+        "family": "Mona10",
+        "px": 10
+      },
+      {
+        "max": 17,
+        "family": "Mona12",
+        "px": 12
+      },
+      {
+        "max": 25,
+        "family": "Mona10",
+        "px": 20
+      },
+      {
+        "max": 33,
+        "family": "Mona12",
+        "px": 24
+      },
+      {
+        "max": 45,
+        "family": "Mona10",
+        "px": 40
+      },
+      {
+        "max": 9999,
+        "family": "Mona12",
+        "px": 48
+      }
+    ]
+  },
+  "common": {
+    "next": "Next →",
+    "prev": "← Back",
+    "done": "Finish",
+    "doneAlready": "Done",
+    "yes": "I'm ready",
+    "no": "Not yet",
+    "close": "X Close",
+    "move": "↑↓ Move",
+    "keyNext": "Z — Next",
+    "keySkip": "X — Skip"
+  },
+  "title": {
+    "name": "SPIKE  M A S T E R",
+    "sub": "~ The Sleeping Hub King ~",
+    "press": "◆  PRESS ENTER  ◆",
+    "footer": "SPIKE Prime — build a robot & code it   |   F1 Controls",
+    "attract": "Waiting for the next challenger"
+  },
+  "quest": {
+    "gran": "Talk to the Codex Granny",
+    "smith": "Learn the joining rules",
+    "guard": "Take the gatekeeper's test",
+    "toWorkshop": "Head south to the workshop",
+    "maker": "Talk to the Robot Maker",
+    "bossReady": "Prove the teardown order",
+    "bossDone": "Wake the Hub King!"
+  },
+  "guide": {
+    "find": {
+      "title": "Find the parts",
+      "goal": "Pick out 7 parts",
+      "body": [
+        "Take seven parts from the tray.",
+        "Count the holes: the beam has 7."
+      ],
+      "warn": "Take the SMALL motor. The big one is a Large Motor"
+    },
+    "motor": {
+      "title": "Motor + connector",
+      "goal": "Fit the connector on the axle",
+      "body": [
+        "The motor has a cross axle.",
+        "Push the connector's cross hole",
+        "all the way onto it."
+      ],
+      "warn": "Won't fit? It's the angle, not force. Turn it 90 degrees",
+      "labelConnector": "Connector",
+      "labelMotor": "Medium motor",
+      "labelAxle": "Cross axle"
+    },
+    "beam": {
+      "title": "Fix the beam",
+      "goal": "Lock the beam with 2 black pins",
+      "body": [
+        "Line up the beam's end hole",
+        "with the connector, then lock it",
+        "with two black pins."
+      ],
+      "warn": "One pin makes a hinge. You need two",
+      "labelBeam": "7-hole beam",
+      "labelConnector": "Connector",
+      "caption": "2 black pins = lock"
+    },
+    "flag": {
+      "title": "Add the flag",
+      "goal": "Put a decoration on the tip",
+      "body": [
+        "At the far end of the beam,",
+        "away from the motor, add a brick."
+      ],
+      "warn": "Keep it light — a heavy flag strains the motor",
+      "labelHere": "here",
+      "labelDone": "Done!",
+      "toast": "The golem's body is complete!"
+    },
+    "cable": {
+      "title": "Cable · Port A",
+      "goal": "Connect the motor to port A",
+      "body": [
+        "Plug one end into the motor,",
+        "the other into the hub's port A.",
+        "It should click when fully in."
+      ],
+      "warn": "If the code says A, it must be A. Most common mistake",
+      "labelMotor": "Motor",
+      "labelHub": "Hub",
+      "caption": "Port must be A"
+    },
+    "code": {
+      "title": "Spell book",
+      "goal": "Copy the spell into the app",
+      "body": [],
+      "warn": ""
+    },
+    "parts": {
+      "hub": "Hub",
+      "motor": "Motor",
+      "cable": "Cable",
+      "beam": "Beam 7",
+      "connector": "Conn.",
+      "pin": "Pin",
+      "flag": "Flag"
+    },
+    "finishToast": "First golem complete!"
+  },
+  "code": {
+    "cardTitle": "「 SPELL BOOK 」",
+    "findTitle": "Where to find them",
+    "outro": "Copy this into the app",
+    "blocks": {
+      "start": "when program starts",
+      "repeat": "repeat 4 times",
+      "cw": "motor A 0.3s ↻",
+      "ccw": "motor A 0.3s ↺"
+    },
+    "findIt": [
+      {
+        "cat": "event",
+        "name": "Yellow",
+        "text": "top of the drawer"
+      },
+      {
+        "cat": "ctrl",
+        "name": "Orange",
+        "text": "repeat (set to 4)"
+      },
+      {
+        "cat": "motor",
+        "name": "Teal",
+        "text": "run _ seconds"
+      }
+    ]
+  },
+  "battle": {
+    "question": "Q {n}/{total}",
+    "correct": "Correct!",
+    "wrong": "So close!",
+    "why": "Why",
+    "hint": "↑↓ or mouse to choose,  Z / click",
+    "skip": "X — Skip"
+  },
+  "dex": {
+    "title": "PART CODEX",
+    "collected": "Found {n} / {total}",
+    "new": "NEW",
+    "tip": "TIP",
+    "move": "↑↓ Move    X Close",
+    "unknown": "Not discovered yet",
+    "core": "Electronics",
+    "tech": "Structure"
+  },
+  "ending": {
+    "header": "M I S S I O N   C O M P L E T E",
+    "rank": "R A N K",
+    "rowAccuracy": "Correct",
+    "rowTime": "Time",
+    "rowDex": "Codex",
+    "timeFmt": "{m}m {s}s",
+    "dexFmt": "{n} / {total}",
+    "press": "Press any key to restart",
+    "ranks": {
+      "S": {
+        "word": "Perfect mechanic!",
+        "sub": "Every part, every step — exactly right."
+      },
+      "A": {
+        "word": "Great mechanic!",
+        "sub": "Almost all correct. You'd do well for real."
+      },
+      "B": {
+        "word": "Good start!",
+        "sub": "You got the core ideas. Review the codex!"
+      },
+      "C": {
+        "word": "Well done!",
+        "sub": "The hands-on feel is what really sticks."
+      }
+    }
+  },
+  "hotkeys": {
+    "title": "Controls",
+    "reset": "Ctrl+R  Reset now",
+    "help": "F1  Controls",
+    "jump": "F2  Jump chapter",
+    "pause": "F3  Pause timer",
+    "text": "F4  Load text JSON",
+    "mute": "M  Mute",
+    "jumpTitle": "Jump to chapter",
+    "jump1": "1 — Hub Village",
+    "jump2": "2 — Workshop",
+    "jump3": "3 — Teardown Room",
+    "closeHint": "Press any key to close",
+    "toastReset": "Reset — waiting for the next student",
+    "toastPause": "Timer paused",
+    "toastResume": "Timer resumed",
+    "toastText": "Choose a text JSON",
+    "toastMuteOn": "Sound OFF",
+    "toastMuteOff": "Sound ON",
+    "toastJump": "Jumped to chapter {n}",
+    "toastLang": "Language: {name}",
+    "rows": [
+      [
+        "Arrows / WASD",
+        "Move"
+      ],
+      [
+        "Z · Space · Enter",
+        "Talk / OK"
+      ],
+      [
+        "X · Esc",
+        "Cancel / Menu"
+      ],
+      [
+        "Mouse",
+        "Select · Buttons"
+      ],
+      [
+        "Q / E",
+        "Guide back / next"
+      ],
+      [
+        "",
+        ""
+      ],
+      [
+        "Ctrl+R",
+        "Next student (reset)"
+      ],
+      [
+        "F2",
+        "Jump chapter"
+      ],
+      [
+        "F3",
+        "Pause timer"
+      ],
+      [
+        "F4",
+        "Load text JSON"
+      ],
+      [
+        "M",
+        "Mute"
+      ]
+    ]
+  },
+  "cards": {
+    "hint": "Z — Next     X — Skip"
+  },
+  "idle": {
+    "title": "Still there?",
+    "hint": "Press any key to continue",
+    "countdown": "Back to title in {n}s"
+  },
+  "lang": {
+    "button": "{name}",
+    "hint": "L — Language"
+  }
+}
+
+</script>
+<script type="application/json" id="spike-dialogue-en" data-kind="dialogue" data-lang="en">
+{
+  "meta": {
+    "kind": "dialogue",
+    "lang": "en",
+    "name": "English",
+    "note": "Only what characters say out loud. Buttons and labels live in ui.en.json.",
+    "format": {
+      "string": "one message box",
+      "array": "several boxes — press Z to advance",
+      "\\n": "line break inside a box",
+      "{name}": "substituted variable"
+    }
+  },
+  "names": {
+    "gran": "Codex Granny",
+    "smith": "Blacksmith",
+    "guard": "Gatekeeper",
+    "maker": "Robot Maker",
+    "hub": "Hub King",
+    "altar": "Hub Altar"
+  },
+  "village": {
+    "gran": {
+      "intro": [
+        "Welcome, apprentice mechanic.\nThe Hub King sleeps, and every robot has stopped.",
+        "To wake him you must first know\nthe Six Spirits. Look closely."
+      ],
+      "afterCards": [
+        "Now you know their names.\nPress X any time to open the codex.",
+        "Next, the blacksmith.\nGo learn about beams and pins."
+      ],
+      "repeat": "The codex is on X.\nOpen it whenever you're unsure.",
+      "cardsTitle": "Six Spirits — Electronics"
+    },
+    "smith": {
+      "intro": [
+        "A robot's bones are BEAMS,\nand the nails that join them are PINS.",
+        "Tell pins apart by colour.\nBlack and blue feel rough — they grip. For locking!",
+        "Light grey and beige feel smooth — they spin.\nUse those for wheels and joints."
+      ],
+      "afterCards": [
+        "Axles tell their length by colour:\nodd = grey, even = black, and only the 2-long is red.",
+        "And never pry parts with your nails.\nUse the SEPARATOR. That's a craftsman's manner.",
+        "The gatekeeper will test you.\nGo on."
+      ],
+      "repeat": "Black and blue lock.\nGrey and beige spin. Don't forget.",
+      "cardsTitle": "Joining Rules — Structure"
+    },
+    "guard": {
+      "passed": "You pass. Take the south gate.\nThe maker is waiting in the workshop.",
+      "notReady": "You're not ready yet.\nSee the granny and the blacksmith first.",
+      "challenge": "None pass this gate untested.\nThree questions. Ready?",
+      "declined": "Come back any time.",
+      "enemyName": "Pin Thief"
+    },
+    "altar": [
+      "A huge hub lies dormant.\nAll 25 lights are dark.",
+      "Six ports, A through F.\nNot one of them is connected…"
+    ],
+    "sign": [
+      "\" Hub Village \"\nArrows — move / Z·Enter — talk / X — codex",
+      "South gate → Assembly Workshop\nLearn from the villagers first."
+    ]
+  },
+  "workshop": {
+    "maker": {
+      "find": "You need seven things.\nPull out what matches the picture.",
+      "motor": "Two kinds of holes — cross and round.\nAn axle only fits the cross one.",
+      "beam": "Black pins feel rough — they don't turn.\nStiff is normal. That's the point.",
+      "flag": "Shape is up to you. It's your golem.",
+      "cable": "The body is done. Now the lifeline.\nPort A. Read the letter with your eyes.",
+      "code": "Read the spell book on the right\nand copy it into the SPIKE app.",
+      "afterDone": "The north door is open.\nHead to the Teardown Room.",
+      "finish": [
+        "You did it.\nThe golem waves its flag, just as you wrote!",
+        "But one gate remains.\nGo north — the Teardown Room."
+      ]
+    },
+    "late": {
+      "find": "If finding parts takes this long, the rest gets tight.\nCall me if you're stuck.",
+      "motor": "Don't force it. Changing the angle is faster.",
+      "beam": "Press with your thumb until it clicks.",
+      "flag": "Any shape works. Let's move on.",
+      "cable": "Did you read the port letter? It's A.",
+      "code": "The block colour tells you which drawer."
+    },
+    "bench": "A workbench. Parts are laid out neatly.\nThis is where you build the real robot.",
+    "quizEnemyName": "Tangled Cable"
+  },
+  "hubroom": {
+    "altarLocked": "The Hub King still sleeps.\nTangled cables coil around him…",
+    "altarAwake": "…Thank you, apprentice mechanic.\nBrixity moves again!",
+    "bossName": "Tangled Cable"
+  },
+  "battle": {
+    "appear": "{name} appeared!\nAnswer correctly to drive it back!",
+    "revive": "The spirits lend you their strength!\nTry again."
+  },
+  "common": {
+    "nothing": "Nothing happens."
+  },
+  "opening": [
+    "The robot kingdom of Brixity.\nEvery machine here ran on the Hub King at its centre.",
+    "Then one day tangled cables coiled around him\nand the 5x5 eyes went dark.",
+    "A kingdom stopped. One hope remains —\nthe apprentice mechanic who started today. You.",
+    "Learn the parts, build with your own hands,\nweave the spell — the code — and wake the king.",
+    "You have ten minutes.\n…Let us begin."
+  ]
+}
+
+</script>
+<script type="application/json" id="spike-parts-en" data-kind="parts" data-lang="en">
+{
+  "meta": {
+    "kind": "parts",
+    "lang": "en",
+    "name": "English",
+    "note": "Part codex. Keep the item keys; translate the values. 'lines' is the description, 'tip' is a one-line hint."
+  },
+  "items": {
+    "hub": {
+      "title": "The Hub King",
+      "real": "Large Hub",
+      "one": "Brain and heart in one.",
+      "lines": [
+        "Six ports, labelled A through F.",
+        "A 5x5 light matrix shows pictures and letters.",
+        "Centre button = power on / run program.",
+        "A gyro that senses tilt, a speaker,",
+        "and a rechargeable battery are all inside."
+      ],
+      "tip": "Any port works, but it must match the port in your program."
+    },
+    "motorL": {
+      "title": "The Steel Giant",
+      "real": "Large Motor",
+      "one": "The strongest motor.",
+      "lines": [
+        "Use it to push heavy things or turn big wheels.",
+        "It has a rotation sensor inside, so it knows",
+        "exactly how many degrees it has turned.",
+        "That is how \"exactly one turn\" is possible."
+      ],
+      "tip": "Large for power, Medium for light and fast."
+    },
+    "motorM": {
+      "title": "The Twin Runners",
+      "real": "Medium Motor",
+      "one": "Small, fast. Two in set.",
+      "lines": [
+        "For arms, grippers, steering — light, fast moves.",
+        "It has a rotation sensor, same as the Large Motor.",
+        "It stars in today's build, the flag-waving arm."
+      ],
+      "tip": "The two look identical. Tell them apart by port."
+    },
+    "color": {
+      "title": "The Rainbow Eye",
+      "real": "Colour Sensor",
+      "one": "An eye that reads colour.",
+      "lines": [
+        "It tells red, blue, yellow and more apart.",
+        "It also measures how much light bounces back.",
+        "Line following is its classic use."
+      ],
+      "tip": "Too close to the floor or too far and it misreads."
+    },
+    "dist": {
+      "title": "The Owl Eye",
+      "real": "Distance Sensor",
+      "one": "An eye that uses sound.",
+      "lines": [
+        "The two eye-like holes send out sound and time",
+        "the echo to know how far the object ahead is.",
+        "Those eyes are also LEDs you can switch on and off."
+      ],
+      "tip": "Soft cloth or slanted surfaces absorb sound and confuse it."
+    },
+    "force": {
+      "title": "The Fist Sentinel",
+      "real": "Force Sensor",
+      "one": "A hand that feels how hard.",
+      "lines": [
+        "It knows not only that it was pressed,",
+        "but how hard, as a number.",
+        "You can tell a light press from a firm one."
+      ],
+      "tip": "Often used as a bumper to detect collisions."
+    },
+    "cable": {
+      "title": "The Joining Thread",
+      "real": "Connector Cable (LPF2)",
+      "one": "The wire to the hub.",
+      "lines": [
+        "Sensor or motor, the plug is always the same.",
+        "Only the length differs. Short ones keep it tidy.",
+        "Pull the hard plug, never the wire."
+      ],
+      "tip": "Pulling the wire breaks it. Unplug cables first when taking apart."
+    },
+    "beam": {
+      "title": "The Bone Piece",
+      "real": "Technic Beam",
+      "one": "The robot's skeleton.",
+      "lines": [
+        "The hole count is the length. 7 holes = a 7-beam.",
+        "They come straight, L-shaped, and as frames.",
+        "Beams join to each other with pins."
+      ],
+      "tip": "Count the holes to find the beam you need. Colour means nothing."
+    },
+    "pinBlack": {
+      "title": "The Black Locking Nail",
+      "real": "Black Friction Pin (2-long)",
+      "one": "Grips tight, never turns.",
+      "lines": [
+        "Rough surface = friction = for locking.",
+        "The longer 3-length friction pin is blue.",
+        "Use this pin to join the frame firmly."
+      ],
+      "tip": "\"It won't come out\" is not a fault — that's the job. Use the separator."
+    },
+    "pinGray": {
+      "title": "The Pale Turning Nail",
+      "real": "Frictionless Pin (grey)",
+      "one": "Smooth — it turns freely.",
+      "lines": [
+        "Shiny surface = no friction = for turning.",
+        "Use it for wheels, joints and swinging arms.",
+        "Use it where you needed a lock and the robot wobbles."
+      ],
+      "tip": "Judge by colour. Black/blue lock, light grey/beige turn."
+    },
+    "connector": {
+      "title": "The Key of Direction",
+      "real": "Cross Connector Block",
+      "one": "Turns the build a corner.",
+      "lines": [
+        "It turns a horizontal structure into a vertical one.",
+        "The cross hole takes an axle, the round hole a pin.",
+        "It often bridges a motor's output axle and a beam."
+      ],
+      "tip": "Look at the hole shape. Cross = axle, circle = pin."
+    },
+    "axle": {
+      "title": "The Turning Core",
+      "real": "Axle",
+      "one": "A rod, cross in section.",
+      "lines": [
+        "What you fit on it turns with it. It carries force.",
+        "You can memorise the length by colour:",
+        "odd = light grey, even = black, and 2-long is red."
+      ],
+      "tip": "Unsure of the length? Hold it against beam holes and count."
+    },
+    "bush": {
+      "title": "The Stopper",
+      "real": "Bush",
+      "one": "A ring that locks an axle.",
+      "lines": [
+        "The 1-length one is grey, the half-length one yellow.",
+        "Fit them at both ends so the axle cannot drift."
+      ],
+      "tip": "If the robot keeps going loose, check for a missing bush."
+    },
+    "separator": {
+      "title": "The Teardown Tool",
+      "real": "Brick Separator",
+      "one": "The safe way to pry parts.",
+      "lines": [
+        "It levers pins and bricks out for you.",
+        "Nails and teeth hurt you and damage the parts.",
+        "It halves the time a teardown takes."
+      ],
+      "tip": "Slip the pointed end under the pin head and press up slowly."
+    },
+    "flag": {
+      "title": "The Victory Flag",
+      "real": "Decoration Brick / Flag",
+      "one": "Goes on the robot's tip.",
+      "lines": [
+        "It does nothing, but it makes the motion visible.",
+        "You can see at a glance how far the motor turned."
+      ],
+      "tip": "Keep it light so the motor has an easy time."
+    }
+  }
+}
+
+</script>
+<script type="application/json" id="spike-quiz-en" data-kind="quiz" data-lang="en">
+{
+  "meta": {
+    "kind": "quiz",
+    "lang": "en",
+    "name": "English",
+    "note": "The FIRST entry in 'choices' is the correct answer — the game shuffles them at run time. 'why' is the explanation; 'act' is the real teardown step shown on a correct boss answer."
+  },
+  "sets": {
+    "gate": [
+      {
+        "q": "How many ports does the hub have for parts?",
+        "choices": ["6 (A-F)", "4 (A-D)", "8 (A-H)", "2 (A, B)"],
+        "why": "The Large Hub has six ports, A through F. Any port works, but it must match the one written in your program."
+      },
+      {
+        "q": "Which pin colour do you use to lock something firmly?",
+        "choices": ["Black (rough surface)", "Light grey (smooth)", "Beige (smooth)", "Colour doesn't matter"],
+        "why": "Black and blue friction pins have a rough surface and grip = locking. Light grey and beige frictionless pins are smooth and turn = rotation."
+      },
+      {
+        "q": "What is this part called?",
+        "choices": ["Distance Sensor", "Colour Sensor", "Force Sensor", "Medium Motor"],
+        "why": "The Distance Sensor measures how far away an object is using ultrasound. The two eye-like holes are also LEDs you can switch on and off."
+      }
+    ],
+    "mission": [
+      {
+        "q": "Your program says \"motor A\". Which port takes the cable?",
+        "choices": ["Port A", "Port B", "Any port is fine", "Plug into both"],
+        "why": "The port in the program and the port you actually used must match. If nothing moves, check this first!"
+      },
+      {
+        "q": "The build is done but the motor won't move. What do you check first?",
+        "choices": ["The cable and the port letter", "Shake the hub hard", "Remove the battery", "Rebuild from scratch"],
+        "why": "Nine times out of ten the cable is loose or the port is wrong. The run button is the next thing to check."
+      }
+    ],
+    "boss": [
+      {
+        "q": "Time to take it apart. What comes off first?",
+        "choices": ["The cable", "The flag", "The 7-hole beam", "The motor"],
+        "why": "Start with the cable, the part carrying electricity. Go ahead and unplug it now!",
+        "act": "1) Unplug the cable"
+      },
+      {
+        "q": "What is the right way to unplug a cable?",
+        "choices": ["Hold the hard plug and pull", "Grab the wire and yank", "Shake the hub loose", "Twist it out"],
+        "why": "Pulling the wire snaps the strands inside. Always hold the plug.",
+        "act": "2) Remove the flag and beam"
+      },
+      {
+        "q": "A black friction pin is stuck fast. What do you do?",
+        "choices": ["Lever it out with the separator", "Pick at it with your nails", "Bite it", "Hit it with a hammer"],
+        "why": "Friction pins are meant to be hard to remove. The separator saves your fingers and the parts.",
+        "act": "3) Split the connector and pins"
+      },
+      {
+        "q": "What is the correct teardown order?",
+        "choices": ["The reverse of how you built it", "Wherever it feels loose", "Twist the whole thing apart", "Take the motor off first"],
+        "why": "Reverse order is fastest and safest. Finally, sort the parts back into their trays — that's courtesy to the next person.",
+        "act": "4) Sort the parts into trays"
+      }
+    ]
   }
 }
 
@@ -646,36 +1735,48 @@ SPIKE.BLOCK_CATS = [
 <script>
 /* ==== src/core/text.js ==== */
 /* ============================================================
- *  SPIKE.Text — 외부 JSON 텍스트 리소스
+ *  SPIKE.Text — 외부 JSON 텍스트 리소스 + 언어 전환
  *
- *  대사와 UI 텍스트를 코드에서 분리해 JSON으로 관리한다.
- *    content/ui.ko.json        UI 텍스트 (버튼·라벨·가이드 문구·폰트 설정)
- *    content/dialogue.ko.json  대사 (NPC·장인·전투·엔딩)
+ *  게임에 나오는 모든 글자를 코드에서 분리해 JSON 으로 관리한다.
+ *    content/ui.<lang>.json        UI (버튼·라벨·가이드 문구·폰트 설정)
+ *    content/dialogue.<lang>.json  대사 (NPC·장인·전투·엔딩)
+ *    content/parts.<lang>.json     부품 도감
+ *    content/quiz.<lang>.json      퀴즈 문제·해설
  *
- *  키는 영어 점 표기법.  S.T('common.next')  S.D('village.gran.intro')
+ *  키는 영어 점 표기법.  S.T('common.next')   S.D('village.gran.intro')
  *
  *  불러오는 경로 3가지 — 앞에서부터 우선한다
- *    1) <script type="application/json" id="spike-ui"> 인라인  (배포본)
- *    2) fetch(data-src)                                        (개발 서버)
- *    3) 없으면 빈 채로 두고 코드의 fallback 사용                (안전망)
+ *    1) <script type="application/json" id="spike-<kind>-<lang>"> 인라인  (배포본)
+ *    2) fetch(data-src)                                                  (개발 서버)
+ *    3) 없으면 코드의 fallback                                            (안전망)
  *
- *  부스 현장에서 재빌드 없이 고치는 법:
- *    JSON 파일을 게임 화면에 드래그&드롭 하거나 F4 → 파일 선택.
- *    (file:// 에서도 동작한다. FileReader 는 CORS 를 타지 않는다)
+ *  언어 전환: 타이틀 화면의 버튼 또는 S.Text.setLang('en').
+ *  부스에서 강사가 한 번 정하면 학생이 바뀌어도 유지된다 (State.reset 과 무관).
+ *
+ *  재빌드 없이 문구 고치기: JSON 을 화면에 드래그&드롭 하거나 F4.
+ *  (file:// 에서도 된다 — FileReader 는 CORS 를 타지 않는다)
  * ============================================================ */
 (function (S) {
   'use strict';
 
+  var KINDS = ['ui', 'dialogue', 'parts', 'quiz'];
+
   var Text = S.Text = {
-    ui: {},
-    dialogue: {},
-    missing: {},        // 참조됐지만 JSON에 없는 키 (스모크 테스트가 검사한다)
-    loaded: { ui: false, dialogue: false },
-    onChange: null,     // 런타임 교체 시 호출 (캐시 비우기 등)
+    KINDS: KINDS,
+
+    lang: 'ko',
+    langs: ['ko'],          // 실제로 불러온 언어들 (토글 순서)
+    store: {},              // store[lang][kind] = 객체
+    missing: {},            // 참조됐지만 없는 키 (스모크 테스트가 검사한다)
+    onChange: null,         // 언어·내용이 바뀔 때 (도감/퀴즈 재구성용)
 
     /* ---------------- 조회 ---------------- */
 
-    /* 'a.b.c' 경로로 중첩 객체를 판다 */
+    ns: function (kind) {
+      var l = this.store[this.lang];
+      return (l && l[kind]) || {};
+    },
+
     _dig: function (root, key) {
       var parts = String(key).split('.');
       var cur = root;
@@ -686,24 +1787,21 @@ SPIKE.BLOCK_CATS = [
       return cur;
     },
 
-    _get: function (root, key, fallback) {
-      var v = this._dig(root, key);
+    get: function (kind, key, fallback) {
+      var v = this._dig(this.ns(kind), key);
       if (v === undefined || v === null) {
-        this.missing[key] = true;
+        this.missing[kind + ':' + key] = true;
         return fallback !== undefined ? fallback : '[' + key + ']';
       }
       return v;
     },
 
-    /* UI 텍스트 */
-    t: function (key, fallback) { return this._get(this.ui, key, fallback); },
+    t: function (key, fb) { return this.get('ui', key, fb); },
+    d: function (key, fb) { return this.get('dialogue', key, fb); },
 
-    /* 대사 */
-    d: function (key, fallback) { return this._get(this.dialogue, key, fallback); },
-
-    /* 배열(여러 줄 대사)을 반드시 배열로 받는다 */
-    list: function (root, key) {
-      var v = this._get(root === 'ui' ? this.ui : this.dialogue, key, null);
+    /* 반드시 배열로 */
+    list: function (kind, key) {
+      var v = this.get(kind, key, null);
       if (v == null) return [];
       return Array.isArray(v) ? v : [v];
     },
@@ -718,11 +1816,13 @@ SPIKE.BLOCK_CATS = [
 
     /* ---------------- 적용 ---------------- */
 
-    apply: function (kind, obj) {
+    apply: function (kind, obj, lang) {
       if (!obj || typeof obj !== 'object') return false;
-      this[kind] = obj;
-      this.loaded[kind] = true;
-      if (kind === 'ui') this._applyFont(obj.font);
+      lang = lang || (obj.meta && obj.meta.lang) || this.lang;
+      if (!this.store[lang]) this.store[lang] = {};
+      this.store[lang][kind] = obj;
+      if (this.langs.indexOf(lang) < 0) this.langs.push(lang);
+      if (kind === 'ui' && lang === this.lang) this._applyFont(obj.font);
       return true;
     },
 
@@ -736,18 +1836,53 @@ SPIKE.BLOCK_CATS = [
       S.Font.cache.clear();
     },
 
+    /* ---------------- 언어 ---------------- */
+
+    has: function (lang) { return !!this.store[lang]; },
+
+    setLang: function (lang) {
+      if (!this.has(lang) || lang === this.lang) return false;
+      this.lang = lang;
+      this._applyFont(this.ns('ui').font);
+      S.Font.cache.clear();
+      this._refresh();
+      return true;
+    },
+
+    /* 다음 언어로 (타이틀 버튼) */
+    cycleLang: function () {
+      if (this.langs.length < 2) return false;
+      var i = this.langs.indexOf(this.lang);
+      return this.setLang(this.langs[(i + 1) % this.langs.length]);
+    },
+
+    /* 현재 언어의 표시 이름 */
+    langName: function (lang) {
+      var l = this.store[lang || this.lang];
+      return (l && l.ui && l.ui.meta && l.ui.meta.short) || (lang || this.lang).toUpperCase();
+    },
+
+    /* 도감·퀴즈처럼 JSON 에서 만들어지는 자료구조를 다시 세운다 */
+    _refresh: function () {
+      if (S.rebuildParts) S.rebuildParts();
+      if (S.rebuildQuiz) S.rebuildQuiz();
+      if (this.onChange) this.onChange(this.lang);
+    },
+
     /* ---------------- 부팅 로드 ---------------- */
 
-    /* 인라인 <script type="application/json"> 또는 fetch(data-src) */
-    _loadOne: function (kind, elId) {
+    _loadEl: function (el) {
       var self = this;
-      var el = document.getElementById(elId);
-      if (!el) return Promise.resolve(false);
+      var kind = el.getAttribute('data-kind');
+      var lang = el.getAttribute('data-lang');
 
       var inline = (el.textContent || '').trim();
       if (inline) {
-        try { return Promise.resolve(self.apply(kind, JSON.parse(inline))); }
-        catch (e) { console.error('[Text] 인라인 JSON 파싱 실패:', elId, e); return Promise.resolve(false); }
+        try { return Promise.resolve(self.apply(kind, JSON.parse(inline), lang)); }
+        catch (e) {
+          console.error('[Text] 인라인 JSON 파싱 실패:', el.id, e);
+          return Promise.resolve(false);
+        }
       }
 
       var src = el.getAttribute('data-src');
@@ -755,9 +1890,8 @@ SPIKE.BLOCK_CATS = [
 
       return fetch(src)
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (j) { return j ? self.apply(kind, j) : false; })
+        .then(function (j) { return j ? self.apply(kind, j, lang) : false; })
         .catch(function () {
-          // file:// 에서는 fetch 가 막힌다 — 코드 fallback 으로 간다
           console.warn('[Text] ' + src + ' 을 읽지 못했습니다. 내장 기본값을 씁니다.');
           return false;
         });
@@ -765,20 +1899,42 @@ SPIKE.BLOCK_CATS = [
 
     boot: function () {
       var self = this;
-      return Promise.all([
-        this._loadOne('ui', 'spike-ui'),
-        this._loadOne('dialogue', 'spike-dialogue')
-      ]).then(function () {
-        self._installDropLoader();
-        return self;
-      });
+      var els = [];
+      if (typeof document !== 'undefined' && document.querySelectorAll) {
+        els = [].slice.call(document.querySelectorAll('script[data-kind]'));
+      }
+      return Promise.all(els.map(function (el) { return self._loadEl(el); }))
+        .then(function () {
+          // 기본 언어가 안 실려 있으면 실린 것 중 첫 번째로
+          if (!self.has(self.lang) && self.langs.length) self.lang = self.langs[0];
+          self.langs.sort();                       // ko, en 순서 고정
+          self._applyFont(self.ns('ui').font);
+          // JSON 이 실리기 전(스크립트 로드 시점)의 조회는 당연히 빗나간다.
+          // 여기서 지워야 missing 이 '플레이 중 진짜 빠진 키'만 담는다.
+          self.missing = {};
+          self._refresh();
+          self._installDropLoader();
+          return self;
+        });
+    },
+
+    loaded: function (kind, lang) {
+      var l = this.store[lang || this.lang];
+      return !!(l && l[kind]);
     },
 
     /* ---------------- 런타임 교체 (재빌드 없이) ---------------- */
 
-    /* 파일 이름으로 종류를 추측한다: *ui*.json → ui, 그 외 → dialogue */
-    kindOf: function (filename) {
-      return /ui/i.test(filename) ? 'ui' : 'dialogue';
+    /* 파일 이름에서 종류와 언어를 짐작한다: ui.en.json → ui / en */
+    guess: function (filename) {
+      var m = String(filename).match(/([a-z]+)\.([a-z]{2})\.json$/i);
+      if (m && KINDS.indexOf(m[1].toLowerCase()) >= 0) {
+        return { kind: m[1].toLowerCase(), lang: m[2].toLowerCase() };
+      }
+      for (var i = 0; i < KINDS.length; i++) {
+        if (new RegExp(KINDS[i], 'i').test(filename)) return { kind: KINDS[i], lang: null };
+      }
+      return { kind: 'ui', lang: null };
     },
 
     loadFile: function (file) {
@@ -788,10 +1944,12 @@ SPIKE.BLOCK_CATS = [
         fr.onload = function () {
           try {
             var obj = JSON.parse(fr.result);
-            var kind = (obj.meta && obj.meta.kind) || self.kindOf(file.name);
-            self.apply(kind, obj);
-            if (self.onChange) self.onChange(kind);
-            self.toast = kind + ' 텍스트를 교체했습니다: ' + file.name;
+            var g = self.guess(file.name);
+            var kind = (obj.meta && obj.meta.kind) || g.kind;
+            var lang = (obj.meta && obj.meta.lang) || g.lang || self.lang;
+            self.apply(kind, obj, lang);
+            if (lang === self.lang) { S.Font.cache.clear(); self._refresh(); }
+            self.toast = kind + ' (' + lang + ') 교체: ' + file.name;
             self.toastT = 2.5;
             resolve(kind);
           } catch (e) {
@@ -809,7 +1967,6 @@ SPIKE.BLOCK_CATS = [
 
     tick: function (dt) { if (this.toastT > 0) this.toastT -= dt; },
 
-    /* 교체 결과를 화면 위에 잠깐 띄운다 */
     draw: function (r) {
       if (this.toastT <= 0 || !this.toast) return;
       var w = Math.min(S.W - 16, r.textWidth(this.toast, 11) + 20);
@@ -833,7 +1990,7 @@ SPIKE.BLOCK_CATS = [
       });
     },
 
-    /* F4 — 파일 선택 대화상자 */
+    /* F4 — 파일 선택 */
     pickFile: function () {
       var self = this;
       var inp = document.createElement('input');
@@ -850,8 +2007,8 @@ SPIKE.BLOCK_CATS = [
   /* 짧은 별칭 — 코드에서 이걸 쓴다 */
   S.T = function (key, fallback) { return Text.t(key, fallback); };
   S.D = function (key, fallback) { return Text.d(key, fallback); };
-  S.TL = function (key) { return Text.list('ui', key); };        // UI 배열
-  S.DL = function (key) { return Text.list('dialogue', key); };  // 대사 배열
+  S.TL = function (key) { return Text.list('ui', key); };
+  S.DL = function (key) { return Text.list('dialogue', key); };
 })(SPIKE);
 
 </script>
@@ -2145,7 +3302,7 @@ SPIKE.BLOCK_CATS = [
         e.preventDefault();
         S.Audio.stopBGM();
         S.Game.transition('attract');
-        this.say('초기화 — 다음 학생을 기다립니다');
+        this.say(S.T('hotkeys.toastReset', ''));
         return true;
       }
       if (e.code === 'F1') { e.preventDefault(); this.helpOpen = !this.helpOpen; return true; }
@@ -2153,17 +3310,17 @@ SPIKE.BLOCK_CATS = [
       if (e.code === 'F3') {
         e.preventDefault();
         var p = S.State.togglePause();
-        this.say(p ? '타이머 일시정지' : '타이머 재개');
+        this.say(S.T(p ? 'hotkeys.toastPause' : 'hotkeys.toastResume', ''));
         return true;
       }
       if (e.code === 'F4') {
         e.preventDefault();
-        if (S.Text) { S.Text.pickFile(); this.say('텍스트 JSON 선택'); }
+        if (S.Text) { S.Text.pickFile(); this.say(S.T('hotkeys.toastText', '')); }
         return true;
       }
       if (e.code === 'KeyM') {
         var m = S.Audio.toggleMute();
-        this.say(m ? '음소거 ON' : '음소거 OFF');
+        this.say(S.T(m ? 'hotkeys.toastMuteOn' : 'hotkeys.toastMuteOff', ''));
         return true;
       }
       if (this.helpOpen) { this.helpOpen = false; return true; }
@@ -2176,7 +3333,7 @@ SPIKE.BLOCK_CATS = [
       if (ch === 1) S.Game.transition('field', { map: 'village' });
       else if (ch === 2) S.Game.transition('field', { map: 'workshop' });
       else S.Game.transition('field', { map: 'hubroom' });
-      this.say('챕터 ' + ch + '로 이동');
+      this.say(S.Text.fmt(S.T('hotkeys.toastJump', ''), { n: ch }));
     },
 
     draw: function (r) {
@@ -2193,10 +3350,10 @@ SPIKE.BLOCK_CATS = [
         r.fade(0.55);
         var bw = 200, bh = 96, bx = (S.W - bw) / 2, by = (S.H - bh) / 2;
         r.window(bx, by, bw, bh);
-        r.text('챕터 점프', bx + bw / 2, by + 10, { size: 12, color: C.textHi, align: 'center' });
-        r.text('1 — 허브 마을', bx + 22, by + 32, { size: 12 });
-        r.text('2 — 조립 공방', bx + 22, by + 50, { size: 12 });
-        r.text('3 — 해체의 방', bx + 22, by + 68, { size: 12 });
+        r.text(S.T('hotkeys.jumpTitle', ''), bx + bw / 2, by + 10, { size: 12, color: C.textHi, align: 'center' });
+        r.text(S.T('hotkeys.jump1', ''), bx + 22, by + 32, { size: 12 });
+        r.text(S.T('hotkeys.jump2', ''), bx + 22, by + 50, { size: 12 });
+        r.text(S.T('hotkeys.jump3', ''), bx + 22, by + 68, { size: 12 });
         return;
       }
 
@@ -2204,26 +3361,14 @@ SPIKE.BLOCK_CATS = [
         r.fade(0.6);
         var w2 = 300, h2 = 222, x2 = (S.W - w2) / 2, y2 = (S.H - h2) / 2;
         r.window(x2, y2, w2, h2);
-        r.text('조 작 법', x2 + w2 / 2, y2 + 10, { size: 14, color: C.textHi, align: 'center' });
-        var rows = [
-          ['방향키 / WASD', '이동'],
-          ['Z · Space · Enter', '말 걸기 / 확인'],
-          ['X · Esc', '취소 / 메뉴'],
-          ['마우스', '선택 · 버튼'],
-          ['Q / E', '가이드 이전 / 다음'],
-          ['', ''],
-          ['Ctrl+R', '다음 학생 (초기화)'],
-          ['F2', '챕터 점프'],
-          ['F3', '타이머 일시정지'],
-          ['F4', '텍스트 JSON 불러오기'],
-          ['M', '음소거']
-        ];
+        r.text(S.T('hotkeys.title', ''), x2 + w2 / 2, y2 + 10, { size: 14, color: C.textHi, align: 'center' });
+        var rows = S.T('hotkeys.rows', []);
         for (var i = 0; i < rows.length; i++) {
           var yy = y2 + 34 + i * 16;
           r.text(rows[i][0], x2 + 20, yy, { size: 11, color: C.textHi });
           r.text(rows[i][1], x2 + 150, yy, { size: 11, color: C.text });
         }
-        r.text('아무 키나 눌러 닫기', x2 + w2 / 2, y2 + h2 - 16,
+        r.text(S.T('hotkeys.closeHint', ''), x2 + w2 / 2, y2 + h2 - 16,
           { size: 10, color: C.textDim, align: 'center' });
       }
     }
@@ -2265,11 +3410,11 @@ SPIKE.BLOCK_CATS = [
       r.fade(0.6);
       var bw = 260, bh = 78, bx = (S.W - bw) / 2, by = (S.H - bh) / 2;
       r.window(bx, by, bw, bh);
-      r.text('자리를 비우셨나요?', bx + bw / 2, by + 12,
+      r.text(S.T('idle.title', ''), bx + bw / 2, by + 12,
         { size: 13, color: S.C.textHi, align: 'center' });
       r.text(left + '초 후 처음 화면으로 돌아갑니다', bx + bw / 2, by + 34,
         { size: 10, color: S.C.text, align: 'center' });
-      r.text('아무 키나 누르면 계속합니다', bx + bw / 2, by + 54,
+      r.text(S.T('idle.hint', ''), bx + bw / 2, by + 54,
         { size: 10, color: S.C.textDim, align: 'center' });
     }
   };
@@ -2476,203 +3621,64 @@ SPIKE.BLOCK_CATS = [
 <script>
 /* ==== src/data/parts.js ==== */
 /* ============================================================
- *  SPIKE.PARTS — 부품 도감 (게임 내장 매뉴얼 본체)
- *  게임에서 배우는 내용이 곧 실습 매뉴얼이 되도록 작성.
+ *  SPIKE.PARTS — 부품 도감 (게임 내장 매뉴얼)
+ *
+ *  ⚠ 글자는 여기 없다. content/parts.<언어>.json 의 items.<id> 에 있다.
+ *    이 파일은 순서·아이콘·분류만 갖는다.
+ *
+ *  언어를 바꾸면 S.rebuildParts() 가 배열 내용을 갈아끼운다.
+ *  배열 자체는 그대로 두고 안을 비웠다 채운다 — 다른 코드가
+ *  S.PARTS 를 붙들고 있어도 끊기지 않게.
  * ============================================================ */
 (function (S) {
   'use strict';
 
-  /* 전자 부품 — "6대 정령" */
-  S.PARTS = [
-    {
-      id: 'hub', icon: 'p_hub', group: 'core',
-      title: '허브 왕',
-      real: '라지 허브 (Large Hub)',
-      one: '로봇의 두뇌이자 심장.',
-      lines: [
-        '포트가 A부터 F까지 여섯 개 있다.',
-        '앞면 5×5 LED 매트릭스로 그림·글자를 보여준다.',
-        '가운데 버튼 = 전원 켜기 / 프로그램 실행.',
-        '기울기를 아는 자이로, 소리를 내는 스피커,',
-        '충전식 배터리가 전부 안에 들어 있다.'
-      ],
-      tip: '포트는 아무 데나 꽂아도 되지만, 프로그램에 적은 포트와 반드시 같아야 한다.'
-    },
-    {
-      id: 'motorL', icon: 'p_motor_l', group: 'core',
-      title: '강철 거인',
-      real: '라지 모터 (Large Motor)',
-      one: '힘이 가장 센 모터.',
-      lines: [
-        '무거운 것을 밀거나 큰 바퀴를 굴릴 때 쓴다.',
-        '안에 회전각 센서가 있어서 "몇 도 돌렸는지"를',
-        '스스로 알고 있다.',
-        '그래서 "정확히 1회전" 같은 명령이 가능하다.'
-      ],
-      tip: '힘이 필요하면 라지, 빠르고 가벼우면 미디엄.'
-    },
-    {
-      id: 'motorM', icon: 'p_motor_m', group: 'core',
-      title: '쌍둥이 러너',
-      real: '미디엄 모터 (Medium Motor)',
-      one: '작고 빠른 모터. 세트에 두 개.',
-      lines: [
-        '팔, 집게, 방향 조절처럼 가볍고 빠른 동작 담당.',
-        '라지 모터와 마찬가지로 회전각 센서 내장.',
-        '오늘 만들 "깃발 흔드는 팔"의 주인공이다.'
-      ],
-      tip: '두 개가 똑같이 생겼다. 왼쪽·오른쪽 구분이 필요하면 포트로 구분한다.'
-    },
-    {
-      id: 'color', icon: 'p_color', group: 'core',
-      title: '무지개 눈',
-      real: '컬러 센서 (Color Sensor)',
-      one: '색을 알아보는 눈.',
-      lines: [
-        '빨강·파랑·노랑 같은 색을 구분한다.',
-        '빛이 얼마나 반사되는지(밝기)도 잴 수 있다.',
-        '검은 선을 따라가는 라인트레이싱이 대표 활용.'
-      ],
-      tip: '센서를 바닥에 너무 붙이거나 너무 띄우면 색을 잘못 읽는다.'
-    },
-    {
-      id: 'dist', icon: 'p_dist', group: 'core',
-      title: '올빼미 눈',
-      real: '거리 센서 (Distance Sensor)',
-      one: '초음파로 거리를 재는 눈.',
-      lines: [
-        '눈처럼 생긴 두 구멍으로 소리를 쏘고 되돌아오는',
-        '시간을 재서 앞에 있는 물체까지의 거리를 안다.',
-        '두 눈은 프로그램으로 켜고 끌 수 있는 LED이기도 하다.'
-      ],
-      tip: '푹신한 천이나 비스듬한 면은 소리를 흡수·반사해서 잘 못 잰다.'
-    },
-    {
-      id: 'force', icon: 'p_force', group: 'core',
-      title: '주먹 파수꾼',
-      real: '포스 센서 (Force Sensor)',
-      one: '눌림과 "세기"를 아는 손.',
-      lines: [
-        '버튼처럼 눌렸는지 알 뿐 아니라,',
-        '얼마나 세게 눌렀는지까지 숫자로 알려준다.',
-        '살짝 누름 / 꽉 누름을 구분하는 프로그램이 가능.'
-      ],
-      tip: '충돌 감지용 범퍼로도 자주 쓴다.'
-    },
-
-    /* 구조 부품 — "연결의 법칙" */
-    {
-      id: 'cable', icon: 'p_cable', group: 'tech',
-      title: '이어주는 실',
-      real: '연결 케이블 (LPF2)',
-      one: '모든 부품과 허브를 잇는 선.',
-      lines: [
-        '센서든 모터든 케이블 모양은 전부 똑같다.',
-        '길이만 여러 가지다. 짧은 걸 쓰면 깔끔하다.',
-        '뽑을 때는 선이 아니라 커넥터(딱딱한 부분)를 잡는다.'
-      ],
-      tip: '선을 잡아당기면 끊어진다. 해체할 때 케이블을 가장 먼저 뺀다.'
-    },
-    {
-      id: 'beam', icon: 'p_beam', group: 'tech',
-      title: '뼈대 조각',
-      real: '테크닉 빔 (Beam)',
-      one: '로봇의 뼈대.',
-      lines: [
-        '구멍 개수가 곧 길이다. 구멍 7개 = 7칸 빔.',
-        '직선형, ㄱ자형, 사각 프레임 등이 있다.',
-        '빔끼리는 핀으로 이어 붙인다.'
-      ],
-      tip: '필요한 빔을 찾을 땐 구멍을 세어라. 색은 길이와 상관없다.'
-    },
-    {
-      id: 'pinBlack', icon: 'p_pin_black', group: 'tech',
-      title: '고정의 검은 못',
-      real: '검정 마찰핀 (2칸)',
-      one: '꽉 물려서 안 돌아가는 핀.',
-      lines: [
-        '표면이 거칠거칠하다 = 마찰이 있다 = 고정용.',
-        '3칸짜리 긴 마찰핀은 파란색이다.',
-        '뼈대를 단단히 붙일 때 이 핀을 쓴다.'
-      ],
-      tip: '"잘 안 빠져요"는 고장이 아니라 정상. 분리 도구를 쓴다.'
-    },
-    {
-      id: 'pinGray', icon: 'p_pin_gray', group: 'tech',
-      title: '회전의 흰 못',
-      real: '무마찰핀 (연회색·베이지)',
-      one: '매끈해서 잘 도는 핀.',
-      lines: [
-        '표면이 반질반질하다 = 마찰이 없다 = 회전용.',
-        '바퀴, 관절, 회전하는 팔에 쓴다.',
-        '고정해야 할 곳에 쓰면 로봇이 흐물거린다.'
-      ],
-      tip: '색으로 구분하라. 검정·파랑=고정, 연회색·베이지=회전.'
-    },
-    {
-      id: 'connector', icon: 'p_connector', group: 'tech',
-      title: '방향의 열쇠',
-      real: '십자 커넥터 / 커넥터 블록',
-      one: '방향을 꺾어주는 이음쇠.',
-      lines: [
-        '가로로 가던 구조를 세로로 바꿔준다.',
-        '가운데 십자 구멍에는 축이, 둥근 구멍에는 핀이 들어간다.',
-        '모터 출력축과 빔을 잇는 다리 역할을 자주 한다.'
-      ],
-      tip: '구멍 모양을 보라. 십자 = 축, 동그라미 = 핀.'
-    },
-    {
-      id: 'axle', icon: 'p_axle', group: 'tech',
-      title: '회전의 심',
-      real: '축 (Axle)',
-      one: '단면이 십자인 막대.',
-      lines: [
-        '끼우면 같이 돈다. 힘을 전달하는 부품.',
-        '길이를 색으로 외울 수 있다.',
-        '홀수 길이 = 연회색 / 짝수 길이 = 검정 / 2칸만 빨강.'
-      ],
-      tip: '길이를 모르겠으면 빔 구멍에 대보고 몇 칸인지 센다.'
-    },
-    {
-      id: 'bush', icon: 'p_bush', group: 'tech',
-      title: '멈춤쇠',
-      real: '부시 (Bush)',
-      one: '축이 빠지지 않게 잠그는 고리.',
-      lines: [
-        '1칸짜리는 회색, 절반(½)짜리는 노란색이다.',
-        '축 양 끝에 끼워서 좌우로 흘러내리지 않게 한다.'
-      ],
-      tip: '로봇이 자꾸 헐거워지면 부시가 빠졌는지 본다.'
-    },
-    {
-      id: 'separator', icon: 'p_separator', group: 'tech',
-      title: '해체의 도구',
-      real: '분리 도구 (브릭 세퍼레이터)',
-      one: '안전하게 뜯는 유일한 방법.',
-      lines: [
-        '핀이나 블록을 지렛대처럼 눌러서 떼어낸다.',
-        '손톱이나 이빨로 뜯으면 다치고 부품도 상한다.',
-        '해체 시간의 절반을 줄여주는 물건.'
-      ],
-      tip: '뾰족한 쪽을 핀 머리 밑에 넣고 천천히 눌러 올린다.'
-    },
-    {
-      id: 'flag', icon: 'p_flag', group: 'tech',
-      title: '승리의 깃발',
-      real: '장식 브릭 / 깃발',
-      one: '오늘 만들 로봇의 끝에 달릴 것.',
-      lines: [
-        '기능은 없지만, 움직임이 눈에 보이게 해준다.',
-        '모터가 얼마나 돌았는지 한눈에 알 수 있다.'
-      ],
-      tip: '가볍게 만들어야 모터가 편하다.'
-    }
+  /* 도감에 나오는 순서 그대로 */
+  var ORDER = [
+    { id: 'hub',       icon: 'p_hub',       group: 'core' },
+    { id: 'motorL',    icon: 'p_motor_l',   group: 'core' },
+    { id: 'motorM',    icon: 'p_motor_m',   group: 'core' },
+    { id: 'color',     icon: 'p_color',     group: 'core' },
+    { id: 'dist',      icon: 'p_dist',      group: 'core' },
+    { id: 'force',     icon: 'p_force',     group: 'core' },
+    { id: 'cable',     icon: 'p_cable',     group: 'tech' },
+    { id: 'beam',      icon: 'p_beam',      group: 'tech' },
+    { id: 'pinBlack',  icon: 'p_pin_black', group: 'tech' },
+    { id: 'pinGray',   icon: 'p_pin_gray',  group: 'tech' },
+    { id: 'connector', icon: 'p_connector', group: 'tech' },
+    { id: 'axle',      icon: 'p_axle',      group: 'tech' },
+    { id: 'bush',      icon: 'p_bush',      group: 'tech' },
+    { id: 'separator', icon: 'p_separator', group: 'tech' },
+    { id: 'flag',      icon: 'p_flag',      group: 'tech' }
   ];
+
+  S.PART_ORDER = ORDER;
+  S.PARTS = [];
+
+  S.rebuildParts = function () {
+    S.PARTS.length = 0;
+    for (var i = 0; i < ORDER.length; i++) {
+      var o = ORDER[i];
+      var txt = S.Text ? S.Text.get('parts', 'items.' + o.id, null) : null;
+      txt = txt || {};
+      S.PARTS.push({
+        id: o.id, icon: o.icon, group: o.group,
+        title: txt.title || o.id,
+        real:  txt.real  || '',
+        one:   txt.one   || '',
+        lines: Array.isArray(txt.lines) ? txt.lines : [],
+        tip:   txt.tip   || ''
+      });
+    }
+    return S.PARTS;
+  };
 
   S.partById = function (id) {
     for (var i = 0; i < S.PARTS.length; i++) if (S.PARTS[i].id === id) return S.PARTS[i];
     return null;
   };
+
+  S.rebuildParts();   // JSON 이 아직 없으면 빈 껍데기 — boot 후 다시 불린다
 })(SPIKE);
 
 </script>
@@ -2680,91 +3686,42 @@ SPIKE.BLOCK_CATS = [
 /* ==== src/data/quiz.js ==== */
 /* ============================================================
  *  SPIKE.QUIZ — 퀴즈 배틀 문제 풀
- *  ans = choices 배열에서의 정답 인덱스 (실행 시 보기를 섞는다)
+ *
+ *  ⚠ 문제·보기·해설은 여기 없다. content/quiz.<언어>.json 에 있다.
+ *    이 파일은 세트 구성과 문제별 아이콘만 갖는다.
+ *
+ *  JSON 의 choices 는 **첫 번째가 정답**이다.
+ *  게임이 출제할 때 S.shuffleQuiz 로 보기를 섞으므로 순서는 티나지 않는다.
+ *  이렇게 하면 번역할 때 정답 번호를 따로 맞출 일이 없다.
  * ============================================================ */
 (function (S) {
   'use strict';
 
-  S.QUIZ = {
+  /* 세트별 아이콘 (문제 순서대로) */
+  var ICONS = {
+    gate:    ['p_hub', 'p_pin_black', 'p_dist'],
+    mission: ['p_cable', 'p_hub'],
+    boss:    ['p_cable', 'p_cable', 'p_separator', 'p_beam']
+  };
 
-    /* 문지기 — 마을 관문 (3문제) */
-    gate: [
-      {
-        q: '허브에 부품을 꽂는 포트는 모두 몇 개일까?',
-        icon: 'p_hub',
-        choices: ['6개 (A~F)', '4개 (A~D)', '8개 (A~H)', '2개 (A, B)'],
-        ans: 0,
-        why: '라지 허브의 포트는 A부터 F까지 여섯 개. 아무 포트나 써도 되지만 프로그램에 적은 포트와 같아야 한다.'
-      },
-      {
-        q: '단단히 고정해야 하는 곳에 쓰는 핀의 색은?',
-        icon: 'p_pin_black',
-        choices: ['검정 (거친 표면)', '연회색 (매끈)', '베이지 (매끈)', '색은 상관없다'],
-        ans: 0,
-        why: '검정·파랑 마찰핀은 표면이 거칠어 꽉 물린다 = 고정. 연회색·베이지 무마찰핀은 매끈해서 잘 돈다 = 회전.'
-      },
-      {
-        q: '이 부품의 이름은 무엇일까?',
-        icon: 'p_dist',
-        choices: ['거리 센서', '컬러 센서', '포스 센서', '미디엄 모터'],
-        ans: 0,
-        why: '초음파로 앞 물체까지의 거리를 재는 거리 센서. 눈처럼 보이는 두 구멍은 켜고 끌 수 있는 LED이기도 하다.'
-      }
-    ],
+  S.QUIZ = {};
 
-    /* 실습 중 확인 (2문제) */
-    mission: [
-      {
-        q: '프로그램에 「A 모터」라고 썼다. 모터 케이블은 어느 포트에 꽂아야 할까?',
-        icon: 'p_cable',
-        choices: ['A 포트', 'B 포트', '아무 포트나 상관없다', '두 개 다 꽂는다'],
-        ans: 0,
-        why: '프로그램이 가리키는 포트와 실제로 꽂은 포트가 같아야 움직인다. 안 움직이면 여기부터 확인!'
-      },
-      {
-        q: '조립은 끝났는데 모터가 전혀 안 움직인다. 가장 먼저 확인할 것은?',
-        icon: 'p_hub',
-        choices: ['케이블 연결과 포트 번호', '허브를 세게 흔든다', '배터리를 빼 본다', '처음부터 다시 조립'],
-        ans: 0,
-        why: '90%는 케이블이 덜 꽂혔거나 포트가 다른 경우다. 그다음이 프로그램 실행 버튼.'
-      }
-    ],
-
-    /* 보스 — 해체와 정리 (4문제, 정답 1개 = 실제 1단계 해체) */
-    boss: [
-      {
-        q: '해체를 시작한다. 가장 먼저 분리할 것은?',
-        icon: 'p_cable',
-        choices: ['연결 케이블', '깃발 장식', '빔 7칸', '모터'],
-        ans: 0,
-        why: '전기가 흐르는 케이블부터 분리한다. 실제로 지금 케이블을 빼자!',
-        act: '1) 케이블을 뽑는다'
-      },
-      {
-        q: '케이블을 뽑는 올바른 방법은?',
-        icon: 'p_cable',
-        choices: ['커넥터(딱딱한 부분)를 잡고 뺀다', '선을 잡고 힘껏 당긴다', '허브를 흔들어 뺀다', '비틀어서 돌려 뺀다'],
-        ans: 0,
-        why: '선을 당기면 안쪽 전선이 끊어진다. 항상 커넥터를 잡는다.',
-        act: '2) 깃발과 빔을 뗀다'
-      },
-      {
-        q: '검정 마찰핀이 꽉 껴서 안 빠진다. 어떻게 할까?',
-        icon: 'p_separator',
-        choices: ['분리 도구로 지렛대처럼 민다', '손톱으로 뜯는다', '이빨로 문다', '망치로 친다'],
-        ans: 0,
-        why: '마찰핀은 원래 잘 안 빠지는 게 정상. 분리 도구를 쓰면 안 다치고 부품도 안 상한다.',
-        act: '3) 커넥터와 핀을 분리한다'
-      },
-      {
-        q: '해체 순서로 올바른 것은?',
-        icon: 'p_beam',
-        choices: ['조립의 역순으로 분해한다', '아무 데나 힘이 들어가는 곳부터', '한 번에 비틀어 통째로', '모터를 가장 먼저 뗀다'],
-        ans: 0,
-        why: '조립 역순이 가장 빠르고 안전하다. 마지막은 부품을 종류별 칸에 정리 — 다음 사람을 위한 예의다.',
-        act: '4) 부품을 칸에 분류해 정리한다'
-      }
-    ]
+  S.rebuildQuiz = function () {
+    for (var k in S.QUIZ) delete S.QUIZ[k];
+    Object.keys(ICONS).forEach(function (set) {
+      var rows = S.Text ? S.Text.get('quiz', 'sets.' + set, null) : null;
+      S.QUIZ[set] = (Array.isArray(rows) ? rows : []).map(function (row, i) {
+        return {
+          q: row.q || '',
+          icon: ICONS[set][i] || ICONS[set][0],
+          choices: Array.isArray(row.choices) ? row.choices.slice() : [],
+          ans: 0,                       // JSON 은 정답을 맨 앞에 둔다
+          why: row.why || '',
+          act: row.act
+        };
+      });
+    });
+    return S.QUIZ;
   };
 
   /* 보기 섞기 (정답 공유 방지). 정답 인덱스를 다시 계산해 돌려준다. */
@@ -2782,6 +3739,8 @@ SPIKE.BLOCK_CATS = [
       ans: ans
     };
   };
+
+  S.rebuildQuiz();
 })(SPIKE);
 
 </script>
@@ -3937,10 +4896,27 @@ SPIKE.BLOCK_CATS = [
       S.Audio.playBGM('title');
     },
 
+    /* 언어 버튼 (우측 상단). 버튼이 없으면 null */
+    langBtn: function () {
+      if (!S.Text || S.Text.langs.length < 2) return null;
+      var w = Math.max(46, S.Game.renderer
+        ? S.Game.renderer.ctx && S.Font.measure(S.Text.langName(), 10) + 16 : 46);
+      return [S.W - w - 6, 6, w, 18];
+    },
+
     update: function (dt) {
       this.t += dt;
       this.demo += dt;
       var I = S.Input;
+
+      // 언어 전환 — 게임 시작보다 먼저 본다 (클릭을 가로채야 한다)
+      var b = this.langBtn();
+      if (b && (I.clicked(b[0], b[1], b[2], b[3]) || I.rawKey === 'KeyL')) {
+        I.rawKey = null;
+        if (S.Text.cycleLang()) S.Audio.se('cursor');
+        return;
+      }
+
       if (I.pressed.ok || I.mouse.pressed) {
         S.Audio.resume();
         S.Audio.se('ok');
@@ -3971,13 +4947,13 @@ SPIKE.BLOCK_CATS = [
       if (hub) r.ctx.drawImage(hub, (S.W - 64) / 2, by - 30, 64, 64);
 
       // 타이틀
-      r.text('SPIKE  마 스 터', S.W / 2, 22, { size: 22, color: '#ffe066', align: 'center' });
-      r.text('~ 잠 든  허 브  왕 ~', S.W / 2, 52, { size: 12, color: '#9fc4ff', align: 'center' });
+      r.text(S.T('title.name', ''), S.W / 2, 22, { size: 22, color: '#ffe066', align: 'center' });
+      r.text(S.T('title.sub', ''), S.W / 2, 52, { size: 12, color: '#9fc4ff', align: 'center' });
       r.rect(S.W / 2 - 110, 72, 220, 1, '#4a6aa8');
 
       // 아래 안내
       if ((this.t % 1.2) < 0.75) {
-        r.text('◆  P R E S S   E N T E R  ◆', S.W / 2, 186,
+        r.text(S.T('title.press', ''), S.W / 2, 186,
           { size: 13, color: '#ffffff', align: 'center' });
       }
 
@@ -3994,20 +4970,27 @@ SPIKE.BLOCK_CATS = [
         }
       }
 
+      // 언어 버튼
+      var lb = this.langBtn();
+      if (lb) {
+        var hov = S.Input.hover(lb[0], lb[1], lb[2], lb[3]);
+        r.window(lb[0], lb[1], lb[2], lb[3], { alpha: hov ? 0.95 : 0.75 });
+        r.text(S.Text.langName(), lb[0] + lb[2] / 2, lb[1] + 4,
+          { size: 10, color: hov ? S.C.textHi : S.C.text, align: 'center' });
+        // 버튼이 화면 오른쪽 끝에 붙어 있어 가운데 정렬하면 힌트가 잘린다
+        r.text(S.T('lang.hint', ''), S.W - 6, lb[1] + 20,
+          { size: 9, color: S.C.textDim, align: 'right' });
+      }
+
       r.window(4, S.H - 26, S.W - 8, 22, { alpha: 0.8 });
-      r.text('중학생 학과체험 · SPIKE Prime 조립 & 블록코딩   |   F1 조작법', S.W / 2, S.H - 20,
+      r.text(S.T('title.footer', ''), S.W / 2, S.H - 20,
         { size: 9, color: '#bcd2f0', align: 'center' });
     }
   };
 
   /* ================= 오프닝 ================= */
-  var PAGES = [
-    '로봇 왕국 「브릭시티」.\n이 나라의 모든 기계는 중앙의 허브 왕이 움직였다.',
-    '그러나 어느 날, 뒤엉킨 케이블이 왕을 감쌌고\n5×5의 눈은 빛을 잃었다.',
-    '멈춰버린 왕국. 남은 희망은 단 하나 —\n오늘 부임한 견습 메카닉, 바로 당신이다.',
-    '부품을 익히고, 직접 손으로 조립하고,\n주문(코드)을 엮어 왕을 깨워라.',
-    '제한 시간은 10분.\n…시작하자.'
-  ];
+  /* 내레이션은 content/dialogue.<언어>.json 의 opening 배열 */
+  function pages() { return S.DL('opening'); }
 
   var Opening = {
     page: 0, t: 0, shown: 0, mw: null,
@@ -4021,9 +5004,9 @@ SPIKE.BLOCK_CATS = [
 
     _show: function () {
       var self = this;
-      this.mw.show({ text: PAGES[this.page] }, function () {
+      this.mw.show({ text: pages()[this.page] }, function () {
         self.page++;
-        if (self.page >= PAGES.length) {
+        if (self.page >= pages().length) {
           S.State.chapter = 1;
           S.Game.transition('field', { map: 'village' });
         } else {
@@ -4061,7 +5044,7 @@ SPIKE.BLOCK_CATS = [
       }
 
       this.mw.draw(r);
-      r.text('X — 건너뛰기', S.W - 10, 8, { size: 9, color: '#7e93c0', align: 'right' });
+      r.text(S.T('battle.skip', ''), S.W - 10, 8, { size: 9, color: '#7e93c0', align: 'right' });
     }
   };
 
@@ -4739,7 +5722,7 @@ SPIKE.BLOCK_CATS = [
 
       // 진행 안내
       if ((this.t % 1) < 0.6) {
-        r.text('Z — 다음     X — 건너뛰기', S.W / 2, by + bh + 8,
+        r.text(S.T('cards.hint', ''), S.W / 2, by + bh + 8,
           { size: 10, color: C.white, align: 'center' });
       }
     }
@@ -4794,9 +5777,9 @@ SPIKE.BLOCK_CATS = [
 
       // 헤더
       r.window(4, 4, S.W - 8, 26);
-      r.text('부 품 도 감', 14, 10, { size: 14, color: C.textHi });
-      r.text('수집 ' + S.State.dexCount() + ' / ' + S.PARTS.length, 150, 13, { size: 10, color: C.text });
-      r.text('↑↓ 이동    X 닫기', S.W - 14, 13, { size: 10, color: C.textDim, align: 'right' });
+      r.text(S.T('dex.title', ''), 14, 10, { size: 14, color: C.textHi });
+      r.text(S.Text.fmt(S.T('dex.collected', ''), { n: S.State.dexCount(), total: S.PARTS.length }), 150, 13, { size: 10, color: C.text });
+      r.text(S.T('dex.move', ''), S.W - 14, 13, { size: 10, color: C.textDim, align: 'right' });
 
       // 좌측 목록
       r.window(4, 34, 132, S.H - 40);
@@ -4829,7 +5812,7 @@ SPIKE.BLOCK_CATS = [
       r.window(dx, 34, dw, S.H - 40);
 
       if (!S.State.dex[p2.id]) {
-        r.text('아직 만나지 못한 부품', dx + dw / 2, 120, { size: 11, color: C.textDim, align: 'center' });
+        r.text(S.T('dex.unknown', ''), dx + dw / 2, 120, { size: 11, color: C.textDim, align: 'center' });
         return;
       }
 
@@ -4842,7 +5825,7 @@ SPIKE.BLOCK_CATS = [
       r.text(p2.title, dx + 88, 46, { size: 13, color: C.textHi });
       r.text(p2.real, dx + 88, 64, { size: 9, color: C.textDim });
       r.text(p2.one, dx + 88, 82, { size: 10, color: C.white });
-      r.text(p2.group === 'core' ? '전자 부품' : '구조 부품', dx + 88, 98,
+      r.text(S.T(p2.group === 'core' ? 'dex.core' : 'dex.tech', ''), dx + 88, 98,
         { size: 9, color: p2.group === 'core' ? C.blkSense : C.blkCtrl });
 
       r.rect(dx + 10, 118, dw - 20, 1, C.winEdge2);
@@ -4856,17 +5839,17 @@ SPIKE.BLOCK_CATS = [
       var tipH = tipLines.length * 12 + 10;
       var tipY = panelBottom - 8 - tipH;
 
-      var desc = [];
-      for (var k = 0; k < p2.lines.length; k++) {
-        desc = desc.concat(S.Font.wrap(p2.lines[k], 10, dw - 24));
-      }
+      /* 설명은 산문이다. 작성자가 끊어 놓은 위치를 그대로 쓰면
+         언어나 폰트가 바뀔 때 "time" 같은 고아 단어가 생긴다.
+         이어 붙인 뒤 칸 폭에 맞춰 다시 끊는다. */
+      var desc = S.Font.wrap(p2.lines.join(' '), 10, dw - 24);
       var fit = Math.max(1, Math.floor((tipY - 126 - 6) / 14));
       for (var m = 0; m < desc.length && m < fit; m++) {
         r.text(desc[m], dx + 12, 126 + m * 14, { size: 10, color: C.text });
       }
 
       r.rect(dx + 8, tipY, dw - 16, tipH, '#0a123099');
-      r.text('TIP', dx + 14, tipY + 5, { size: 9, color: C.textHi });
+      r.text(S.T('dex.tip', 'TIP'), dx + 14, tipY + 5, { size: 9, color: C.textHi });
       for (var j = 0; j < tipLines.length; j++) {
         r.text(tipLines[j], dx + 40, tipY + 5 + j * 12, { size: 9, color: C.textDim });
       }
@@ -5075,7 +6058,8 @@ SPIKE.BLOCK_CATS = [
 
       // 진행 표시
       r.window(4, 4, 62, 20, { alpha: 0.85 });
-      r.text('문제 ' + Math.min(this.qi + 1, this.qs.length) + '/' + this.qs.length, 11, 9,
+      r.text(S.Text.fmt(S.T('battle.question', ''),
+        { n: Math.min(this.qi + 1, this.qs.length), total: this.qs.length }), 11, 9,
         { size: 10, color: C.textHi });
 
       // 플레이어 하트
@@ -5119,7 +6103,7 @@ SPIKE.BLOCK_CATS = [
         }
 
         if (this.phase === PH.ASK && (this.t % 1.4) < 0.9) {
-          r.text('↑↓ 또는 마우스로 고르고  Z/클릭', S.W / 2, S.H - 16,
+          r.text(S.T('battle.hint', ''), S.W / 2, S.H - 16,
             { size: 9, color: C.textDim, align: 'center' });
         }
       }
@@ -5229,7 +6213,7 @@ SPIKE.BLOCK_CATS = [
       }
 
       if (this.ready && (this.t % 1.2) < 0.7) {
-        r.text('아무 키나 누르면 처음 화면으로', S.W / 2, S.H - 24,
+        r.text(S.T('ending.press', ''), S.W / 2, S.H - 24,
           { size: 10, color: '#cfe0ff', align: 'center' });
       }
     }

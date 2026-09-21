@@ -102,7 +102,7 @@
 
       // 진행 안내
       if ((this.t % 1) < 0.6) {
-        r.text('Z — 다음     X — 건너뛰기', S.W / 2, by + bh + 8,
+        r.text(S.T('cards.hint', ''), S.W / 2, by + bh + 8,
           { size: 10, color: C.white, align: 'center' });
       }
     }

@@ -31,7 +31,7 @@
         e.preventDefault();
         S.Audio.stopBGM();
         S.Game.transition('attract');
-        this.say('초기화 — 다음 학생을 기다립니다');
+        this.say(S.T('hotkeys.toastReset', ''));
         return true;
       }
       if (e.code === 'F1') { e.preventDefault(); this.helpOpen = !this.helpOpen; return true; }
@@ -39,17 +39,17 @@
       if (e.code === 'F3') {
         e.preventDefault();
         var p = S.State.togglePause();
-        this.say(p ? '타이머 일시정지' : '타이머 재개');
+        this.say(S.T(p ? 'hotkeys.toastPause' : 'hotkeys.toastResume', ''));
         return true;
       }
       if (e.code === 'F4') {
         e.preventDefault();
-        if (S.Text) { S.Text.pickFile(); this.say('텍스트 JSON 선택'); }
+        if (S.Text) { S.Text.pickFile(); this.say(S.T('hotkeys.toastText', '')); }
         return true;
       }
       if (e.code === 'KeyM') {
         var m = S.Audio.toggleMute();
-        this.say(m ? '음소거 ON' : '음소거 OFF');
+        this.say(S.T(m ? 'hotkeys.toastMuteOn' : 'hotkeys.toastMuteOff', ''));
         return true;
       }
       if (this.helpOpen) { this.helpOpen = false; return true; }
@@ -62,7 +62,7 @@
       if (ch === 1) S.Game.transition('field', { map: 'village' });
       else if (ch === 2) S.Game.transition('field', { map: 'workshop' });
       else S.Game.transition('field', { map: 'hubroom' });
-      this.say('챕터 ' + ch + '로 이동');
+      this.say(S.Text.fmt(S.T('hotkeys.toastJump', ''), { n: ch }));
     },
 
     draw: function (r) {
@@ -79,10 +79,10 @@
         r.fade(0.55);
         var bw = 200, bh = 96, bx = (S.W - bw) / 2, by = (S.H - bh) / 2;
         r.window(bx, by, bw, bh);
-        r.text('챕터 점프', bx + bw / 2, by + 10, { size: 12, color: C.textHi, align: 'center' });
-        r.text('1 — 허브 마을', bx + 22, by + 32, { size: 12 });
-        r.text('2 — 조립 공방', bx + 22, by + 50, { size: 12 });
-        r.text('3 — 해체의 방', bx + 22, by + 68, { size: 12 });
+        r.text(S.T('hotkeys.jumpTitle', ''), bx + bw / 2, by + 10, { size: 12, color: C.textHi, align: 'center' });
+        r.text(S.T('hotkeys.jump1', ''), bx + 22, by + 32, { size: 12 });
+        r.text(S.T('hotkeys.jump2', ''), bx + 22, by + 50, { size: 12 });
+        r.text(S.T('hotkeys.jump3', ''), bx + 22, by + 68, { size: 12 });
         return;
       }
 
@@ -90,26 +90,14 @@
         r.fade(0.6);
         var w2 = 300, h2 = 222, x2 = (S.W - w2) / 2, y2 = (S.H - h2) / 2;
         r.window(x2, y2, w2, h2);
-        r.text('조 작 법', x2 + w2 / 2, y2 + 10, { size: 14, color: C.textHi, align: 'center' });
-        var rows = [
-          ['방향키 / WASD', '이동'],
-          ['Z · Space · Enter', '말 걸기 / 확인'],
-          ['X · Esc', '취소 / 메뉴'],
-          ['마우스', '선택 · 버튼'],
-          ['Q / E', '가이드 이전 / 다음'],
-          ['', ''],
-          ['Ctrl+R', '다음 학생 (초기화)'],
-          ['F2', '챕터 점프'],
-          ['F3', '타이머 일시정지'],
-          ['F4', '텍스트 JSON 불러오기'],
-          ['M', '음소거']
-        ];
+        r.text(S.T('hotkeys.title', ''), x2 + w2 / 2, y2 + 10, { size: 14, color: C.textHi, align: 'center' });
+        var rows = S.T('hotkeys.rows', []);
         for (var i = 0; i < rows.length; i++) {
           var yy = y2 + 34 + i * 16;
           r.text(rows[i][0], x2 + 20, yy, { size: 11, color: C.textHi });
           r.text(rows[i][1], x2 + 150, yy, { size: 11, color: C.text });
         }
-        r.text('아무 키나 눌러 닫기', x2 + w2 / 2, y2 + h2 - 16,
+        r.text(S.T('hotkeys.closeHint', ''), x2 + w2 / 2, y2 + h2 - 16,
           { size: 10, color: C.textDim, align: 'center' });
       }
     }

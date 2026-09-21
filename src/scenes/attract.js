@@ -24,10 +24,27 @@
       S.Audio.playBGM('title');
     },
 
+    /* 언어 버튼 (우측 상단). 버튼이 없으면 null */
+    langBtn: function () {
+      if (!S.Text || S.Text.langs.length < 2) return null;
+      var w = Math.max(46, S.Game.renderer
+        ? S.Game.renderer.ctx && S.Font.measure(S.Text.langName(), 10) + 16 : 46);
+      return [S.W - w - 6, 6, w, 18];
+    },
+
     update: function (dt) {
       this.t += dt;
       this.demo += dt;
       var I = S.Input;
+
+      // 언어 전환 — 게임 시작보다 먼저 본다 (클릭을 가로채야 한다)
+      var b = this.langBtn();
+      if (b && (I.clicked(b[0], b[1], b[2], b[3]) || I.rawKey === 'KeyL')) {
+        I.rawKey = null;
+        if (S.Text.cycleLang()) S.Audio.se('cursor');
+        return;
+      }
+
       if (I.pressed.ok || I.mouse.pressed) {
         S.Audio.resume();
         S.Audio.se('ok');
@@ -58,13 +75,13 @@
       if (hub) r.ctx.drawImage(hub, (S.W - 64) / 2, by - 30, 64, 64);
 
       // 타이틀
-      r.text('SPIKE  마 스 터', S.W / 2, 22, { size: 22, color: '#ffe066', align: 'center' });
-      r.text('~ 잠 든  허 브  왕 ~', S.W / 2, 52, { size: 12, color: '#9fc4ff', align: 'center' });
+      r.text(S.T('title.name', ''), S.W / 2, 22, { size: 22, color: '#ffe066', align: 'center' });
+      r.text(S.T('title.sub', ''), S.W / 2, 52, { size: 12, color: '#9fc4ff', align: 'center' });
       r.rect(S.W / 2 - 110, 72, 220, 1, '#4a6aa8');
 
       // 아래 안내
       if ((this.t % 1.2) < 0.75) {
-        r.text('◆  P R E S S   E N T E R  ◆', S.W / 2, 186,
+        r.text(S.T('title.press', ''), S.W / 2, 186,
           { size: 13, color: '#ffffff', align: 'center' });
       }
 
@@ -81,20 +98,27 @@
         }
       }
 
+      // 언어 버튼
+      var lb = this.langBtn();
+      if (lb) {
+        var hov = S.Input.hover(lb[0], lb[1], lb[2], lb[3]);
+        r.window(lb[0], lb[1], lb[2], lb[3], { alpha: hov ? 0.95 : 0.75 });
+        r.text(S.Text.langName(), lb[0] + lb[2] / 2, lb[1] + 4,
+          { size: 10, color: hov ? S.C.textHi : S.C.text, align: 'center' });
+        // 버튼이 화면 오른쪽 끝에 붙어 있어 가운데 정렬하면 힌트가 잘린다
+        r.text(S.T('lang.hint', ''), S.W - 6, lb[1] + 20,
+          { size: 9, color: S.C.textDim, align: 'right' });
+      }
+
       r.window(4, S.H - 26, S.W - 8, 22, { alpha: 0.8 });
-      r.text('중학생 학과체험 · SPIKE Prime 조립 & 블록코딩   |   F1 조작법', S.W / 2, S.H - 20,
+      r.text(S.T('title.footer', ''), S.W / 2, S.H - 20,
         { size: 9, color: '#bcd2f0', align: 'center' });
     }
   };
 
   /* ================= 오프닝 ================= */
-  var PAGES = [
-    '로봇 왕국 「브릭시티」.\n이 나라의 모든 기계는 중앙의 허브 왕이 움직였다.',
-    '그러나 어느 날, 뒤엉킨 케이블이 왕을 감쌌고\n5×5의 눈은 빛을 잃었다.',
-    '멈춰버린 왕국. 남은 희망은 단 하나 —\n오늘 부임한 견습 메카닉, 바로 당신이다.',
-    '부품을 익히고, 직접 손으로 조립하고,\n주문(코드)을 엮어 왕을 깨워라.',
-    '제한 시간은 10분.\n…시작하자.'
-  ];
+  /* 내레이션은 content/dialogue.<언어>.json 의 opening 배열 */
+  function pages() { return S.DL('opening'); }
 
   var Opening = {
     page: 0, t: 0, shown: 0, mw: null,
@@ -108,9 +132,9 @@
 
     _show: function () {
       var self = this;
-      this.mw.show({ text: PAGES[this.page] }, function () {
+      this.mw.show({ text: pages()[this.page] }, function () {
         self.page++;
-        if (self.page >= PAGES.length) {
+        if (self.page >= pages().length) {
           S.State.chapter = 1;
           S.Game.transition('field', { map: 'village' });
         } else {
@@ -148,7 +172,7 @@
       }
 
       this.mw.draw(r);
-      r.text('X — 건너뛰기', S.W - 10, 8, { size: 9, color: '#7e93c0', align: 'right' });
+      r.text(S.T('battle.skip', ''), S.W - 10, 8, { size: 9, color: '#7e93c0', align: 'right' });
     }
   };
 

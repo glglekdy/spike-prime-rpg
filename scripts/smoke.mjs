@@ -92,27 +92,33 @@ const S = sandbox.SPIKE;
 if (!S) { console.error('SPIKE 전역이 만들어지지 않았습니다'); process.exit(1); }
 
 /* ---------------- 텍스트 JSON 적용 ----------------
- * index.dev.html 의 data-src 를 그대로 읽어서 넣는다.
- * 이렇게 해야 아래 씬 구동에서 "없는 키"가 실제로 걸린다. */
-const TEXT_RE =
-  /<script\s+type="application\/json"\s+id="spike-(ui|dialogue)"\s+data-src="([^"]+)"/g;
-for (const [, kind, src] of html.matchAll(TEXT_RE)) {
+ * index.dev.html 의 data-src 를 그대로 읽어 넣는다.
+ * 이렇게 해야 아래 씬 구동에서 "없는 키"가 실제로 걸린다.
+ * 언어별로 전부 넣고, 마지막에 각 언어로 한 번씩 돌려 검사한다. */
+const TEXT_RE = /<script\s+type="application\/json"[^>]*?data-kind="([a-z]+)"[^>]*?data-lang="([a-z]+)"[^>]*?data-src="([^"]+)"/g;
+const LANGS = [];
+for (const [, kind, lang, src] of html.matchAll(TEXT_RE)) {
   let raw;
   try { raw = readFileSync(join(ROOT, src), "utf8"); }
-  catch {
-    console.error("  텍스트 파일 없음: " + src);
-    process.exit(1);
-  }
-  try { S.Text.apply(kind, JSON.parse(raw)); }
+  catch { console.error("  텍스트 파일 없음: " + src); process.exit(1); }
+  try { S.Text.apply(kind, JSON.parse(raw), lang); }
   catch (e) {
-    console.error("  JSON 파싱 실패: " + src + " — " + e.message);
+    console.error("  JSON 파싱 실패: " + src + " - " + e.message);
     process.exit(1);
   }
+  if (!LANGS.includes(lang)) LANGS.push(lang);
 }
-if (!S.Text.loaded.ui || !S.Text.loaded.dialogue) {
-  console.error("  ui / dialogue JSON 을 모두 불러오지 못했습니다");
-  process.exit(1);
+for (const lang of LANGS) {
+  for (const kind of S.Text.KINDS) {
+    if (!S.Text.loaded(kind, lang)) {
+      console.error("  " + kind + "." + lang + " JSON 을 불러오지 못했습니다");
+      process.exit(1);
+    }
+  }
 }
+S.Text.lang = LANGS[0];
+S.rebuildParts(); S.rebuildQuiz();
+S.Text.missing = {};   // 로드 이전의 조회는 검사 대상이 아니다
 
 /* ---------------- 구동 ---------------- */
 let now = 0;
@@ -260,9 +266,11 @@ scene('스프라이트 전수 검사', () => {
   process.stdout.write(`       스프라이트 ${need.size}종 확인\n`);
 });
 
-/* ---------------- 텍스트 키 누락 검사 ----------------
- * 위에서 전 씬을 돌렸으므로, 그 과정에서 조회된 키 중
- * JSON 에 없던 것이 S.Text.missing 에 쌓여 있다. */
+/* ---------------- 텍스트 검사 ----------------
+ * (1) 전 씬을 돌리는 동안 조회됐는데 JSON 에 없던 키
+ * (2) 언어끼리 키 구조가 어긋나지 않는가
+ *     번역 파일에서 키를 빠뜨리면 그 자리에 [key] 가 뜬다.
+ *     기준 언어와 키 트리를 비교해 미리 잡는다. */
 scene('텍스트 키 전수 검사', () => {
   const miss = Object.keys(S.Text.missing);
   if (miss.length) {
@@ -272,8 +280,39 @@ scene('텍스트 키 전수 검사', () => {
     for (const k in o) n += (typeof o[k] === "object" && o[k]) ? count(o[k]) : 1;
     return n;
   };
-  process.stdout.write("       UI " + count(S.Text.ui) + "개 · 대사 "
-    + count(S.Text.dialogue) + "개 항목\n");
+  let total = 0;
+  for (const kind of S.Text.KINDS) total += count(S.Text.store[LANGS[0]][kind]);
+  process.stdout.write("       " + LANGS[0] + " 기준 " + total + "개 항목 · " +
+    S.Text.KINDS.join("/") + "\n");
+});
+
+scene('언어 간 키 일치 검사', () => {
+  /* meta 와 note 류는 언어마다 달라도 된다 */
+  const SKIP = new Set(["meta", "_note", "font"]);
+  const keysOf = (o, pre = "", out = []) => {
+    for (const k in o) {
+      if (!pre && SKIP.has(k)) continue;
+      const path = pre ? pre + "." + k : k;
+      const v = o[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) keysOf(v, path, out);
+      else out.push(path);
+    }
+    return out;
+  };
+  const base = LANGS[0];
+  const problems = [];
+  for (const kind of S.Text.KINDS) {
+    const a = new Set(keysOf(S.Text.store[base][kind]));
+    for (const lang of LANGS.slice(1)) {
+      const b = new Set(keysOf(S.Text.store[lang][kind]));
+      for (const k of a) if (!b.has(k)) problems.push(lang + " 에 없음: " + kind + "." + k);
+      for (const k of b) if (!a.has(k)) problems.push(base + " 에 없음: " + kind + "." + k);
+    }
+  }
+  if (problems.length) {
+    throw new Error(problems.length + "건 어긋남:\n       " + problems.join("\n       "));
+  }
+  process.stdout.write("       언어 " + LANGS.join(", ") + " 키 구조 일치\n");
 });
 
 /* ---------------- 결과 ---------------- */

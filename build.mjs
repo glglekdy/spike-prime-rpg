@@ -24,14 +24,15 @@ const inlined = [];
 let out = html
   /* 텍스트 JSON 인라인 — data-src 를 읽어 태그 안에 넣는다.
      file:// 에서는 fetch 가 막히므로 배포본에는 반드시 인라인돼야 한다. */
-  .replace(/<script\s+type="application\/json"\s+id="([^"]+)"\s+data-src="([^"]+)"\s*><\/script>/gi,
-    (_m, id, src) => {
+  .replace(/<script\s+type="application\/json"([^>]*?)data-src="([^"]+)"\s*><\/script>/gi,
+    (_m, attrs, src) => {
       const raw = readFileSync(join(ROOT, src), 'utf8');
       JSON.parse(raw);                                   // 깨진 JSON을 빌드에서 잡는다
       total += Buffer.byteLength(raw);
       inlined.push(src);
       const safe = raw.replace(/<\//g, '<\/');
-      return `<script type="application/json" id="${id}">
+      const keep = attrs.replace(/\s*data-src="[^"]*"/, '').trim();
+      return `<script type="application/json" ${keep}>
 ${safe}
 </script>`;
     })

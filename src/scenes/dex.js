@@ -41,9 +41,9 @@
 
       // 헤더
       r.window(4, 4, S.W - 8, 26);
-      r.text('부 품 도 감', 14, 10, { size: 14, color: C.textHi });
-      r.text('수집 ' + S.State.dexCount() + ' / ' + S.PARTS.length, 150, 13, { size: 10, color: C.text });
-      r.text('↑↓ 이동    X 닫기', S.W - 14, 13, { size: 10, color: C.textDim, align: 'right' });
+      r.text(S.T('dex.title', ''), 14, 10, { size: 14, color: C.textHi });
+      r.text(S.Text.fmt(S.T('dex.collected', ''), { n: S.State.dexCount(), total: S.PARTS.length }), 150, 13, { size: 10, color: C.text });
+      r.text(S.T('dex.move', ''), S.W - 14, 13, { size: 10, color: C.textDim, align: 'right' });
 
       // 좌측 목록
       r.window(4, 34, 132, S.H - 40);
@@ -76,7 +76,7 @@
       r.window(dx, 34, dw, S.H - 40);
 
       if (!S.State.dex[p2.id]) {
-        r.text('아직 만나지 못한 부품', dx + dw / 2, 120, { size: 11, color: C.textDim, align: 'center' });
+        r.text(S.T('dex.unknown', ''), dx + dw / 2, 120, { size: 11, color: C.textDim, align: 'center' });
         return;
       }
 
@@ -89,7 +89,7 @@
       r.text(p2.title, dx + 88, 46, { size: 13, color: C.textHi });
       r.text(p2.real, dx + 88, 64, { size: 9, color: C.textDim });
       r.text(p2.one, dx + 88, 82, { size: 10, color: C.white });
-      r.text(p2.group === 'core' ? '전자 부품' : '구조 부품', dx + 88, 98,
+      r.text(S.T(p2.group === 'core' ? 'dex.core' : 'dex.tech', ''), dx + 88, 98,
         { size: 9, color: p2.group === 'core' ? C.blkSense : C.blkCtrl });
 
       r.rect(dx + 10, 118, dw - 20, 1, C.winEdge2);
@@ -103,17 +103,17 @@
       var tipH = tipLines.length * 12 + 10;
       var tipY = panelBottom - 8 - tipH;
 
-      var desc = [];
-      for (var k = 0; k < p2.lines.length; k++) {
-        desc = desc.concat(S.Font.wrap(p2.lines[k], 10, dw - 24));
-      }
+      /* 설명은 산문이다. 작성자가 끊어 놓은 위치를 그대로 쓰면
+         언어나 폰트가 바뀔 때 "time" 같은 고아 단어가 생긴다.
+         이어 붙인 뒤 칸 폭에 맞춰 다시 끊는다. */
+      var desc = S.Font.wrap(p2.lines.join(' '), 10, dw - 24);
       var fit = Math.max(1, Math.floor((tipY - 126 - 6) / 14));
       for (var m = 0; m < desc.length && m < fit; m++) {
         r.text(desc[m], dx + 12, 126 + m * 14, { size: 10, color: C.text });
       }
 
       r.rect(dx + 8, tipY, dw - 16, tipH, '#0a123099');
-      r.text('TIP', dx + 14, tipY + 5, { size: 9, color: C.textHi });
+      r.text(S.T('dex.tip', 'TIP'), dx + 14, tipY + 5, { size: 9, color: C.textHi });
       for (var j = 0; j < tipLines.length; j++) {
         r.text(tipLines[j], dx + 40, tipY + 5 + j * 12, { size: 9, color: C.textDim });
       }

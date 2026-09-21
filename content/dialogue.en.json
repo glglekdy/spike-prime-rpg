@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "kind": "dialogue",
+    "lang": "en",
+    "name": "English",
+    "note": "Only what characters say out loud. Buttons and labels live in ui.en.json.",
+    "format": {
+      "string": "one message box",
+      "array": "several boxes — press Z to advance",
+      "\\n": "line break inside a box",
+      "{name}": "substituted variable"
+    }
+  },
+  "names": {
+    "gran": "Codex Granny",
+    "smith": "Blacksmith",
+    "guard": "Gatekeeper",
+    "maker": "Robot Maker",
+    "hub": "Hub King",
+    "altar": "Hub Altar"
+  },
+  "village": {
+    "gran": {
+      "intro": [
+        "Welcome, apprentice mechanic.\nThe Hub King sleeps, and every robot has stopped.",
+        "To wake him you must first know\nthe Six Spirits. Look closely."
+      ],
+      "afterCards": [
+        "Now you know their names.\nPress X any time to open the codex.",
+        "Next, the blacksmith.\nGo learn about beams and pins."
+      ],
+      "repeat": "The codex is on X.\nOpen it whenever you're unsure.",
+      "cardsTitle": "Six Spirits — Electronics"
+    },
+    "smith": {
+      "intro": [
+        "A robot's bones are BEAMS,\nand the nails that join them are PINS.",
+        "Tell pins apart by colour.\nBlack and blue feel rough — they grip. For locking!",
+        "Light grey and beige feel smooth — they spin.\nUse those for wheels and joints."
+      ],
+      "afterCards": [
+        "Axles tell their length by colour:\nodd = grey, even = black, and only the 2-long is red.",
+        "And never pry parts with your nails.\nUse the SEPARATOR. That's a craftsman's manner.",
+        "The gatekeeper will test you.\nGo on."
+      ],
+      "repeat": "Black and blue lock.\nGrey and beige spin. Don't forget.",
+      "cardsTitle": "Joining Rules — Structure"
+    },
+    "guard": {
+      "passed": "You pass. Take the south gate.\nThe maker is waiting in the workshop.",
+      "notReady": "You're not ready yet.\nSee the granny and the blacksmith first.",
+      "challenge": "None pass this gate untested.\nThree questions. Ready?",
+      "declined": "Come back any time.",
+      "enemyName": "Pin Thief"
+    },
+    "altar": [
+      "A huge hub lies dormant.\nAll 25 lights are dark.",
+      "Six ports, A through F.\nNot one of them is connected…"
+    ],
+    "sign": [
+      "\" Hub Village \"\nArrows — move / Z·Enter — talk / X — codex",
+      "South gate → Assembly Workshop\nLearn from the villagers first."
+    ]
+  },
+  "workshop": {
+    "maker": {
+      "find": "You need seven things.\nPull out what matches the picture.",
+      "motor": "Two kinds of holes — cross and round.\nAn axle only fits the cross one.",
+      "beam": "Black pins feel rough — they don't turn.\nStiff is normal. That's the point.",
+      "flag": "Shape is up to you. It's your golem.",
+      "cable": "The body is done. Now the lifeline.\nPort A. Read the letter with your eyes.",
+      "code": "Read the spell book on the right\nand copy it into the SPIKE app.",
+      "afterDone": "The north door is open.\nHead to the Teardown Room.",
+      "finish": [
+        "You did it.\nThe golem waves its flag, just as you wrote!",
+        "But one gate remains.\nGo north — the Teardown Room."
+      ]
+    },
+    "late": {
+      "find": "If finding parts takes this long, the rest gets tight.\nCall me if you're stuck.",
+      "motor": "Don't force it. Changing the angle is faster.",
+      "beam": "Press with your thumb until it clicks.",
+      "flag": "Any shape works. Let's move on.",
+      "cable": "Did you read the port letter? It's A.",
+      "code": "The block colour tells you which drawer."
+    },
+    "bench": "A workbench. Parts are laid out neatly.\nThis is where you build the real robot.",
+    "quizEnemyName": "Tangled Cable"
+  },
+  "hubroom": {
+    "altarLocked": "The Hub King still sleeps.\nTangled cables coil around him…",
+    "altarAwake": "…Thank you, apprentice mechanic.\nBrixity moves again!",
+    "bossName": "Tangled Cable"
+  },
+  "battle": {
+    "appear": "{name} appeared!\nAnswer correctly to drive it back!",
+    "revive": "The spirits lend you their strength!\nTry again."
+  },
+  "common": {
+    "nothing": "Nothing happens."
+  },
+  "opening": [
+    "The robot kingdom of Brixity.\nEvery machine here ran on the Hub King at its centre.",
+    "Then one day tangled cables coiled around him\nand the 5x5 eyes went dark.",
+    "A kingdom stopped. One hope remains —\nthe apprentice mechanic who started today. You.",
+    "Learn the parts, build with your own hands,\nweave the spell — the code — and wake the king.",
+    "You have ten minutes.\n…Let us begin."
+  ]
+}

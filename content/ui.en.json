@@ -1,0 +1,307 @@
+{
+  "meta": {
+    "kind": "ui",
+    "lang": "en",
+    "name": "English",
+    "short": "EN",
+    "note": "On-screen text: buttons, labels, guide copy. Character speech lives in dialogue.en.json."
+  },
+  "font": {
+    "binarize": false,
+    "threshold": 96,
+    "fallback": "Dotum,monospace",
+    "_note": "Mona is a bitmap font — crisp only at its design sizes (10/12px) and integer multiples. The ladder snaps a requested size to a crisp one.",
+    "ladder": [
+      {
+        "max": 11,
+        "family": "Mona10",
+        "px": 10
+      },
+      {
+        "max": 17,
+        "family": "Mona12",
+        "px": 12
+      },
+      {
+        "max": 25,
+        "family": "Mona10",
+        "px": 20
+      },
+      {
+        "max": 33,
+        "family": "Mona12",
+        "px": 24
+      },
+      {
+        "max": 45,
+        "family": "Mona10",
+        "px": 40
+      },
+      {
+        "max": 9999,
+        "family": "Mona12",
+        "px": 48
+      }
+    ]
+  },
+  "common": {
+    "next": "Next →",
+    "prev": "← Back",
+    "done": "Finish",
+    "doneAlready": "Done",
+    "yes": "I'm ready",
+    "no": "Not yet",
+    "close": "X Close",
+    "move": "↑↓ Move",
+    "keyNext": "Z — Next",
+    "keySkip": "X — Skip"
+  },
+  "title": {
+    "name": "SPIKE  M A S T E R",
+    "sub": "~ The Sleeping Hub King ~",
+    "press": "◆  PRESS ENTER  ◆",
+    "footer": "SPIKE Prime — build a robot & code it   |   F1 Controls",
+    "attract": "Waiting for the next challenger"
+  },
+  "quest": {
+    "gran": "Talk to the Codex Granny",
+    "smith": "Learn the joining rules",
+    "guard": "Take the gatekeeper's test",
+    "toWorkshop": "Head south to the workshop",
+    "maker": "Talk to the Robot Maker",
+    "bossReady": "Prove the teardown order",
+    "bossDone": "Wake the Hub King!"
+  },
+  "guide": {
+    "find": {
+      "title": "Find the parts",
+      "goal": "Pick out 7 parts",
+      "body": [
+        "Take seven parts from the tray.",
+        "Count the holes: the beam has 7."
+      ],
+      "warn": "Take the SMALL motor. The big one is a Large Motor"
+    },
+    "motor": {
+      "title": "Motor + connector",
+      "goal": "Fit the connector on the axle",
+      "body": [
+        "The motor has a cross axle.",
+        "Push the connector's cross hole",
+        "all the way onto it."
+      ],
+      "warn": "Won't fit? It's the angle, not force. Turn it 90 degrees",
+      "labelConnector": "Connector",
+      "labelMotor": "Medium motor",
+      "labelAxle": "Cross axle"
+    },
+    "beam": {
+      "title": "Fix the beam",
+      "goal": "Lock the beam with 2 black pins",
+      "body": [
+        "Line up the beam's end hole",
+        "with the connector, then lock it",
+        "with two black pins."
+      ],
+      "warn": "One pin makes a hinge. You need two",
+      "labelBeam": "7-hole beam",
+      "labelConnector": "Connector",
+      "caption": "2 black pins = lock"
+    },
+    "flag": {
+      "title": "Add the flag",
+      "goal": "Put a decoration on the tip",
+      "body": [
+        "At the far end of the beam,",
+        "away from the motor, add a brick."
+      ],
+      "warn": "Keep it light — a heavy flag strains the motor",
+      "labelHere": "here",
+      "labelDone": "Done!",
+      "toast": "The golem's body is complete!"
+    },
+    "cable": {
+      "title": "Cable · Port A",
+      "goal": "Connect the motor to port A",
+      "body": [
+        "Plug one end into the motor,",
+        "the other into the hub's port A.",
+        "It should click when fully in."
+      ],
+      "warn": "If the code says A, it must be A. Most common mistake",
+      "labelMotor": "Motor",
+      "labelHub": "Hub",
+      "caption": "Port must be A"
+    },
+    "code": {
+      "title": "Spell book",
+      "goal": "Copy the spell into the app",
+      "body": [],
+      "warn": ""
+    },
+    "parts": {
+      "hub": "Hub",
+      "motor": "Motor",
+      "cable": "Cable",
+      "beam": "Beam 7",
+      "connector": "Conn.",
+      "pin": "Pin",
+      "flag": "Flag"
+    },
+    "finishToast": "First golem complete!"
+  },
+  "code": {
+    "cardTitle": "「 SPELL BOOK 」",
+    "findTitle": "Where to find them",
+    "outro": "Copy this into the app",
+    "blocks": {
+      "start": "when program starts",
+      "repeat": "repeat 4 times",
+      "cw": "motor A 0.3s ↻",
+      "ccw": "motor A 0.3s ↺"
+    },
+    "findIt": [
+      {
+        "cat": "event",
+        "name": "Yellow",
+        "text": "top of the drawer"
+      },
+      {
+        "cat": "ctrl",
+        "name": "Orange",
+        "text": "repeat (set to 4)"
+      },
+      {
+        "cat": "motor",
+        "name": "Teal",
+        "text": "run _ seconds"
+      }
+    ]
+  },
+  "battle": {
+    "question": "Q {n}/{total}",
+    "correct": "Correct!",
+    "wrong": "So close!",
+    "why": "Why",
+    "hint": "↑↓ or mouse to choose,  Z / click",
+    "skip": "X — Skip"
+  },
+  "dex": {
+    "title": "PART CODEX",
+    "collected": "Found {n} / {total}",
+    "new": "NEW",
+    "tip": "TIP",
+    "move": "↑↓ Move    X Close",
+    "unknown": "Not discovered yet",
+    "core": "Electronics",
+    "tech": "Structure"
+  },
+  "ending": {
+    "header": "M I S S I O N   C O M P L E T E",
+    "rank": "R A N K",
+    "rowAccuracy": "Correct",
+    "rowTime": "Time",
+    "rowDex": "Codex",
+    "timeFmt": "{m}m {s}s",
+    "dexFmt": "{n} / {total}",
+    "press": "Press any key to restart",
+    "ranks": {
+      "S": {
+        "word": "Perfect mechanic!",
+        "sub": "Every part, every step — exactly right."
+      },
+      "A": {
+        "word": "Great mechanic!",
+        "sub": "Almost all correct. You'd do well for real."
+      },
+      "B": {
+        "word": "Good start!",
+        "sub": "You got the core ideas. Review the codex!"
+      },
+      "C": {
+        "word": "Well done!",
+        "sub": "The hands-on feel is what really sticks."
+      }
+    }
+  },
+  "hotkeys": {
+    "title": "Controls",
+    "reset": "Ctrl+R  Reset now",
+    "help": "F1  Controls",
+    "jump": "F2  Jump chapter",
+    "pause": "F3  Pause timer",
+    "text": "F4  Load text JSON",
+    "mute": "M  Mute",
+    "jumpTitle": "Jump to chapter",
+    "jump1": "1 — Hub Village",
+    "jump2": "2 — Workshop",
+    "jump3": "3 — Teardown Room",
+    "closeHint": "Press any key to close",
+    "toastReset": "Reset — waiting for the next student",
+    "toastPause": "Timer paused",
+    "toastResume": "Timer resumed",
+    "toastText": "Choose a text JSON",
+    "toastMuteOn": "Sound OFF",
+    "toastMuteOff": "Sound ON",
+    "toastJump": "Jumped to chapter {n}",
+    "toastLang": "Language: {name}",
+    "rows": [
+      [
+        "Arrows / WASD",
+        "Move"
+      ],
+      [
+        "Z · Space · Enter",
+        "Talk / OK"
+      ],
+      [
+        "X · Esc",
+        "Cancel / Menu"
+      ],
+      [
+        "Mouse",
+        "Select · Buttons"
+      ],
+      [
+        "Q / E",
+        "Guide back / next"
+      ],
+      [
+        "",
+        ""
+      ],
+      [
+        "Ctrl+R",
+        "Next student (reset)"
+      ],
+      [
+        "F2",
+        "Jump chapter"
+      ],
+      [
+        "F3",
+        "Pause timer"
+      ],
+      [
+        "F4",
+        "Load text JSON"
+      ],
+      [
+        "M",
+        "Mute"
+      ]
+    ]
+  },
+  "cards": {
+    "hint": "Z — Next     X — Skip"
+  },
+  "idle": {
+    "title": "Still there?",
+    "hint": "Press any key to continue",
+    "countdown": "Back to title in {n}s"
+  },
+  "lang": {
+    "button": "{name}",
+    "hint": "L — Language"
+  }
+}

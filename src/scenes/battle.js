@@ -194,7 +194,8 @@
 
       // 진행 표시
       r.window(4, 4, 62, 20, { alpha: 0.85 });
-      r.text('문제 ' + Math.min(this.qi + 1, this.qs.length) + '/' + this.qs.length, 11, 9,
+      r.text(S.Text.fmt(S.T('battle.question', ''),
+        { n: Math.min(this.qi + 1, this.qs.length), total: this.qs.length }), 11, 9,
         { size: 10, color: C.textHi });
 
       // 플레이어 하트
@@ -238,7 +239,7 @@
         }
 
         if (this.phase === PH.ASK && (this.t % 1.4) < 0.9) {
-          r.text('↑↓ 또는 마우스로 고르고  Z/클릭', S.W / 2, S.H - 16,
+          r.text(S.T('battle.hint', ''), S.W / 2, S.H - 16,
             { size: 9, color: C.textDim, align: 'center' });
         }
       }
