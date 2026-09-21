@@ -1,0 +1,13 @@
+{
+  "name": "spike-prime-rpg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "중학생 학과체험용 SPIKE Prime 안내 RPG (쯔꾸르 스타일, 단일 HTML 배포)",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node scripts/smoke.mjs",
+    "check": "node scripts/smoke.mjs && node build.mjs",
+    "serve": "node -e \"import('node:http').then(({default:h})=>{import('node:fs').then(({default:f})=>{h.createServer((q,s)=>{let p='.'+decodeURIComponent(q.url.split('?')[0]);if(p==='./')p='./index.dev.html';f.readFile(p,(e,d)=>{if(e){s.writeHead(404);return s.end('404')}const t={'.html':'text/html','.js':'text/javascript','.css':'text/css'}[p.slice(p.lastIndexOf('.'))]||'text/plain';s.writeHead(200,{'Content-Type':t+'; charset=utf-8'});s.end(d)})}).listen(5173,()=>console.log('http://localhost:5173'))})})\""
+  }
+}

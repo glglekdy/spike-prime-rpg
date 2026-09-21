@@ -1,0 +1,37 @@
+/* 부스 환경용 최소 스타일 — 캔버스만 보이면 된다 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #05070f;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "DungGeunMo", "Galmuri11", Dotum, "돋움", "Malgun Gothic", sans-serif;
+}
+
+#game {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  box-shadow: 0 0 0 2px #1a2445, 0 0 40px #000a;
+  background: #000;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7e93c0;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
