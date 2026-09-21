@@ -20,6 +20,8 @@
     this.queue = [];
     this.cur = null;
     this.lines = [];
+    this.pages = null;      // 창 높이에 맞춰 쪼갠 페이지들
+    this.pageIdx = 0;
     this.shown = 0;
     this.total = 0;
     this.active = false;
@@ -31,6 +33,16 @@
     this.choiceIndex = 0;
     this.onChoice = null;
   }
+
+  /* ------------------------------------------------------------
+   *  이 창에 몇 줄이 들어가는가
+   *    첫 줄 기준선 = y + 9, 줄 간격 = LINE, 글자 높이 ≈ FONT + 2
+   *    마지막 줄 바닥이 y + h - 6 을 넘으면 안 된다.
+   *  폰트를 바꾸면 글자가 커질 수 있으므로 상수로 박지 않고 계산한다.
+   * ---------------------------------------------------------- */
+  MessageWindow.prototype.maxLines = function () {
+    return Math.max(1, Math.floor((this.h - 29) / LINE) + 1);
+  };
 
   /* msgs: 문자열 | {name, text, icon, color} | 배열 */
   MessageWindow.prototype.show = function (msgs, onDone) {
@@ -57,9 +69,17 @@
     this.cur = null;
     this.queue.length = 0;
     this.choiceList = null;
+    this.pages = null;
+    this.pageIdx = 0;
   };
 
   MessageWindow.prototype._next = function () {
+    // 같은 메시지에 남은 페이지가 있으면 먼저 넘긴다
+    if (this.pages && this.pageIdx < this.pages.length - 1) {
+      this.pageIdx++;
+      this._showPage();
+      return;
+    }
     if (!this.queue.length) {
       if (this.choiceList) { this.done = true; return; }  // 선택지 대기
       this.active = false;
@@ -70,7 +90,19 @@
     }
     this.cur = this.queue.shift();
     var innerW = this.w - 20 - (this.cur.icon ? 40 : 0);
-    this.lines = S.Font.wrap(this.cur.text, FONT, innerW);
+    var all = S.Font.wrap(this.cur.text, FONT, innerW);
+
+    // 창에 안 들어가면 페이지로 쪼갠다 (▼ 로 넘긴다)
+    var m = this.maxLines();
+    this.pages = [];
+    for (var i = 0; i < all.length; i += m) this.pages.push(all.slice(i, i + m));
+    if (!this.pages.length) this.pages = [['']];
+    this.pageIdx = 0;
+    this._showPage();
+  };
+
+  MessageWindow.prototype._showPage = function () {
+    this.lines = this.pages[this.pageIdx];
     this.total = this.lines.join('').length;
     this.shown = 0;
     this.done = false;
@@ -156,7 +188,7 @@
 
     // 본문 (타이핑 중이면 잘라서)
     var left = Math.floor(this.shown);
-    for (var i = 0; i < this.lines.length && i < 4; i++) {
+    for (var i = 0; i < this.lines.length; i++) {
       var ln = this.lines[i];
       var part = ln;
       if (left < ln.length) part = ln.slice(0, Math.max(0, left));

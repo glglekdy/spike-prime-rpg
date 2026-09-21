@@ -343,25 +343,38 @@
       r.rect(x0 + 2, HEAD_H, PW - 4, 1, C.winEdge2);
     },
 
+    /* 설명 2~3줄 + ⚠주의 1~2줄.
+     * 폰트를 바꾸면 글자 폭·높이가 달라지므로 줄 수를 세어 배치한다.
+     * 본문도 방어적으로 줄바꿈한다 — JSON 을 길게 고쳐도 잘리면 안 된다. */
     _body: function (r, x0, p, C) {
       r.rect(x0 + 2, BODY_Y - 2, PW - 4, 1, C.winEdge2);
-      var body = S.pageText.body(p), y = BODY_Y + 6;
-      for (var i = 0; i < body.length; i++) {
+
+      var warn = S.pageText.warn(p);
+      var wLines = warn ? S.Font.wrap(warn, 10, PW - 42).slice(0, 2) : [];
+      var warnH = wLines.length ? wLines.length * 12 + 8 : 0;
+      var warnY = BODY_Y + BODY_H - warnH - 2;
+
+      // 본문 — 남는 높이만큼만 그린다
+      var body = [];
+      var raw = S.pageText.body(p);
+      for (var k = 0; k < raw.length; k++) {
+        body = body.concat(S.Font.wrap(raw[k], 10, PW - 20));
+      }
+      var room = (warnH ? warnY : BODY_Y + BODY_H) - (BODY_Y + 6) - 2;
+      var fit = Math.max(1, Math.floor(room / 15));
+      var y = BODY_Y + 6;
+      for (var i = 0; i < body.length && i < fit; i++) {
         r.text(body[i], x0 + 10, y, { size: 10, color: C.text });
         y += 15;
       }
-      var warn = S.pageText.warn(p);
-      if (warn) {
-        var wy = BODY_Y + BODY_H - 26;
-        r.rect(x0 + 8, wy, PW - 16, 22, '#00000055');
-        r.text('⚠', x0 + 12, wy + 6, { size: 10, color: C.textHi });
-        var lines = S.Font.wrap(warn, 10, PW - 42);
-        for (var j = 0; j < Math.min(2, lines.length); j++) {
-          r.text(lines[j], x0 + 26, wy + 1 + j * 11, { size: 10, color: C.textHi });
-        }
+
+      if (!wLines.length) return;
+      r.rect(x0 + 8, warnY, PW - 16, warnH, '#00000055');
+      r.text('⚠', x0 + 12, warnY + (warnH - 12) / 2, { size: 10, color: C.textHi });
+      for (var j = 0; j < wLines.length; j++) {
+        r.text(wLines[j], x0 + 26, warnY + 4 + j * 12, { size: 10, color: C.textHi });
       }
     },
-
     _footer: function (r, x0, C) {
       r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
 

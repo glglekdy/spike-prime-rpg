@@ -28,7 +28,8 @@
       this.phase = PH.INTRO; this.t = 0; this.shake = 0; this.flash = 0;
       this.dmgPop = null;
 
-      this.mw = new S.MessageWindow({ h: 54, y: S.H - 62 });
+      // 해설이 3줄까지 나온다 — 높이를 그만큼 준다 (maxLines 참조)
+      this.mw = new S.MessageWindow({ h: 74, y: S.H - 82 });
       var self = this;
       this.mw.show({ name: this.enemyName, text: this.enemyName + '이(가) 나타났다!\n문제를 맞혀서 물리쳐라!' },
         function () { self.phase = PH.ASK; });

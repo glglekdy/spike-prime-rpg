@@ -1,0 +1,109 @@
+<!doctype html><html><head><meta charset="utf-8"><title>overflow</title>
+<link rel="stylesheet" href="../src/style.css"></head><body><pre id="r">scanning</pre>
+<canvas id="game" style="display:none"></canvas>
+<script type="application/json" id="spike-ui" data-src="../content/ui.ko.json"></script>
+<script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
+<script src="../src/core/const.js"></script><script src="../src/core/font.js"></script>
+<script src="../src/core/text.js"></script>
+<script>
+/* 게임에 나오는 모든 문자열의 실제 픽셀 폭을, 그 문자열이 들어갈 칸 폭과 비교한다.
+   폰트를 바꾸면 폭이 달라지므로 눈으로 훑는 대신 수치로 잡는다. */
+var CHECKS = [];   // {label, text, size, limit}
+var bad0 = [];     // 줄 수로 잡은 넘침
+
+function add(label, text, size, limit) {
+  if (text == null || text === '') return;
+  String(text).split('\n').forEach(function (ln) {
+    CHECKS.push({ label: label, text: ln, size: size, limit: limit });
+  });
+}
+
+Promise.all([
+  fetch('../content/ui.ko.json').then(function(r){return r.json()}),
+  fetch('../content/dialogue.ko.json').then(function(r){return r.json()}),
+  document.fonts.load('10px "Mona10"'), document.fonts.load('12px "Mona12"')
+]).then(function (a) {
+  var ui = a[0], dlg = a[1];
+  SPIKE.Text.apply('ui', ui); SPIKE.Text.apply('dialogue', dlg);
+  return document.fonts.ready.then(function () {
+
+    /* --- 가이드 패널 ---
+       warn 과 body 는 줄바꿈되므로 폭이 아니라 "몇 줄이 되는가"를 본다.
+       missionPanel._body 와 같은 폭·같은 한계를 쓴다. */
+    function lines(text, size, w) { return SPIKE.Font.wrap(text, size, w).length; }
+    ['find','motor','beam','flag','cable','code'].forEach(function (id) {
+      var g = ui.guide[id] || {};
+      add('guide.'+id+'.title(헤더)', g.title, 11, 192 - 48);
+      add('guide.'+id+'.goal(분할HUD)', g.goal, 10, 192 - 26);
+
+      if (g.warn) {
+        var wl = lines(g.warn, 10, 192 - 42);
+        if (wl > 2) bad0.push('guide.'+id+'.warn  ' + wl + '줄 > 2줄   「' + g.warn + '」');
+      }
+      var bl = 0;
+      (g.body||[]).forEach(function (b) { bl += lines(b, 10, 192 - 20); });
+      var room = g.warn ? 3 : 4;
+      if (bl > room) bad0.push('guide.'+id+'.body  ' + bl + '줄 > ' + room + '줄');
+
+      ['labelConnector','labelMotor','labelAxle','labelBeam','labelHub','labelHere','labelDone','caption']
+        .forEach(function(k){ if(g[k]) add('guide.'+id+'.'+k, g[k], 10, 100); });
+    });
+
+    /* --- 버튼 (54px 안쪽) --- */
+    ['next','prev','done','doneAlready'].forEach(function(k){
+      add('common.'+k+'(버튼54)', ui.common[k], 10, 54 - 6);
+    });
+
+    /* --- 주문서 블록 (패널 폭 192 - 여백, 들여쓴 줄은 더 좁다) --- */
+    Object.keys(ui.code.blocks).forEach(function(k){
+      var indent = (k === 'cw' || k === 'ccw');
+      add('code.blocks.'+k, ui.code.blocks[k], 10, 192 - 16 - (indent?14:0) - 16 - 34);
+    });
+    ui.code.findIt.forEach(function(f,i){
+      add('code.findIt['+i+'].name', f.name, 10, 80);
+      add('code.findIt['+i+'].text', f.text, 10, 96);
+    });
+    add('code.findTitle', ui.code.findTitle, 10, 192-20);
+    add('code.outro', ui.code.outro, 10, 192-20);
+
+    /* --- 엔딩 (창 폭 260) --- */
+    Object.keys(ui.ending.ranks).forEach(function(k){
+      add('ending.ranks.'+k+'.word', ui.ending.ranks[k].word, 15, 384-40);
+      add('ending.ranks.'+k+'.sub',  ui.ending.ranks[k].sub,  10, 384-40);
+    });
+    ['rowAccuracy','rowTime','rowDex'].forEach(function(k){
+      add('ending.'+k, ui.ending[k], 11, 110);
+    });
+    add('ending.press', ui.ending.press, 10, 384-20);
+
+    /* --- 퀘스트 HUD (전체폭 맵 376 / 분할맵 166) --- */
+    Object.keys(ui.quest).forEach(function(k){
+      add('quest.'+k, '◆ ' + ui.quest[k], 10, 376 - 18);
+    });
+
+    /* --- 타이틀 --- */
+    add('title.footer', ui.title.footer, 9, 384-24);
+    add('title.press', ui.title.press, 13, 384-20);
+
+    /* --- 대사: 메시지창 (기본 창 폭 368, 분할 184, 아이콘 있으면 -40) --- */
+    function walkD(o, path) {
+      if (typeof o === 'string') { add('대사 ' + path, o, 12, 368 - 20); return; }
+      if (Array.isArray(o)) { o.forEach(function(v,i){ walkD(v, path+'['+i+']'); }); return; }
+      if (o && typeof o === 'object') { Object.keys(o).forEach(function(k){
+        if (k === 'meta' || k === 'format') return;
+        walkD(o[k], path ? path+'.'+k : k); }); }
+    }
+    walkD(dlg, '');
+
+    /* --- 판정 --- */
+    var bad = bad0.slice();
+    CHECKS.forEach(function (c) {
+      var w = SPIKE.Font.measure(c.text, c.size);
+      if (w > c.limit) bad.push(c.label + '  폭 ' + w + ' > ' + c.limit + '   「' + c.text + '」');
+    });
+    document.getElementById('r').textContent =
+      bad.length ? (bad.length + '건 넘침\n' + bad.join('\n')) : '넘침 없음 (' + CHECKS.length + '건 검사)';
+    document.title = 'READY';
+  });
+}).catch(function(e){ document.getElementById('r').textContent = 'ERR ' + e.message; document.title='READY'; });
+</script></body></html>

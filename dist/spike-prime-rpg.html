@@ -3,7 +3,7 @@
   SPIKE 마스터 ~잠든 허브 왕~
   중학생 학과체험용 SPIKE Prime 안내 RPG
   단일 파일 배포본 — 인터넷 없이 더블클릭으로 실행됩니다.
-  빌드: 2026-09-21 13:46
+  빌드: 2026-09-21 14:23
 -->
 <html lang="ko">
 <head>
@@ -100,7 +100,7 @@ body {
   "common": {
     "next": "다음 →",
     "prev": "← 이전",
-    "done": "완료 ■",
+    "done": "완료",
     "doneAlready": "완료됨",
     "yes": "도전한다",
     "no": "조금만 더 준비",
@@ -156,7 +156,7 @@ body {
     "flag": {
       "title": "깃발 달기",
       "goal": "빔 끝에 장식을 달자",
-      "body": ["빔의 반대쪽 끝, 모터에서 가장 먼 곳에", "장식 브릭을 붙인다."],
+      "body": ["빔의 반대쪽 끝, 모터에서 먼 곳에", "장식 브릭을 붙인다."],
       "warn": "가볍게. 무거우면 모터가 힘들어한다",
       "labelHere": "여기",
       "labelDone": "완성!",
@@ -3266,6 +3266,8 @@ SPIKE.BLOCK_CATS = [
     this.queue = [];
     this.cur = null;
     this.lines = [];
+    this.pages = null;      // 창 높이에 맞춰 쪼갠 페이지들
+    this.pageIdx = 0;
     this.shown = 0;
     this.total = 0;
     this.active = false;
@@ -3277,6 +3279,16 @@ SPIKE.BLOCK_CATS = [
     this.choiceIndex = 0;
     this.onChoice = null;
   }
+
+  /* ------------------------------------------------------------
+   *  이 창에 몇 줄이 들어가는가
+   *    첫 줄 기준선 = y + 9, 줄 간격 = LINE, 글자 높이 ≈ FONT + 2
+   *    마지막 줄 바닥이 y + h - 6 을 넘으면 안 된다.
+   *  폰트를 바꾸면 글자가 커질 수 있으므로 상수로 박지 않고 계산한다.
+   * ---------------------------------------------------------- */
+  MessageWindow.prototype.maxLines = function () {
+    return Math.max(1, Math.floor((this.h - 29) / LINE) + 1);
+  };
 
   /* msgs: 문자열 | {name, text, icon, color} | 배열 */
   MessageWindow.prototype.show = function (msgs, onDone) {
@@ -3303,9 +3315,17 @@ SPIKE.BLOCK_CATS = [
     this.cur = null;
     this.queue.length = 0;
     this.choiceList = null;
+    this.pages = null;
+    this.pageIdx = 0;
   };
 
   MessageWindow.prototype._next = function () {
+    // 같은 메시지에 남은 페이지가 있으면 먼저 넘긴다
+    if (this.pages && this.pageIdx < this.pages.length - 1) {
+      this.pageIdx++;
+      this._showPage();
+      return;
+    }
     if (!this.queue.length) {
       if (this.choiceList) { this.done = true; return; }  // 선택지 대기
       this.active = false;
@@ -3316,7 +3336,19 @@ SPIKE.BLOCK_CATS = [
     }
     this.cur = this.queue.shift();
     var innerW = this.w - 20 - (this.cur.icon ? 40 : 0);
-    this.lines = S.Font.wrap(this.cur.text, FONT, innerW);
+    var all = S.Font.wrap(this.cur.text, FONT, innerW);
+
+    // 창에 안 들어가면 페이지로 쪼갠다 (▼ 로 넘긴다)
+    var m = this.maxLines();
+    this.pages = [];
+    for (var i = 0; i < all.length; i += m) this.pages.push(all.slice(i, i + m));
+    if (!this.pages.length) this.pages = [['']];
+    this.pageIdx = 0;
+    this._showPage();
+  };
+
+  MessageWindow.prototype._showPage = function () {
+    this.lines = this.pages[this.pageIdx];
     this.total = this.lines.join('').length;
     this.shown = 0;
     this.done = false;
@@ -3402,7 +3434,7 @@ SPIKE.BLOCK_CATS = [
 
     // 본문 (타이핑 중이면 잘라서)
     var left = Math.floor(this.shown);
-    for (var i = 0; i < this.lines.length && i < 4; i++) {
+    for (var i = 0; i < this.lines.length; i++) {
       var ln = this.lines[i];
       var part = ln;
       if (left < ln.length) part = ln.slice(0, Math.max(0, left));
@@ -3794,25 +3826,38 @@ SPIKE.BLOCK_CATS = [
       r.rect(x0 + 2, HEAD_H, PW - 4, 1, C.winEdge2);
     },
 
+    /* 설명 2~3줄 + ⚠주의 1~2줄.
+     * 폰트를 바꾸면 글자 폭·높이가 달라지므로 줄 수를 세어 배치한다.
+     * 본문도 방어적으로 줄바꿈한다 — JSON 을 길게 고쳐도 잘리면 안 된다. */
     _body: function (r, x0, p, C) {
       r.rect(x0 + 2, BODY_Y - 2, PW - 4, 1, C.winEdge2);
-      var body = S.pageText.body(p), y = BODY_Y + 6;
-      for (var i = 0; i < body.length; i++) {
+
+      var warn = S.pageText.warn(p);
+      var wLines = warn ? S.Font.wrap(warn, 10, PW - 42).slice(0, 2) : [];
+      var warnH = wLines.length ? wLines.length * 12 + 8 : 0;
+      var warnY = BODY_Y + BODY_H - warnH - 2;
+
+      // 본문 — 남는 높이만큼만 그린다
+      var body = [];
+      var raw = S.pageText.body(p);
+      for (var k = 0; k < raw.length; k++) {
+        body = body.concat(S.Font.wrap(raw[k], 10, PW - 20));
+      }
+      var room = (warnH ? warnY : BODY_Y + BODY_H) - (BODY_Y + 6) - 2;
+      var fit = Math.max(1, Math.floor(room / 15));
+      var y = BODY_Y + 6;
+      for (var i = 0; i < body.length && i < fit; i++) {
         r.text(body[i], x0 + 10, y, { size: 10, color: C.text });
         y += 15;
       }
-      var warn = S.pageText.warn(p);
-      if (warn) {
-        var wy = BODY_Y + BODY_H - 26;
-        r.rect(x0 + 8, wy, PW - 16, 22, '#00000055');
-        r.text('⚠', x0 + 12, wy + 6, { size: 10, color: C.textHi });
-        var lines = S.Font.wrap(warn, 10, PW - 42);
-        for (var j = 0; j < Math.min(2, lines.length); j++) {
-          r.text(lines[j], x0 + 26, wy + 1 + j * 11, { size: 10, color: C.textHi });
-        }
+
+      if (!wLines.length) return;
+      r.rect(x0 + 8, warnY, PW - 16, warnH, '#00000055');
+      r.text('⚠', x0 + 12, warnY + (warnH - 12) / 2, { size: 10, color: C.textHi });
+      for (var j = 0; j < wLines.length; j++) {
+        r.text(wLines[j], x0 + 26, warnY + 4 + j * 12, { size: 10, color: C.textHi });
       }
     },
-
     _footer: function (r, x0, C) {
       r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
 
@@ -4820,7 +4865,8 @@ SPIKE.BLOCK_CATS = [
       this.phase = PH.INTRO; this.t = 0; this.shake = 0; this.flash = 0;
       this.dmgPop = null;
 
-      this.mw = new S.MessageWindow({ h: 54, y: S.H - 62 });
+      // 해설이 3줄까지 나온다 — 높이를 그만큼 준다 (maxLines 참조)
+      this.mw = new S.MessageWindow({ h: 74, y: S.H - 82 });
       var self = this;
       this.mw.show({ name: this.enemyName, text: this.enemyName + '이(가) 나타났다!\n문제를 맞혀서 물리쳐라!' },
         function () { self.phase = PH.ASK; });

@@ -167,6 +167,25 @@
       S.Mission.pageT = 1.1;          // 애니메이션이 살아 있는 지점
     },
 
+    /* 7c. 전투 해설(WHY) — 사용자가 보고한 넘침 지점 */
+    why: function () {
+      S.State.reset();
+      S.Game.change('battle', {
+        enemy: 'e_pin', enemyName: S.D('village.guard.enemyName', '핀 도둑'),
+        bgm: 'battle', quizSet: 'gate',
+        back: { map: 'village', at: { x: 11, y: 11, dir: 'down' } },
+        onWin: function () {}
+      });
+      var B = S.Game.scene;
+      // 핀 색 문제를 오답 처리해 해설을 띄운다
+      B.qi = 1;
+      B.phase = 3;                    // PH.WHY
+      B.lastOk = false;
+      var q = B.qs[1];
+      B.mw.show({ name: '해설', color: '#ff7d7d',
+        text: '정답은 「' + q.choices[q.ans] + '」.' + String.fromCharCode(10) + q.why, icon: q.icon });
+    },
+
     /* 8. 보스전 */
     boss: function () {
       S.State.reset();

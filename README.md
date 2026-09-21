@@ -15,6 +15,8 @@ dist/spike-prime-rpg.html   ← 더블클릭. 인터넷 불필요, 단일 파일
 npm test      # 헤드리스 스모크 테스트 (전 씬 구동 + 스프라이트 전수 검사)
 npm run build # dist/spike-prime-rpg.html 단일 파일 생성
 npm run serve # http://localhost:5173 (index.dev.html)
+              #   /scripts/overflow.html  문구 넘침 검사
+              #   /scripts/fonttest.html  폰트 비교
 ```
 
 ## 조작
