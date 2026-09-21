@@ -91,6 +91,29 @@ for (const f of files) {
 const S = sandbox.SPIKE;
 if (!S) { console.error('SPIKE 전역이 만들어지지 않았습니다'); process.exit(1); }
 
+/* ---------------- 텍스트 JSON 적용 ----------------
+ * index.dev.html 의 data-src 를 그대로 읽어서 넣는다.
+ * 이렇게 해야 아래 씬 구동에서 "없는 키"가 실제로 걸린다. */
+const TEXT_RE =
+  /<script\s+type="application\/json"\s+id="spike-(ui|dialogue)"\s+data-src="([^"]+)"/g;
+for (const [, kind, src] of html.matchAll(TEXT_RE)) {
+  let raw;
+  try { raw = readFileSync(join(ROOT, src), "utf8"); }
+  catch {
+    console.error("  텍스트 파일 없음: " + src);
+    process.exit(1);
+  }
+  try { S.Text.apply(kind, JSON.parse(raw)); }
+  catch (e) {
+    console.error("  JSON 파싱 실패: " + src + " — " + e.message);
+    process.exit(1);
+  }
+}
+if (!S.Text.loaded.ui || !S.Text.loaded.dialogue) {
+  console.error("  ui / dialogue JSON 을 모두 불러오지 못했습니다");
+  process.exit(1);
+}
+
 /* ---------------- 구동 ---------------- */
 let now = 0;
 win.performance.now = () => now;
@@ -235,6 +258,22 @@ scene('스프라이트 전수 검사', () => {
   const missing = [...need].filter((id) => !S.Sprites.get(id));
   if (missing.length) throw new Error('누락된 스프라이트: ' + missing.join(', '));
   process.stdout.write(`       스프라이트 ${need.size}종 확인\n`);
+});
+
+/* ---------------- 텍스트 키 누락 검사 ----------------
+ * 위에서 전 씬을 돌렸으므로, 그 과정에서 조회된 키 중
+ * JSON 에 없던 것이 S.Text.missing 에 쌓여 있다. */
+scene('텍스트 키 전수 검사', () => {
+  const miss = Object.keys(S.Text.missing);
+  if (miss.length) {
+    throw new Error("JSON 에 없는 키 " + miss.length + "개:\n       " + miss.join("\n       "));
+  }
+  const count = (o, n = 0) => {
+    for (const k in o) n += (typeof o[k] === "object" && o[k]) ? count(o[k]) : 1;
+    return n;
+  };
+  process.stdout.write("       UI " + count(S.Text.ui) + "개 · 대사 "
+    + count(S.Text.dialogue) + "개 항목\n");
 });
 
 /* ---------------- 결과 ---------------- */

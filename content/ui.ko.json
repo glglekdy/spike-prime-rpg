@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "kind": "ui",
+    "lang": "ko",
+    "name": "한국어 (기본)",
+    "note": "화면에 표시되는 텍스트. 버튼·라벨·가이드 문구. 대사는 dialogue.ko.json 에 있다."
+  },
+
+  "font": {
+    "family": "\"DungGeunMo\",\"NeoDunggeunmo\",\"Galmuri11\",\"Galmuri9\",Dotum,\"돋움\",\"Malgun Gothic\",\"맑은 고딕\",monospace",
+    "threshold": 96,
+    "_note": "픽셀 폰트를 설치하거나 임베드했다면 family 맨 앞에 이름을 넣고 threshold 를 조절하세요. binarize:false 로 이진화를 끌 수 있습니다."
+  },
+
+  "common": {
+    "next": "다음 ▶",
+    "prev": "◀ 이전",
+    "done": "완료 ▣",
+    "doneAlready": "완료됨",
+    "yes": "도전한다",
+    "no": "조금만 더 준비",
+    "close": "X 닫기",
+    "move": "↑↓ 이동",
+    "keyNext": "Z — 다음",
+    "keySkip": "X — 건너뛰기"
+  },
+
+  "title": {
+    "name": "SPIKE 마스터",
+    "sub": "~잠든 허브 왕~",
+    "press": "▶  PRESS ENTER  ◀",
+    "footer": "중학생 학과체험 · SPIKE Prime 조립 & 블록코딩   |   F1 조작법",
+    "attract": "다음 도전자를 기다립니다"
+  },
+
+  "quest": {
+    "gran": "도감 할머니에게 말을 걸자",
+    "smith": "대장장이에게 연결의 법칙을 배우자",
+    "guard": "문지기의 시험에 도전하자",
+    "toWorkshop": "남쪽 문으로 나가 조립 공방으로",
+    "maker": "로봇 장인에게 말을 걸자",
+    "bossReady": "해체의 순서를 증명하라",
+    "bossDone": "허브 왕을 깨워라!"
+  },
+
+  "guide": {
+    "find": {
+      "title": "부품 찾기",
+      "goal": "트레이에서 부품 7종을 꺼내자",
+      "body": ["트레이에서 일곱 가지를 꺼내자.", "빔은 구멍을 세어라 — 7개짜리다."],
+      "warn": "모터는 작은 쪽. 큰 것은 라지 모터다"
+    },
+    "motor": {
+      "title": "모터 + 커넥터",
+      "goal": "모터 축에 십자 커넥터를 꽂자",
+      "body": ["모터 가운데 튀어나온 십자 축에", "커넥터의 십자 구멍을 끼운다.", "끝까지 눌러 넣는다."],
+      "warn": "안 들어가면 힘이 아니라 방향. 90도 돌려보자",
+      "labelConnector": "커넥터",
+      "labelMotor": "중형 모터",
+      "labelAxle": "십자 축"
+    },
+    "beam": {
+      "title": "빔 고정",
+      "goal": "검정 핀 2개로 빔을 고정하자",
+      "body": ["빔 7칸의 끝 구멍을 커넥터에 맞추고", "검정 핀 두 개로 고정한다."],
+      "warn": "핀이 하나면 관절이 된다. 반드시 두 개",
+      "labelBeam": "빔 7칸",
+      "labelConnector": "커넥터",
+      "caption": "검정 핀 2개 = 고정"
+    },
+    "flag": {
+      "title": "깃발 달기",
+      "goal": "빔 끝에 장식을 달자",
+      "body": ["빔의 반대쪽 끝, 모터에서 가장 먼 곳에", "장식 브릭을 붙인다."],
+      "warn": "가볍게. 무거우면 모터가 힘들어한다",
+      "labelHere": "여기",
+      "labelDone": "완성!",
+      "toast": "골렘의 몸이 완성되었다!"
+    },
+    "cable": {
+      "title": "케이블 · 포트 A",
+      "goal": "모터를 허브 A 포트에 연결하자",
+      "body": ["케이블 한쪽을 모터에,", "반대쪽을 허브의 A 포트에 꽂는다.", "딸깍 소리가 나야 끝까지 들어간 것."],
+      "warn": "프로그램이 A라면 반드시 A. 최다 실수 지점",
+      "labelMotor": "모터",
+      "labelHub": "허브",
+      "caption": "포트는 반드시 A"
+    },
+    "code": {
+      "title": "주문서",
+      "goal": "주문서를 보고 SPIKE 앱에 옮겨 적자",
+      "body": [],
+      "warn": ""
+    },
+    "parts": {
+      "hub": "허브",
+      "motor": "모터",
+      "cable": "케이블",
+      "beam": "빔 7칸",
+      "connector": "커넥터",
+      "pin": "검정핀",
+      "flag": "깃발"
+    },
+    "finishToast": "첫 번째 골렘, 완성!"
+  },
+
+  "code": {
+    "cardTitle": "【 주문서 】",
+    "findTitle": "SPIKE 앱에서 찾는 법",
+    "outro": "앱에 똑같이 옮겨 적자",
+    "blocks": {
+      "start": "프로그램이 시작되면",
+      "repeat": "4번 반복하기",
+      "cw": "A 모터 0.3초 ↻",
+      "ccw": "A 모터 0.3초 ↺"
+    },
+    "findIt": [
+      { "cat": "event", "name": "노랑 서랍", "text": "맨 위 첫 블록" },
+      { "cat": "ctrl",  "name": "주황 서랍", "text": "반복하기 (숫자 4)" },
+      { "cat": "motor", "name": "민트 서랍", "text": "_초 동안 _방향" }
+    ]
+  },
+
+  "battle": {
+    "question": "문제 {n}/{total}",
+    "correct": "정답!",
+    "wrong": "아깝다!",
+    "why": "해설"
+  },
+
+  "dex": {
+    "title": "부 품 도 감",
+    "collected": "수집 {n} / {total}",
+    "new": "NEW",
+    "tip": "TIP"
+  },
+
+  "ending": {
+    "header": "M I S S I O N   C O M P L E T E",
+    "rank": "R A N K",
+    "rowAccuracy": "정답률",
+    "rowTime": "걸린 시간",
+    "rowDex": "도감 수집",
+    "timeFmt": "{m}분 {s}초",
+    "dexFmt": "{n} / {total} 종",
+    "press": "아무 키나 누르면 처음 화면으로",
+    "ranks": {
+      "S": { "word": "완벽한 메카닉!", "sub": "부품도 순서도 전부 정확했다." },
+      "A": { "word": "훌륭한 메카닉!", "sub": "거의 다 맞혔다. 실전에서도 잘하겠다." },
+      "B": { "word": "좋은 출발!",     "sub": "핵심은 잡았다. 도감을 다시 보면 완벽!" },
+      "C": { "word": "수고했다!",       "sub": "오늘 만져본 감각이 진짜 실력이 된다." }
+    }
+  },
+
+  "hotkeys": {
+    "title": "조작법",
+    "reset": "Ctrl+R  즉시 초기화",
+    "help": "F1  조작법",
+    "jump": "F2  챕터 점프",
+    "pause": "F3  타이머 일시정지",
+    "text": "F4  텍스트 JSON 불러오기",
+    "mute": "M  음소거"
+  }
+}

@@ -25,9 +25,15 @@
     if (loading) loading.remove();
   }
 
+  /* 텍스트 JSON 을 먼저 읽고 게임을 띄운다 (실패해도 fallback 으로 진행) */
+  function start() {
+    if (S.Text) S.Text.boot().then(boot, boot);
+    else boot();
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', start);
   } else {
-    boot();
+    start();
   }
 })(SPIKE);

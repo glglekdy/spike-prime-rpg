@@ -42,6 +42,11 @@
         this.say(p ? '타이머 일시정지' : '타이머 재개');
         return true;
       }
+      if (e.code === 'F4') {
+        e.preventDefault();
+        if (S.Text) { S.Text.pickFile(); this.say('텍스트 JSON 선택'); }
+        return true;
+      }
       if (e.code === 'KeyM') {
         var m = S.Audio.toggleMute();
         this.say(m ? '음소거 ON' : '음소거 OFF');
@@ -83,18 +88,20 @@
 
       if (this.helpOpen) {
         r.fade(0.6);
-        var w2 = 300, h2 = 190, x2 = (S.W - w2) / 2, y2 = (S.H - h2) / 2;
+        var w2 = 300, h2 = 222, x2 = (S.W - w2) / 2, y2 = (S.H - h2) / 2;
         r.window(x2, y2, w2, h2);
         r.text('조 작 법', x2 + w2 / 2, y2 + 10, { size: 14, color: C.textHi, align: 'center' });
         var rows = [
           ['방향키 / WASD', '이동'],
           ['Z · Space · Enter', '말 걸기 / 확인'],
           ['X · Esc', '취소 / 메뉴'],
-          ['마우스', '체크·드래그·선택'],
+          ['마우스', '선택 · 버튼'],
+          ['Q / E', '가이드 이전 / 다음'],
           ['', ''],
           ['Ctrl+R', '다음 학생 (초기화)'],
           ['F2', '챕터 점프'],
           ['F3', '타이머 일시정지'],
+          ['F4', '텍스트 JSON 불러오기'],
           ['M', '음소거']
         ];
         for (var i = 0; i < rows.length; i++) {

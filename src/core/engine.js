@@ -108,6 +108,7 @@
 
       if (S.Idle) S.Idle.tick(dt, r);
       if (S.Hotkeys) S.Hotkeys.draw(r);
+      if (S.Text) { S.Text.tick(dt); S.Text.draw(r); }   // JSON 교체 알림
 
       S.Input.endFrame();
     },

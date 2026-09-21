@@ -18,6 +18,8 @@
   var Font = S.Font = {
     family: FAMILY,
     threshold: 96,      // 이 값보다 진한 픽셀만 살린다 (낮을수록 획이 두꺼워짐)
+    binarize: true,     // 진짜 픽셀 폰트를 넣었다면 false — 이진화가 오히려 획을 망친다
+                        //   ui.ko.json 의 font.{family,threshold,binarize} 로 바꾼다
     cache: new Map(),
     _measureCtx: null,
 
@@ -28,7 +30,7 @@
         this._measureCtx = c.getContext('2d');
       }
       var ctx = this._measureCtx;
-      ctx.font = size + 'px ' + FAMILY;
+      ctx.font = size + 'px ' + this.family;
       return Math.ceil(ctx.measureText(text).width) + 1;
     },
 
@@ -58,18 +60,20 @@
       var src = document.createElement('canvas');
       src.width = w; src.height = h;
       var sctx = src.getContext('2d', { willReadFrequently: true });
-      sctx.font = size + 'px ' + FAMILY;
+      sctx.font = size + 'px ' + this.family;
       sctx.textBaseline = 'top';
       sctx.fillStyle = '#ffffff';
       sctx.fillText(text, pad, pad);
 
-      // --- 2) 알파 이진화 ---
-      var img = sctx.getImageData(0, 0, w, h);
-      var d = img.data, th = this.threshold;
-      for (var i = 0; i < d.length; i += 4) {
-        d[i + 3] = d[i + 3] >= th ? 255 : 0;
+      // --- 2) 알파 이진화 (픽셀 폰트를 쓸 때는 건너뛴다) ---
+      if (this.binarize !== false) {
+        var img = sctx.getImageData(0, 0, w, h);
+        var d = img.data, th = this.threshold;
+        for (var i = 0; i < d.length; i += 4) {
+          d[i + 3] = d[i + 3] >= th ? 255 : 0;
+        }
+        sctx.putImageData(img, 0, 0);
       }
-      sctx.putImageData(img, 0, 0);
 
       // --- 3) 그림자 + 색 입히기 ---
       var out = document.createElement('canvas');

@@ -10,9 +10,14 @@
 <div id="loading">LOADING…</div>
 <canvas id="game"></canvas>
 
+<!-- 텍스트 리소스 (빌드 시 내용이 인라인된다. 개발 서버에서는 data-src 를 fetch) -->
+<script type="application/json" id="spike-ui" data-src="content/ui.ko.json"></script>
+<script type="application/json" id="spike-dialogue" data-src="content/dialogue.ko.json"></script>
+
 <!-- core -->
 <script src="src/core/const.js"></script>
 <script src="src/core/font.js"></script>
+<script src="src/core/text.js"></script>
 <script src="src/core/renderer.js"></script>
 <script src="src/core/input.js"></script>
 <script src="src/core/audio.js"></script>

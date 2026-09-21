@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>폰트 임계값 실측</title>
+<style>
+  body { background:#0b1020; color:#9fb4d8; font:12px monospace; margin:0; padding:8px; }
+  canvas { image-rendering: pixelated; display:block; margin:2px 0 10px; }
+  h3 { color:#ffe066; margin:8px 0 2px; font-size:12px; }
+</style></head>
+<body>
+<div id="out"></div>
+
+<script src="../src/core/const.js"></script>
+<script src="../src/core/font.js"></script>
+<script>
+/* 문제가 된 실제 문자열들을 임계값 x 크기 조합으로 뽑아 눈으로 비교한다 */
+var SAMPLES = [
+  'A 모터 0.3초  SPIKE',
+  '포트는 아무 데나 꽂아도 되지만',
+  '4번 반복하기  3 / 4',
+  '노랑 서랍 → 맨 위 첫 블록'
+];
+var SIZES = [10, 11, 12];
+var THRESHOLDS = [48, 72, 96, 128];
+var SCALE = 3;
+
+var out = document.getElementById('out');
+
+function block(title, draw) {
+  var h = document.createElement('h3'); h.textContent = title; out.appendChild(h);
+  var cv = document.createElement('canvas');
+  cv.width = 1150; cv.height = SAMPLES.length * 22 * SCALE / SCALE + 8;
+  out.appendChild(cv);
+  draw(cv);
+}
+
+SIZES.forEach(function (size) {
+  THRESHOLDS.forEach(function (th) {
+    block('size=' + size + '  threshold=' + th, function (cv) {
+      var w = 380, h = SAMPLES.length * 20 + 6;
+      cv.width = w * SCALE; cv.height = h * SCALE;
+      cv.style.width = (w * SCALE) + 'px';
+      var ctx = cv.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#12306a'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.scale(SCALE, SCALE);
+      SPIKE.Font.threshold = th;
+      SPIKE.Font.cache.clear();
+      SAMPLES.forEach(function (s, i) {
+        var g = SPIKE.Font.get(s, size, '#ffffff', true);
+        ctx.drawImage(g, 4, 4 + i * 20);
+      });
+    });
+  });
+});
+document.title = 'READY';
+</script>
+</body>
+</html>
