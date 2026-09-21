@@ -5,6 +5,11 @@
 <script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
 <script src="../src/core/const.js"></script><script src="../src/core/font.js"></script>
 <script src="../src/core/text.js"></script>
+<script src="../src/core/renderer.js"></script><script src="../src/core/input.js"></script>
+<script src="../src/core/audio.js"></script><script src="../src/core/sprites.js"></script>
+<script src="../src/core/tiles.js"></script><script src="../src/core/sprites_parts.js"></script>
+<script src="../src/core/state.js"></script><script src="../src/core/engine.js"></script>
+<script src="../src/data/parts.js"></script><script src="../src/data/quiz.js"></script>
 <script>
 /* 게임에 나오는 모든 문자열의 실제 픽셀 폭을, 그 문자열이 들어갈 칸 폭과 비교한다.
    폰트를 바꾸면 폭이 달라지므로 눈으로 훑는 대신 수치로 잡는다. */
@@ -94,6 +99,34 @@ Promise.all([
         walkD(o[k], path ? path+'.'+k : k); }); }
     }
     walkD(dlg, '');
+
+    /* --- 도감 (src/data/parts.js) ---
+       우측 상세 패널: dx=142, dw=238. 설명은 dw-24, TIP 은 dw-56 폭으로 줄바꿈된다.
+       설명 최대 줄 수는 TIP 높이에 따라 달라지므로 넉넉잡아 6줄로 본다. */
+    var DW = 384 - 146;
+    SPIKE.PARTS.forEach(function (p) {
+      add('도감 '+p.id+'.title',  p.title, 13, DW - 88 - 10);
+      add('도감 '+p.id+'.real',   p.real,   9, DW - 88 - 10);
+      add('도감 '+p.id+'.one',    p.one,   10, DW - 88 - 10);
+      var dl = 0;
+      p.lines.forEach(function (ln) { dl += lines(ln, 10, DW - 24); });
+      if (dl > 6) bad0.push('도감 '+p.id+'.lines  ' + dl + '줄 > 6줄');
+      var tl = lines(p.tip, 9, DW - 56);
+      if (tl > 3) bad0.push('도감 '+p.id+'.tip  ' + tl + '줄 > 3줄');
+    });
+
+    /* --- 퀴즈 (src/data/quiz.js) ---
+       문제문: 폭 S.W-40. 보기: 2열 버튼 (S.W-24)/2 - 16. 해설: 메시지창(자동 페이지). */
+    Object.keys(SPIKE.QUIZ).forEach(function (set) {
+      SPIKE.QUIZ[set].forEach(function (q, qi) {
+        var tag = '퀴즈 '+set+'['+qi+']';
+        if (lines(q.q, 11, 384 - 40) > 2) bad0.push(tag+'.q  2줄 초과   「'+q.q+'」');
+        q.choices.forEach(function (c, ci) {
+          add(tag+'.choices['+ci+']', c, 10, ((384 - 24) / 2 | 0) - 16);
+        });
+        if (q.act) add(tag+'.act', q.act, 12, 384 - 60);
+      });
+    });
 
     /* --- 판정 --- */
     var bad = bad0.slice();

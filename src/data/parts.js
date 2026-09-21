@@ -37,7 +37,7 @@
     {
       id: 'motorM', icon: 'p_motor_m', group: 'core',
       title: '쌍둥이 러너',
-      real: '미디엄 모터 (Medium Motor) ×2',
+      real: '미디엄 모터 (Medium Motor)',
       one: '작고 빠른 모터. 세트에 두 개.',
       lines: [
         '팔, 집게, 방향 조절처럼 가볍고 빠른 동작 담당.',

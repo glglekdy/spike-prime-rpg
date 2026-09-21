@@ -93,16 +93,29 @@
         { size: 9, color: p2.group === 'core' ? C.blkSense : C.blkCtrl });
 
       r.rect(dx + 10, 118, dw - 20, 1, C.winEdge2);
+
+      /* 설명과 TIP.
+       * 줄을 그대로 그리면 폰트를 바꿨을 때 오른쪽으로 삐져나간다.
+       * 항상 칸 폭에 맞춰 줄바꿈하고, TIP 은 창 바닥에 붙여
+       * 설명이 길어져도 아래로 밀려 나가지 않게 한다. */
+      var panelBottom = 34 + (S.H - 40);
+      var tipLines = S.Font.wrap(p2.tip, 9, dw - 56).slice(0, 3);
+      var tipH = tipLines.length * 12 + 10;
+      var tipY = panelBottom - 8 - tipH;
+
+      var desc = [];
       for (var k = 0; k < p2.lines.length; k++) {
-        r.text(p2.lines[k], dx + 12, 126 + k * 14, { size: 10, color: C.text });
+        desc = desc.concat(S.Font.wrap(p2.lines[k], 10, dw - 24));
+      }
+      var fit = Math.max(1, Math.floor((tipY - 126 - 6) / 14));
+      for (var m = 0; m < desc.length && m < fit; m++) {
+        r.text(desc[m], dx + 12, 126 + m * 14, { size: 10, color: C.text });
       }
 
-      var ty = 126 + p2.lines.length * 14 + 6;
-      r.rect(dx + 8, ty, dw - 16, 30, '#0a123099');
-      r.text('TIP', dx + 14, ty + 4, { size: 9, color: C.textHi });
-      var tip = S.Font.wrap(p2.tip, 9, dw - 56);
-      for (var j = 0; j < tip.length && j < 2; j++) {
-        r.text(tip[j], dx + 40, ty + 4 + j * 11, { size: 9, color: C.textDim });
+      r.rect(dx + 8, tipY, dw - 16, tipH, '#0a123099');
+      r.text('TIP', dx + 14, tipY + 5, { size: 9, color: C.textHi });
+      for (var j = 0; j < tipLines.length; j++) {
+        r.text(tipLines[j], dx + 40, tipY + 5 + j * 12, { size: 9, color: C.textDim });
       }
     }
   };

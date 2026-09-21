@@ -147,6 +147,16 @@
       S.Game.push('dex', {});
     },
 
+    /* 6b. 도감 특정 항목 (?s=dex4 처럼) */
+    dexAt: function (i) {
+      S.State.reset();
+      S.PARTS.forEach(function (p) { S.State.learn(p.id); });
+      S.Game.change('field', { map: 'village' });
+      S.Game.push('dex', {});
+      S.Game.top().idx = i;
+      S.Game.top().scroll = Math.max(0, Math.min(i, S.PARTS.length - 9));
+    },
+
     /* 7. 조립 공방 — S5 미구현 상태 (우측 패널이 비어 있다) */
     workshop: function () {
       S.State.reset();
@@ -216,6 +226,9 @@
     }
   };
 
+  for (var di = 0; di < 15; di++) {
+    SHOTS['dex' + di] = (function (i) { return function () { SHOTS.dexAt(i); }; })(di);
+  }
   for (var gi = 0; gi < 6; gi++) {
     SHOTS['g' + gi] = (function (i) { return function () { SHOTS._guide(i); }; })(gi);
   }

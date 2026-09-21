@@ -3,7 +3,7 @@
   SPIKE 마스터 ~잠든 허브 왕~
   중학생 학과체험용 SPIKE Prime 안내 RPG
   단일 파일 배포본 — 인터넷 없이 더블클릭으로 실행됩니다.
-  빌드: 2026-09-21 15:01
+  빌드: 2026-09-21 15:12
 -->
 <html lang="ko">
 <head>
@@ -2514,7 +2514,7 @@ SPIKE.BLOCK_CATS = [
     {
       id: 'motorM', icon: 'p_motor_m', group: 'core',
       title: '쌍둥이 러너',
-      real: '미디엄 모터 (Medium Motor) ×2',
+      real: '미디엄 모터 (Medium Motor)',
       one: '작고 빠른 모터. 세트에 두 개.',
       lines: [
         '팔, 집게, 방향 조절처럼 가볍고 빠른 동작 담당.',
@@ -4846,16 +4846,29 @@ SPIKE.BLOCK_CATS = [
         { size: 9, color: p2.group === 'core' ? C.blkSense : C.blkCtrl });
 
       r.rect(dx + 10, 118, dw - 20, 1, C.winEdge2);
+
+      /* 설명과 TIP.
+       * 줄을 그대로 그리면 폰트를 바꿨을 때 오른쪽으로 삐져나간다.
+       * 항상 칸 폭에 맞춰 줄바꿈하고, TIP 은 창 바닥에 붙여
+       * 설명이 길어져도 아래로 밀려 나가지 않게 한다. */
+      var panelBottom = 34 + (S.H - 40);
+      var tipLines = S.Font.wrap(p2.tip, 9, dw - 56).slice(0, 3);
+      var tipH = tipLines.length * 12 + 10;
+      var tipY = panelBottom - 8 - tipH;
+
+      var desc = [];
       for (var k = 0; k < p2.lines.length; k++) {
-        r.text(p2.lines[k], dx + 12, 126 + k * 14, { size: 10, color: C.text });
+        desc = desc.concat(S.Font.wrap(p2.lines[k], 10, dw - 24));
+      }
+      var fit = Math.max(1, Math.floor((tipY - 126 - 6) / 14));
+      for (var m = 0; m < desc.length && m < fit; m++) {
+        r.text(desc[m], dx + 12, 126 + m * 14, { size: 10, color: C.text });
       }
 
-      var ty = 126 + p2.lines.length * 14 + 6;
-      r.rect(dx + 8, ty, dw - 16, 30, '#0a123099');
-      r.text('TIP', dx + 14, ty + 4, { size: 9, color: C.textHi });
-      var tip = S.Font.wrap(p2.tip, 9, dw - 56);
-      for (var j = 0; j < tip.length && j < 2; j++) {
-        r.text(tip[j], dx + 40, ty + 4 + j * 11, { size: 9, color: C.textDim });
+      r.rect(dx + 8, tipY, dw - 16, tipH, '#0a123099');
+      r.text('TIP', dx + 14, tipY + 5, { size: 9, color: C.textHi });
+      for (var j = 0; j < tipLines.length; j++) {
+        r.text(tipLines[j], dx + 40, tipY + 5 + j * 12, { size: 9, color: C.textDim });
       }
     }
   };
