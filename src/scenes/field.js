@@ -86,6 +86,11 @@
     update: function (dt) {
       this.animT += dt;
 
+      // 가이드 패널: 애니메이션은 항상, 입력은 대화창이 없을 때만
+      if (S.MissionPanel && this.map.split) {
+        S.MissionPanel.update(dt, !this.mw.active && !this.busy, this);
+      }
+
       if (this.mw.active) { this.mw.update(dt); return; }
       if (this.busy) return;
 
@@ -127,7 +132,10 @@
           pl.animT = 0;
         }
 
-        if (I.pressed.ok) this._interact();
+        if (I.pressed.ok) {
+          // 정면에 말 걸 대상이 없으면 가이드 페이지를 넘긴다
+          if (!this._interact() && this.map.split && S.Mission) S.Mission.next(this);
+        }
         if (I.pressed.cancel) S.Game.push('dex');
       }
 
@@ -166,7 +174,7 @@
       }
     },
 
-    /* 정면 칸의 대상과 상호작용 */
+    /* 정면 칸의 대상과 상호작용. 말 건 대상이 있으면 true */
     _interact: function () {
       var pl = this.player, v = DIRV[pl.dir];
       var fx = pl.tx + v[0], fy = pl.ty + v[1];
@@ -177,7 +185,7 @@
         if (n[i].tx === fx && n[i].ty === fy) {
           n[i].dir = { up: 'down', down: 'up', left: 'right', right: 'left' }[pl.dir];
           S.Dialogue.talk(this.mapId, n[i].id, this);
-          return;
+          return true;
         }
       }
       var o = this.map.objects || [];
@@ -187,9 +195,18 @@
         for (var k = 0; k < cells.length; k++) {
           if (cells[k][0] === fx && cells[k][1] === fy) {
             S.Dialogue.talk(this.mapId, o[j].id, this);
-            return;
+            return true;
           }
         }
+      }
+      return false;
+    },
+
+    /* Q / E — 가이드 페이지 넘김 (마우스 고장 대비) */
+    onKey: function (e) {
+      if (this.map && this.map.split && !this.mw.active && !this.busy &&
+          S.MissionPanel && S.MissionPanel.onKey(e.code, this)) {
+        e.preventDefault();
       }
     },
 

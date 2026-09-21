@@ -99,6 +99,8 @@
                         }); break;
         case 'snap':    this.tone(1200, 0.04, 'square', 0.16);
                         setTimeout(function(){ Audio.tone(1600, 0.05, 'square', 0.14); }, 40); break;
+        case 'page':    this.noise(0.05, 0.10, 2200);
+                        this.tone(760, 0.035, 'triangle', 0.10); break;
         case 'fanfare': [523,659,784,1046,784,1046,1318].forEach(function (f, i) {
                           setTimeout(function () { Audio.tone(f, 0.22, 'square', 0.2); }, i * 130);
                         }); break;

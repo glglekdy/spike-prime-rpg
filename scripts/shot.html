@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>SPIKE RPG — 캡처 하네스</title>
+<link rel="stylesheet" href="../src/style.css">
+<style>
+  /* 캡처용: 뷰포트에 딱 맞게 */
+  body { background: #05070f; }
+  #game { box-shadow: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<script type="application/json" id="spike-ui" data-src="../content/ui.ko.json"></script>
+<script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
+
+<!-- core -->
+<script src="../src/core/const.js"></script>
+<script src="../src/core/font.js"></script>
+<script src="../src/core/text.js"></script>
+<script src="../src/core/renderer.js"></script>
+<script src="../src/core/input.js"></script>
+<script src="../src/core/audio.js"></script>
+<script src="../src/core/sprites.js"></script>
+<script src="../src/core/tiles.js"></script>
+<script src="../src/core/sprites_parts.js"></script>
+<script src="../src/core/state.js"></script>
+<script src="../src/core/hotkeys.js"></script>
+<script src="../src/core/idle.js"></script>
+<script src="../src/core/engine.js"></script>
+
+<!-- data -->
+<script src="../src/data/bgm.js"></script>
+<script src="../src/data/parts.js"></script>
+<script src="../src/data/quiz.js"></script>
+<script src="../src/data/maps.js"></script>
+<script src="../src/data/dialogue.js"></script>
+<script src="../src/data/steps.js"></script>
+<script src="../src/data/blocks.js"></script>
+
+<!-- ui -->
+<script src="../src/ui/messageWindow.js"></script>
+<script src="../src/ui/missionPanel.js"></script>
+
+<!-- scenes -->
+<script src="../src/scenes/attract.js"></script>
+<script src="../src/scenes/mission.js"></script>
+<script src="../src/scenes/field.js"></script>
+<script src="../src/scenes/cards.js"></script>
+<script src="../src/scenes/dex.js"></script>
+<script src="../src/scenes/battle.js"></script>
+<script src="../src/scenes/ending.js"></script>
+
+<script>
+/* ============================================================
+ *  캡처 하네스 — main.js 대신 씬을 직접 세팅하고 N프레임만 돌린다.
+ *  사용:  shot.html?s=<장면키>
+ *  헤드리스 크롬의 --screenshot 이 찍어갈 수 있도록
+ *  고정 프레임 수만 돌린 뒤 루프를 멈춘다.
+ * ============================================================ */
+(function (S) {
+  'use strict';
+
+  var qs = new URLSearchParams(location.search);
+  var key = qs.get('s') || 'title';
+  var FRAMES = parseInt(qs.get('f') || '90', 10);   // 60fps 기준 1.5초
+  var DT = 1 / 60;
+
+  /* 오디오는 헤드리스에서 무의미 — 전 메서드 무력화 (이름 빠뜨리면 enter()가 죽는다) */
+  if (S.Audio) {
+    Object.keys(S.Audio).forEach(function (k) {
+      if (typeof S.Audio[k] === 'function') S.Audio[k] = function () {};
+    });
+  }
+  /* setTimeout 으로 예약된 오디오도 차단 */
+  var _st = window.setTimeout;
+  window.setTimeout = function (fn, ms) { return _st(function () { try { fn(); } catch (e) {} }, ms); };
+
+  /* 캡처용: 텍스트 JSON 을 동기로 읽어 적용 (비동기면 첫 프레임에 안 맞는다) */
+  ['ui', 'dialogue'].forEach(function (kind) {
+    var el = document.getElementById('spike-' + kind);
+    if (!el) return;
+    var x = new XMLHttpRequest();
+    x.open('GET', el.getAttribute('data-src'), false);
+    x.send(null);
+    S.Text.apply(kind, JSON.parse(x.responseText));
+  });
+
+  var canvas = document.getElementById('game');
+  var r = new S.Renderer(canvas);
+  S.Game.renderer = r;
+  S.Input.init(r);
+  S.Sprites.init();
+
+  /* ---------- 장면 세팅 ---------- */
+  var SHOTS = {
+    /* 1. 타이틀 (어트랙트) */
+    title: function () {
+      S.Game.change('attract');
+    },
+
+    /* 2. 허브 마을 — 시작 직후 */
+    village: function () {
+      S.State.reset();
+      S.Game.change('field', { map: 'village' });
+    },
+
+    /* 3. 도감 할머니 대화 */
+    talk: function () {
+      S.State.reset();
+      S.Game.change('field', { map: 'village' });
+      var f = S.Game.scene;
+      f.player.tx = 5; f.player.ty = 8;
+      f.player.px = 5 * S.TILE; f.player.py = 8 * S.TILE;
+      f.player.dir = 'up';
+      S.Dialogue.talk('village', 'gran', f);
+    },
+
+    /* 4. 부품 카드 (6대 정령) */
+    cards: function () {
+      S.State.reset();
+      S.Game.change('field', { map: 'village' });
+      S.Game.push('cards', {
+        title: '6대 정령 — 전자 부품',
+        ids: ['hub', 'motorL', 'motorM', 'color', 'dist', 'force'],
+        onDone: function () {}
+      });
+    },
+
+    /* 5. 퀴즈 배틀 */
+    battle: function () {
+      S.State.reset();
+      S.Game.change('battle', {
+        enemy: 'e_pin', enemyName: '핀 도둑',
+        bgm: 'battle', quizSet: 'gate',
+        back: { map: 'village', at: { x: 11, y: 11, dir: 'down' } },
+        onWin: function () {}
+      });
+    },
+
+    /* 6. 부품 도감 */
+    dex: function () {
+      S.State.reset();
+      S.PARTS.forEach(function (p) { S.State.learn(p.id); });
+      S.Game.change('field', { map: 'village' });
+      S.Game.push('dex', {});
+    },
+
+    /* 7. 조립 공방 — S5 미구현 상태 (우측 패널이 비어 있다) */
+    workshop: function () {
+      S.State.reset();
+      S.State.chapter = 2;
+      S.State.flags.gatePassed = true;
+      S.Game.change('field', { map: 'workshop' });
+    },
+
+    /* 7b. 조립 가이드 페이지별 (?s=g0 ~ g5) */
+    _guide: function (i) {
+      S.State.reset();
+      S.State.chapter = 2;
+      S.State.flags.gatePassed = true;
+      if (i >= 5) S.State.flags.missionQuizDone = true;
+      S.Game.change('field', { map: 'workshop' });
+      S.Mission.reset();
+      S.State.missionStep = i;
+      S.Mission.pageT = 1.1;          // 애니메이션이 살아 있는 지점
+    },
+
+    /* 8. 보스전 */
+    boss: function () {
+      S.State.reset();
+      S.State.chapter = 3;
+      S.Game.change('battle', {
+        enemy: 'e_cable', enemyName: '혼선 케이블',
+        bgm: 'boss', quizSet: 'boss', boss: true,
+        back: { map: 'hubroom', at: { x: 11, y: 8, dir: 'up' } },
+        onWin: function () {}
+      });
+    },
+
+    /* 9. 해체의 방 */
+    hubroom: function () {
+      S.State.reset();
+      S.State.chapter = 3;
+      S.State.flags.missionDone = true;
+      S.Game.change('field', { map: 'hubroom' });
+    },
+
+    /* 10. 엔딩 수료증 */
+    ending: function () {
+      S.State.reset();
+      S.PARTS.forEach(function (p) { S.State.learn(p.id); });
+      S.State.quizOk = 8; S.State.quizNg = 1;
+      S.State.flags.bossDone = true;
+      S.Game.change('ending');
+    }
+  };
+
+  for (var gi = 0; gi < 6; gi++) {
+    SHOTS['g' + gi] = (function (i) { return function () { SHOTS._guide(i); }; })(gi);
+  }
+
+  /* 세팅 중 예외가 나면 화면에 남긴다 (조용히 죽으면 원인을 못 찾는다) */
+  try {
+    (SHOTS[key] || SHOTS.title)();
+  } catch (e) {
+    document.title = 'SETUP ERROR: ' + e.message;
+    console.error('[shot] 세팅 실패', e);
+  }
+
+  /* ---------- 고정 스텝 루프 ----------
+   * requestAnimationFrame 은 헤드리스에서 몇 프레임만 돌고 멈춘다.
+   * 어차피 DT가 고정이므로 동기 루프로 N프레임을 한 번에 돌린다.
+   * (setTimeout 으로 예약된 씬 로직은 실행되지 않는다 — 캡처용이므로 무방) */
+  var n = 0;
+  function step() {
+    var active = S.Game.top();
+    if (active && active.update) { try { active.update(DT); } catch (e) { window.__err = 'update: ' + e.message; } }
+    if (S.Game.stack.length && S.Game.scene && S.Game.scene.updateBackground) {
+      try { S.Game.scene.updateBackground(DT); } catch (e) {}
+    }
+    r.ctx.save();
+    if (S.Game.scene && S.Game.scene.draw) S.Game.scene.draw(r);
+    for (var i = 0; i < S.Game.stack.length; i++) {
+      if (S.Game.stack[i].draw) S.Game.stack[i].draw(r);
+    }
+    r.ctx.restore();
+    if (S.Idle) { try { S.Idle.tick(DT, r); } catch (e) {} }
+    S.Input.endFrame();
+
+    if (qs.get('dbg')) {
+      var d = document.getElementById('dbg') || (function () {
+        var e = document.createElement('div');
+        e.id = 'dbg';
+        e.style.cssText = 'position:fixed;left:0;top:0;z-index:9;background:#000c;color:#0f0;' +
+                          'font:12px monospace;padding:4px 8px;white-space:pre';
+        document.body.appendChild(e);
+        return e;
+      })();
+      var sc = S.Game.scene || {};
+      d.textContent = 'frame=' + n + '  scene=' + S.Game.sceneName +
+        '\nscene.t=' + (sc.t !== undefined ? sc.t.toFixed(2) : '-') +
+        '\npending=' + (S.Game._pending ? S.Game._pending.name : 'none') +
+        '\nlastErr=' + (window.__err || '-');
+    }
+
+    n++;
+  }
+  window.addEventListener('error', function (e) { window.__err = e.message; });
+
+  while (n < FRAMES) step();
+  document.title = 'READY';            // 캡처 준비 완료 신호
+})(SPIKE);
+</script>
+</body>
+</html>
