@@ -6,3 +6,6 @@ Thumbs.db
 # Mona 원본 TTF (합계 30MB) — 저장소에는 서브셋 woff2 만 넣는다.
 # 원본이 필요하면 src/font/README.md 참조.
 src/font/*.ttf
+
+# 웹 배포용 사본 (내용은 dist/spike-prime-rpg.html 과 동일)
+dist/index.html

@@ -9,6 +9,28 @@
 dist/spike-prime-rpg.html   ← 더블클릭. 인터넷 불필요, 단일 파일.
 ```
 
+## 웹 배포 (Vercel)
+
+부스에서는 `dist/spike-prime-rpg.html` 을 더블클릭해 **오프라인으로** 쓴다.
+웹 배포는 미리보기·공유용이다.
+
+GitHub 저장소를 Vercel 에 Import 하면 `vercel.json` 을 읽어 그대로 돌아간다.
+설정은 건드릴 것이 없다.
+
+| 항목 | 값 |
+|---|---|
+| Framework Preset | Other (자동) |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+| 주소 | 내용 |
+|---|---|
+| `/` | 게임 (= `dist/index.html`) |
+| `/spike-prime-rpg.html` | 오프라인 배포본 **다운로드** |
+
+> 외부 요청이 하나도 없는 단일 파일이라 CDN·빌드 캐시 설정이 필요 없다.
+> ⚠ 폰트가 HTML 에 임베드된 채 공개된다 — Mona 폰트의 재배포 조건을 확인할 것.
+
 ## 개발
 
 ```bash

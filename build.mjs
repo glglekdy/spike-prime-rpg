@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(ROOT, 'dist');
-const OUT = join(OUT_DIR, 'spike-prime-rpg.html');
+const OUT = join(OUT_DIR, 'spike-prime-rpg.html');   // 부스 배포본 (더블클릭용 이름)
+const OUT_INDEX = join(OUT_DIR, 'index.html');       // 웹 배포용 (Vercel 이 / 로 서빙)
 
 const html = readFileSync(join(ROOT, 'index.dev.html'), 'utf8');
 
@@ -65,8 +66,12 @@ out = out
 
 mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(OUT, out, 'utf8');
+/* 같은 내용을 index.html 로도 쓴다. 정적 호스팅은 / 요청에 index.html 을 찾는다.
+   (git 에는 안 올린다 — .gitignore) */
+writeFileSync(OUT_INDEX, out, 'utf8');
 
 const kb = (n) => (n / 1024).toFixed(1) + ' KB';
 console.log(`\n  파일 ${inlined.length}개 인라인 (소스 ${kb(total)})`);
 console.log(`  → ${OUT}`);
+console.log(`  → ${OUT_INDEX}  (웹 배포용)`);
 console.log(`  최종 크기 ${kb(statSync(OUT).size)}\n`);
