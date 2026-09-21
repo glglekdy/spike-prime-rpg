@@ -5,7 +5,10 @@
   'use strict';
 
   var T = S.TILE;
-  var STEP = 0.16;           // 한 칸 이동 시간(초)
+  /* 한 칸 이동 시간(초).
+     10분 안에 세 맵을 도는 체험이라 이동에 시간을 쓰면 안 된다.
+     0.16 은 초당 6칸으로 굼떠서 0.12(초당 8칸)로 올렸다. */
+  var STEP = 0.12;
   var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
   var Field = {
@@ -99,39 +102,37 @@
       // 이동 보간
       if (pl.moving) {
         pl.t += dt / STEP;
+
         if (pl.t >= 1) {
+          // 도착. 남은 시간은 버리지 않고 다음 칸으로 이월한다.
+          // (예전에는 도착 프레임에 아무것도 안 해서 칸마다 한 프레임씩 멈췄다)
+          var carry = (pl.t - 1) * STEP;
           pl.t = 0; pl.moving = false;
           pl.px = pl.tx * T; pl.py = pl.ty * T;
           this._onArrive();
+
+          // 도착 처리가 대화나 맵 이동을 시작했으면 여기서 멈춘다
+          var blocked = this.mw.active || this.busy || S.Game._pending;
+          if (!blocked) {
+            var nd = this._heldDir();
+            if (nd && this._tryStep(nd)) {
+              pl.t = Math.min(0.99, carry / STEP);
+              this._lerp();
+            }
+          }
         } else {
-          pl.px = (pl.fx + (pl.tx - pl.fx) * pl.t) * T;
-          pl.py = (pl.fy + (pl.ty - pl.fy) * pl.t) * T;
+          this._lerp();
         }
         pl.animT += dt;
-      } else {
-        var d = null;
-        if (I.down.up) d = 'up';
-        else if (I.down.down) d = 'down';
-        else if (I.down.left) d = 'left';
-        else if (I.down.right) d = 'right';
 
+      } else {
+        var d = this._heldDir();
         if (d) {
-          pl.dir = d;
-          var v = DIRV[d];
-          var nx = pl.tx + v[0], ny = pl.ty + v[1];
-          if (this.passable(nx, ny)) {
-            pl.fx = pl.tx; pl.fy = pl.ty;
-            pl.tx = nx; pl.ty = ny;
-            pl.moving = true; pl.t = 0;
-            pl.frame = pl.frame === 1 ? 2 : 1;
-          } else {
-            pl.frame = 0;
-          }
+          if (!this._tryStep(d)) pl.frame = 0;
         } else {
           pl.frame = 0;
           pl.animT = 0;
         }
-
         if (I.pressed.ok) {
           // 정면에 말 걸 대상이 없으면 가이드 페이지를 넘긴다
           if (!this._interact() && this.map.split && S.Mission) S.Mission.next(this);
@@ -140,6 +141,36 @@
       }
 
       this._camera();
+    },
+
+    /* 지금 눌려 있는 방향 (없으면 null) */
+    _heldDir: function () {
+      var I = S.Input;
+      if (I.down.up) return 'up';
+      if (I.down.down) return 'down';
+      if (I.down.left) return 'left';
+      if (I.down.right) return 'right';
+      return null;
+    },
+
+    /* 그 방향으로 한 칸 시작. 막혀 있으면 방향만 바꾸고 false */
+    _tryStep: function (d) {
+      var pl = this.player, v = DIRV[d];
+      pl.dir = d;
+      var nx = pl.tx + v[0], ny = pl.ty + v[1];
+      if (!this.passable(nx, ny)) return false;
+      pl.fx = pl.tx; pl.fy = pl.ty;
+      pl.tx = nx; pl.ty = ny;
+      pl.moving = true; pl.t = 0;
+      pl.frame = pl.frame === 1 ? 2 : 1;
+      return true;
+    },
+
+    /* 두 칸 사이 보간 */
+    _lerp: function () {
+      var pl = this.player;
+      pl.px = (pl.fx + (pl.tx - pl.fx) * pl.t) * T;
+      pl.py = (pl.fy + (pl.ty - pl.fy) * pl.t) * T;
     },
 
     _camera: function () {

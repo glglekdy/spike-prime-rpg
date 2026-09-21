@@ -17,6 +17,7 @@ npm run build # dist/spike-prime-rpg.html 단일 파일 생성
 npm run serve # http://localhost:5173 (index.dev.html)
               #   /scripts/overflow.html  문구 넘침 검사
               #   /scripts/fonttest.html  폰트 비교
+              #   /scripts/perf.html      프레임·이동 속도 측정
 ```
 
 ## 조작

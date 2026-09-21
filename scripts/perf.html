@@ -1,0 +1,143 @@
+<!doctype html><html><head><meta charset="utf-8"><title>perf</title>
+<link rel="stylesheet" href="../src/style.css"></head><body><pre id="r">measuring</pre>
+<canvas id="game"></canvas>
+<script type="application/json" id="spike-ui" data-src="../content/ui.ko.json"></script>
+<script type="application/json" id="spike-dialogue" data-src="../content/dialogue.ko.json"></script>
+<script src="../src/core/const.js"></script><script src="../src/core/font.js"></script>
+<script src="../src/core/text.js"></script><script src="../src/core/renderer.js"></script>
+<script src="../src/core/input.js"></script><script src="../src/core/audio.js"></script>
+<script src="../src/core/sprites.js"></script><script src="../src/core/tiles.js"></script>
+<script src="../src/core/sprites_parts.js"></script><script src="../src/core/state.js"></script>
+<script src="../src/core/hotkeys.js"></script><script src="../src/core/idle.js"></script>
+<script src="../src/core/engine.js"></script>
+<script src="../src/data/bgm.js"></script><script src="../src/data/parts.js"></script>
+<script src="../src/data/quiz.js"></script><script src="../src/data/maps.js"></script>
+<script src="../src/data/dialogue.js"></script><script src="../src/data/steps.js"></script>
+<script src="../src/data/blocks.js"></script>
+<script src="../src/ui/messageWindow.js"></script><script src="../src/ui/missionPanel.js"></script>
+<script src="../src/scenes/attract.js"></script><script src="../src/scenes/mission.js"></script>
+<script src="../src/scenes/field.js"></script><script src="../src/scenes/cards.js"></script>
+<script src="../src/scenes/dex.js"></script><script src="../src/scenes/battle.js"></script>
+<script src="../src/scenes/ending.js"></script>
+<script>
+var S = SPIKE, out = [];
+Object.keys(S.Audio).forEach(function(k){ if(typeof S.Audio[k]==='function') S.Audio[k]=function(){}; });
+
+function bench(label, mapId, holdDir) {
+  var r = S.Game.renderer;
+  S.State.reset();
+  if (mapId === 'workshop') { S.State.chapter = 2; S.Mission.reset(); }
+  S.Game.change('field', { map: mapId });
+  if (holdDir) S.Input.down[holdDir] = true;
+
+  var N = 600, dt = 1/60, times = [];
+  for (var i = 0; i < N; i++) {
+    var t0 = performance.now();
+    S.Game.scene.update(dt);
+    r.ctx.save(); S.Game.scene.draw(r); r.ctx.restore();
+    S.Input.endFrame();
+    times.push(performance.now() - t0);
+  }
+  if (holdDir) S.Input.down[holdDir] = false;
+  times.sort(function(a,b){return a-b;});
+  var sum = times.reduce(function(a,b){return a+b;},0);
+  out.push(label + '  평균 ' + (sum/N).toFixed(2) + 'ms  중앙 ' + times[N>>1].toFixed(2) +
+           'ms  최악 ' + times[N-1].toFixed(2) + 'ms  (16.7ms 안이면 60fps)');
+}
+
+/* 이동 한 칸에 실제로 몇 프레임 걸리는지 (NPC 없는 방에서) */
+function steps() {
+  S.State.reset();
+  S.State.chapter = 3;
+  S.Game.change('field', { map: 'hubroom' });
+  var pl = S.Game.scene.player;
+  S.Input.down.up = true;
+  var dt = 1/60, marks = [], gaps = 0, f = 0, last = pl.ty;
+  for (var i = 0; i < 400; i++) {
+    var wasMoving = pl.moving;
+    S.Game.scene.update(dt);
+    S.Input.endFrame();
+    f++;
+    if (!wasMoving && !pl.moving) gaps++;          // 서 있던 프레임
+    if (pl.ty !== last) { marks.push(f); last = pl.ty; f = 0; }
+    if (marks.length >= 6) break;
+  }
+  S.Input.down.up = false;
+  out.push('칸당 프레임: [' + marks.join(', ') + ']  → 평균 ' +
+           (marks.reduce(function(a,b){return a+b;},0)/marks.length).toFixed(1) + '프레임');
+  out.push('  이론값 STEP 0.12초 = 7.2프레임.  칸 사이 멈춘 프레임 ' + gaps + '개');
+  out.push('  6칸 걸린 시간 ' + ((marks.reduce(function(a,b){return a+b;},0))/60).toFixed(2) +
+           '초 → 초당 ' + (6/((marks.reduce(function(a,b){return a+b;},0))/60)).toFixed(1) + '칸');
+}
+
+/* 이동 로직을 바꿨으니 충돌·대화·맵이동이 안 깨졌는지 확인한다 */
+function correctness() {
+  var dt = 1/60, ok = [];
+
+  // (1) NPC 를 통과하지 못한다 — 문지기는 (11,12), 플레이어는 (11,15)에서 위로
+  S.State.reset(); S.Game.change('field', { map: 'village' });
+  var pl = S.Game.scene.player;
+  S.Input.down.up = true;
+  for (var i = 0; i < 200; i++) { S.Game.scene.update(dt); S.Input.endFrame(); }
+  S.Input.down.up = false;
+  ok.push((pl.ty === 13 ? 'PASS' : 'FAIL(ty=' + pl.ty + ')') + '  NPC 충돌 — 문지기 앞 (13)에서 멈춤');
+
+  // (2) 막힌 출구는 못 지나간다 — 남쪽 문은 gatePassed 필요
+  S.State.reset(); S.Game.change('field', { map: 'village' });
+  pl = S.Game.scene.player;
+  S.Input.down.down = true;
+  for (i = 0; i < 200; i++) { S.Game.scene.update(dt); S.Input.endFrame(); }
+  S.Input.down.down = false;
+  ok.push((S.Game.scene.mw.active ? 'PASS' : 'FAIL') + '  잠긴 출구 — 거절 메시지가 뜸');
+
+  // (3) 열린 출구는 맵 전환을 시작한다
+  S.State.reset(); S.State.flags.gatePassed = true;
+  S.Game.change('field', { map: 'village' });
+  pl = S.Game.scene.player;
+  S.Game._pending = null;
+  S.Input.down.down = true;
+  for (i = 0; i < 200 && !S.Game._pending; i++) { S.Game.scene.update(dt); S.Input.endFrame(); }
+  S.Input.down.down = false;
+  ok.push((S.Game._pending ? 'PASS' : 'FAIL') + '  열린 출구 — 맵 전환이 걸림');
+  S.Game._pending = null;
+
+  // (4) 벽에 대고 눌러도 좌표가 안 샌다
+  S.State.reset(); S.Game.change('field', { map: 'village' });
+  pl = S.Game.scene.player;
+  var sx = pl.tx;
+  S.Input.down.left = true;
+  for (i = 0; i < 300; i++) { S.Game.scene.update(dt); S.Input.endFrame(); }
+  S.Input.down.left = false;
+  var solid = S.Game.scene.solid;
+  ok.push((!solid[pl.ty][pl.tx] ? 'PASS' : 'FAIL') + '  벽 통과 안 함 (' + sx + ' -> ' + pl.tx + ')');
+
+  // (5) 정수 좌표로 딱 떨어진다 (보간 이월이 좌표를 어긋내지 않는가)
+  ok.push((pl.px === pl.tx * S.TILE && pl.py === pl.ty * S.TILE ? 'PASS' : 'FAIL') +
+          '  정지 시 픽셀 좌표가 타일에 정렬');
+
+  out.push('');
+  out.push(ok.join(String.fromCharCode(10)));
+}
+
+Promise.all([document.fonts.load('10px "Mona10"'), document.fonts.load('12px "Mona12"')])
+ .then(function(){ return document.fonts.ready; })
+ .then(function(){
+   var cv = document.getElementById('game');
+   S.Game.renderer = new S.Renderer(cv);
+   S.Input.init(S.Game.renderer);
+   S.Sprites.init();
+   var x = new XMLHttpRequest(); x.open('GET','../content/ui.ko.json',false); x.send(null);
+   S.Text.apply('ui', JSON.parse(x.responseText));
+   var y = new XMLHttpRequest(); y.open('GET','../content/dialogue.ko.json',false); y.send(null);
+   S.Text.apply('dialogue', JSON.parse(y.responseText));
+
+   bench('마을 정지     ', 'village', null);
+   bench('마을 이동중   ', 'village', 'up');
+   bench('공방(분할)정지', 'workshop', null);
+   bench('공방(분할)이동', 'workshop', 'up');
+   steps();
+   correctness();
+   document.getElementById('r').textContent = out.join('\n');
+   document.title = 'READY';
+ });
+</script></body></html>
