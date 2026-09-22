@@ -29,6 +29,7 @@
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       this.ctx = new AC();
+      this._noiseBuf = {};          // 버퍼는 만든 컨텍스트에 묶인다
       this.master = this.ctx.createGain();
       this.master.gain.value = 0.35;
       this.master.connect(this.ctx.destination);
@@ -62,15 +63,29 @@
       o.start(t); o.stop(t + dur + 0.02);
     },
 
+    /* 길이별 노이즈 버퍼.
+     * BGM 드럼과 page 효과음이 부를 때마다 수천 샘플을 Math.random() 으로
+     * 새로 채우고 있었다. 쓰는 길이는 두세 가지뿐이라 만들어 두고 재사용한다.
+     * 같은 파형이 반복되지만 50ms 짜리 하이햇이라 귀로는 구분되지 않는다. */
+    _noiseBuf: {},
+
+    _noise: function (dur) {
+      var key = Math.round(dur * 1000);
+      var buf = this._noiseBuf[key];
+      if (buf) return buf;
+      var len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+      buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      this._noiseBuf[key] = buf;
+      return buf;
+    },
+
     noise: function (dur, vol, hp) {
       if (!this.ctx || this.muted) return;
       var t = this.ctx.currentTime;
-      var len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
-      var buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
-      var d = buf.getChannelData(0);
-      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
       var src = this.ctx.createBufferSource();
-      src.buffer = buf;
+      src.buffer = this._noise(dur);
       var g = this.ctx.createGain();
       g.gain.value = vol == null ? 0.2 : vol;
       var f = this.ctx.createBiquadFilter();

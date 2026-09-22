@@ -41,8 +41,20 @@
     threshold: 96,      // binarize 가 켜졌을 때만 쓰인다
     binarize: false,    // 진짜 픽셀 폰트라 이진화하면 오히려 획이 깨진다 (실측)
                         //   ui.ko.json 의 font.{ladder,fallback,threshold,binarize} 로 바꾼다
-    cache: new Map(),
+    cache: new Map(),   // 글자 캔버스
+    _measureCache: new Map(),
+    _wrapCache: new Map(),
     _measureCtx: null,
+    gen: 0,             // 캐시 세대 — 사다리가 바뀔 때마다 오른다.
+                        //   폭을 따로 들고 있는 쪽(HUD 등)이 갱신 시점을 알 수 있다.
+
+    /* 사다리·폴백이 바뀌면 렌더 결과도 폭도 전부 달라진다. 세 캐시를 함께 비운다 */
+    clear: function () {
+      this.cache.clear();
+      this._measureCache.clear();
+      this._wrapCache.clear();
+      this.gen++;
+    },
 
     /* ------------------------------------------------------------
      *  웹폰트 선로딩
@@ -69,44 +81,60 @@
 
       var loaded = Promise.all(jobs)
         .then(function () { return document.fonts.ready; })
-        .then(function () { self.cache.clear(); });
+        .then(function () { self.clear(); });
 
       var timeout = new Promise(function (res) { setTimeout(res, 3000); });
-      return Promise.race([loaded, timeout]).then(function () { self.cache.clear(); });
+      return Promise.race([loaded, timeout]).then(function () { self.clear(); });
     },
 
-    /* 요청 크기 → { css, px } */
+    /* ------------------------------------------------------------
+     *  요청 크기 → { css, px, i }
+     *
+     *  i 는 사다리 칸 번호다. 9·10·11 은 전부 Mona10@10 으로 똑같이 그려지므로
+     *  캐시 키를 요청 크기로 잡으면 같은 그림을 세 번 만들어 세 번 들고 있게 된다.
+     *  키는 반드시 이 칸 번호로 잡는다.
+     * ---------------------------------------------------------- */
     snap: function (size) {
       var L = this.ladder;
       for (var i = 0; i < L.length; i++) {
         if (size <= L[i].max) {
-          return { css: "'" + L[i].family + "'," + this.fallback, px: L[i].px };
+          return { css: "'" + L[i].family + "'," + this.fallback, px: L[i].px, i: i };
         }
       }
-      var last = L[L.length - 1];
-      return { css: "'" + last.family + "'," + this.fallback, px: last.px };
+      var last = L.length - 1;
+      return { css: "'" + L[last].family + "'," + this.fallback, px: L[last].px, i: last };
     },
 
-    /* 문자열 픽셀 폭 (그림자 1px 포함). 스냅된 실제 크기로 잰다 */
-    measure: function (text, size) {
+    /* 스냅된 칸으로 재는 내부용 — measure / wrap / _render 가 공유한다.
+       measureText 는 비싸고 같은 문자열을 매 프레임 다시 재는 곳이 많아 캐시한다. */
+    _measureF: function (text, f) {
+      var key = f.i + '|' + text;
+      var hit = this._measureCache.get(key);
+      if (hit !== undefined) return hit;
       if (!this._measureCtx) {
         var c = document.createElement('canvas');
         this._measureCtx = c.getContext('2d');
       }
-      var f = this.snap(size);
       var ctx = this._measureCtx;
       ctx.font = f.px + 'px ' + f.css;
-      return Math.ceil(ctx.measureText(text).width) + 1;
+      var w = Math.ceil(ctx.measureText(text).width) + 1;
+      if (this._measureCache.size > 4000) this._measureCache.clear();
+      this._measureCache.set(key, w);
+      return w;
     },
+
+    /* 문자열 픽셀 폭 (그림자 1px 포함). 스냅된 실제 크기로 잰다 */
+    measure: function (text, size) { return this._measureF(text, this.snap(size)); },
 
     lineHeight: function (size) { return size + 4; },
 
     /* 캐시된 도트 텍스트 캔버스 얻기 */
     get: function (text, size, color, shadow) {
-      var key = size + '|' + color + '|' + (shadow ? 1 : 0) + '|' + text;
+      var f = this.snap(size);
+      var key = f.i + '|' + color + '|' + (shadow ? 1 : 0) + '|' + text;
       var hit = this.cache.get(key);
       if (hit) return hit;
-      var made = this._render(text, size, color, shadow);
+      var made = this._render(text, f, color, shadow);
       // 캐시가 너무 커지면 앞쪽부터 버린다 (순환형이라 문자열 종류는 유한)
       if (this.cache.size > 1200) {
         var firstKey = this.cache.keys().next().value;
@@ -116,10 +144,9 @@
       return made;
     },
 
-    _render: function (text, size, color, shadow) {
+    _render: function (text, f, color, shadow) {
       var pad = 2;
-      var f = this.snap(size);
-      var w = this.measure(text, size) + pad * 2;
+      var w = this._measureF(text, f) + pad * 2;
       var h = f.px + pad * 2 + 4;
 
       // --- 1) 흰색으로 글자만 그린다 ---
@@ -173,22 +200,41 @@
       return out;
     },
 
-    /* 줄바꿈: 우선 공백에서 끊고, 한 덩어리가 너무 길면 글자 단위로 끊는다 */
+    /* ------------------------------------------------------------
+     *  줄바꿈: 우선 공백에서 끊고, 한 덩어리가 너무 길면 글자 단위로 끊는다.
+     *
+     *  도감·가이드 패널은 같은 문단을 매 프레임 다시 접는다 (내용은 그대로인데).
+     *  한 번 접은 결과를 캐시한다.
+     *
+     *  ⚠ 돌려주는 배열은 캐시가 들고 있는 것과 같은 객체다. 부르는 쪽에서
+     *    push/splice 로 고치면 안 된다. 잘라 쓰려면 slice/concat 으로 복사할 것.
+     * ---------------------------------------------------------- */
     wrap: function (text, size, maxWidth) {
+      var f = this.snap(size);
+      var key = f.i + '|' + (maxWidth | 0) + '|' + text;
+      var hit = this._wrapCache.get(key);
+      if (hit) return hit;
+      var lines = this._wrap(String(text), f, maxWidth);
+      if (this._wrapCache.size > 600) this._wrapCache.clear();
+      this._wrapCache.set(key, lines);
+      return lines;
+    },
+
+    _wrap: function (text, f, maxWidth) {
       var lines = [];
-      var paragraphs = String(text).split('\n');
+      var paragraphs = text.split('\n');
       for (var p = 0; p < paragraphs.length; p++) {
         var words = paragraphs[p].split(' ');
         var line = '';
         for (var i = 0; i < words.length; i++) {
           var test = line ? line + ' ' + words[i] : words[i];
-          if (this.measure(test, size) <= maxWidth) { line = test; continue; }
+          if (this._measureF(test, f) <= maxWidth) { line = test; continue; }
           if (line) { lines.push(line); line = ''; }
           // 단어 자체가 넘치면 글자 단위 분할
           var chunk = words[i];
-          while (this.measure(chunk, size) > maxWidth) {
+          while (this._measureF(chunk, f) > maxWidth) {
             var cut = chunk.length;
-            while (cut > 1 && this.measure(chunk.slice(0, cut), size) > maxWidth) cut--;
+            while (cut > 1 && this._measureF(chunk.slice(0, cut), f) > maxWidth) cut--;
             lines.push(chunk.slice(0, cut));
             chunk = chunk.slice(cut);
           }

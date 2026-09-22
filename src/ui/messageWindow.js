@@ -101,11 +101,28 @@
     this._showPage();
   };
 
+  /* ------------------------------------------------------------
+   *  타이핑은 글자 수로 세지만 그리기는 픽셀 폭으로 자른다.
+   *  줄마다 "n글자까지의 폭"을 페이지 진입 때 한 번만 재 둔다 (0글자 = 0).
+   *  draw() 가 이 표를 보고 클립 폭만 넓히면 되므로,
+   *  글자가 하나 늘 때마다 새 문자열을 렌더할 필요가 없어진다.
+   *
+   *  Font.measure 는 그림자 몫 1px 을 더해 주는데, 그 값을 그대로 클립 경계로
+   *  쓰면 아직 나오면 안 되는 다음 글자의 첫 세로줄이 비친다. 글자 폭만 쓴다.
+   *  (대신 맨 끝 글자의 그림자 한 줄이 잘린다 — 어두운 창 위라 눈에 안 띈다)
+   * ---------------------------------------------------------- */
   MessageWindow.prototype._showPage = function () {
     this.lines = this.pages[this.pageIdx];
     this.total = this.lines.join('').length;
     this.shown = 0;
     this.done = false;
+
+    this.widths = [];
+    for (var i = 0; i < this.lines.length; i++) {
+      var ln = this.lines[i], w = [0];
+      for (var c = 1; c <= ln.length; c++) w.push(S.Font.measure(ln.slice(0, c), FONT) - 1);
+      this.widths.push(w);
+    }
   };
 
   MessageWindow.prototype.update = function (dt) {
@@ -186,15 +203,28 @@
       r.text(this.cur.name, this.x + 11, this.y - 13, { size: FONT, color: this.cur.color || C.textHi });
     }
 
-    // 본문 (타이핑 중이면 잘라서)
+    /* 본문 (타이핑 중이면 잘라서)
+     *
+     * 예전에는 ln.slice(0, left) 를 그대로 넘겼다. 접두사가 매번 다른 문자열이라
+     * 폰트 캐시가 전부 빗나가고, 글자 하나 늘 때마다 캔버스 3장이 새로 생겼다
+     * (대사 하나에 159장 — 실측). 줄 전체를 한 번 그리고 클립으로 폭만 연다.
+     * 부분적으로 보이는 줄은 한 번에 하나뿐이라 클립도 프레임당 최대 1회다. */
     var left = Math.floor(this.shown);
     for (var i = 0; i < this.lines.length; i++) {
-      var ln = this.lines[i];
-      var part = ln;
-      if (left < ln.length) part = ln.slice(0, Math.max(0, left));
-      if (part) r.text(part, tx, ty + i * LINE, { size: FONT, color: C.text });
-      left -= ln.length;
       if (left <= 0) break;
+      var ln = this.lines[i];
+      var ly = ty + i * LINE;
+      if (left >= ln.length) {
+        if (ln) r.text(ln, tx, ly, { size: FONT, color: C.text });
+      } else {
+        r.ctx.save();
+        r.ctx.beginPath();
+        r.ctx.rect(tx, ly - 4, this.widths[i][left], LINE + 8);
+        r.ctx.clip();
+        r.text(ln, tx, ly, { size: FONT, color: C.text });
+        r.ctx.restore();
+      }
+      left -= ln.length;
     }
 
     // ▼ 커서

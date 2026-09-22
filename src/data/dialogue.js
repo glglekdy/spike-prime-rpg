@@ -103,7 +103,7 @@
               F().gatePassed = true;
               F().talked_guard = true;
               var g = S.npc('village', 'guard');   // 길을 비켜준다
-              if (g) { g.tx = 9; g.ty = 12; g.dir = 'right'; }
+              if (g) { g.tx = 10; g.ty = 16; g.dir = 'right'; }
             }
           });
         });
@@ -123,8 +123,10 @@
 
     /* ===== 조립 공방 ===== */
     'workshop:maker': function (fd) {
-      if (S.Mission) S.Mission.talk(fd);
-      else fd.say({ name: N('maker'), text: '…' });
+      if (!S.Mission) { fd.say({ name: N('maker'), text: '…' }); return; }
+      // 첫 대화가 곧 실습 시작이다
+      if (!S.Mission.started()) { S.Mission.start(fd); return; }
+      S.Mission.talk(fd);
     },
 
     'workshop:bench': function (fd) {
@@ -132,15 +134,66 @@
     },
 
     /* ===== 해체의 방 ===== */
+    /* 해체 보스 (DESIGN.md §9).
+       문제 4개 = 실물 해체 4단계라, 오답이면 다음으로 넘어가지 않는다 (strict). */
+    'hubroom:boss': function (fd) {
+      if (S.State.flags.bossDone) {
+        fd.say({ text: S.D('hubroom.bossGone', '') });
+        return;
+      }
+      fd.busy = true;                       // 대사 끝날 때까지 다시 부딪혀도 무시
+      fd.say({ name: S.D('hubroom.bossName', ''), text: S.D('hubroom.bossIntro', ''), icon: 'p_cable' },
+        function () {
+          S.Game.transition('battle', {
+            enemy: 'e_cable',
+            enemyName: S.D('hubroom.bossName', ''),
+            bgm: 'boss',
+            quizSet: 'boss',
+            strict: true,                   // 오답 = 같은 문제 재출제, 정답 = 해체 카드
+            back: { map: 'hubroom', at: { x: 11, y: 11, dir: 'up' } },
+            onWin: function () {
+              S.State.flags.bossDone = true;
+              var b = S.obj('hubroom', 'boss');
+              if (b) b.hidden = true;       // 길이 열린다 (_buildSolid 가 다시 돈다)
+            }
+          });
+        });
+    },
+
     'hubroom:altar': function (fd) {
       if (S.State.flags.bossDone) {
-        fd.say({ name: N('hub'), text: S.D('hubroom.altarAwake', ''), icon: 'p_hub' });
-        S.Game.transition('ending');
+        /* 각성 연출: 케이블이 풀리는 장면(무명) → 허브 왕의 대사 여러 장.
+           다 읽은 뒤에 엔딩으로 간다. transition 을 say 밖에서 부르면
+           페이드가 바로 시작되는데, 엔진이 페이드 중에는 씬 update 를 멈추므로
+           대사창이 한 글자도 타이핑되지 못한 채 0.25초 만에 넘어가 버린다 (실측). */
+        var msgs = [{ text: S.D('hubroom.altarUntangle', ''), icon: 'p_hub' }];
+        S.DL('hubroom.altarAwake').forEach(function (t) {
+          msgs.push({ name: N('hub'), text: t, icon: 'p_hub' });
+        });
+        fd.say(msgs, function () { S.Game.transition('ending'); });
       } else {
         fd.say({ text: S.D('hubroom.altarLocked', ''), icon: 'p_hub' });
       }
     }
   };
+
+  /* ------------------------------------------------------------
+   *  조사하면 한마디 하는 배경 오브젝트 (관찰 대사).
+   *  이름표 없이 내레이션으로 띄운다 — 표지판·제단과 같은 형식.
+   *
+   *  대사는 dialogue.<언어>.json 의 <맵>.<id>. 배열로 쓰면 여러 장이 된다.
+   *  키가 맵별이라 같은 id(예: torch) 라도 맵마다 다른 문구를 쓸 수 있다.
+   *  ⚠ 공방은 분할 화면이라 대사창 글 폭이 164px 뿐이다 (다른 맵은 348px).
+   *    거기 문구는 한 줄 13자 안쪽으로 끊어 둘 것.
+   * ---------------------------------------------------------- */
+  ['village:desk', 'village:shelf', 'village:tree', 'village:bush', 'village:fence',
+   'workshop:shelf', 'workshop:crate', 'workshop:torch',
+   'hubroom:torch'].forEach(function (key) {
+    var dkey = key.replace(':', '.');
+    TALK[key] = function (fd) {
+      fd.say(S.DL(dkey).map(function (t) { return { text: t }; }));
+    };
+  });
 
   S.Dialogue = {
     talk: function (mapId, id, fd) {

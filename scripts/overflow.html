@@ -134,6 +134,26 @@ Promise.all(jobs).then(function () {
       if (tl > 3) bad0.push(PRE + '도감 '+p.id+'.tip  ' + tl + '줄 > 3줄');
     });
 
+    /* --- 부품 카드 (scenes/cards.js) ---
+       창 폭 344. 오른쪽 글칸은 tx=bx+120 부터 214px (도감 상세와 같은 폭).
+       one 과 설명이 by+74 ~ by+178 (104px) 안에 다 들어가야 한다.
+       one 은 16px/줄, 설명은 14px/줄, 사이 간격 4px.
+       여기서 넘치면 화면 밖으로 나가지는 않고 아래가 조용히 잘린다 — 그래서 수치로 잡는다. */
+    var CW = 344 - 120 - 10;
+    SPIKE.PARTS.forEach(function (p) {
+      var ol = lines(p.one, 11, CW);
+      var dl = lines(p.lines.join(' '), 10, CW);
+      var need = ol * 16 + 4 + dl * 14;
+      if (need > 104) {
+        bad0.push(PRE + '카드 ' + p.id + '  글 높이 ' + need + 'px > 104px' +
+          '   (one ' + ol + '줄 + 설명 ' + dl + '줄)');
+      }
+      add('카드 ' + p.id + '.title', p.title, 14, CW);
+      add('카드 ' + p.id + '.real', p.real, 10, CW);
+      var ctl = lines(p.tip, 9, 344 - 52);
+      if (ctl > 2) bad0.push(PRE + '카드 ' + p.id + '.tip  ' + ctl + '줄 > 2줄   「' + p.tip + '」');
+    });
+
     /* --- 퀴즈 (src/data/quiz.js) ---
        문제문: 폭 S.W-40. 보기: 2열 버튼 (S.W-24)/2 - 16. 해설: 메시지창(자동 페이지). */
     Object.keys(SPIKE.QUIZ).forEach(function (set) {

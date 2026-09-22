@@ -4,12 +4,10 @@
 (function (S) {
   'use strict';
 
-  var RANKS = {
-    S: { color: '#ffe066', word: '완벽한 메카닉!', sub: '부품도 순서도 전부 정확했다.' },
-    A: { color: '#8fe3ff', word: '훌륭한 메카닉!', sub: '거의 다 맞혔다. 실전에서도 잘하겠다.' },
-    B: { color: '#b6ffcb', word: '좋은 출발!',     sub: '핵심은 잡았다. 도감을 다시 보면 완벽!' },
-    C: { color: '#ffc0c8', word: '수고했다!',       sub: '오늘 만져본 감각이 진짜 실력이 된다.' }
-  };
+  /* 랭크별 색만 코드에 둔다.
+     글자(word/sub)는 content/ui.<언어>.json 의 ending.ranks.* 에 있다 —
+     예전엔 여기 한국어가 박혀 있어서 영어로 바꿔도 그대로 나왔다. */
+  var RANK_COLOR = { S: '#ffe066', A: '#8fe3ff', B: '#b6ffcb', C: '#ffc0c8' };
 
   var Ending = {
     t: 0, rank: 'C', ready: false, parts: [],
@@ -49,7 +47,10 @@
     },
 
     draw: function (r) {
-      var C = S.C, R = RANKS[this.rank];
+      var C = S.C;
+      var rankColor = RANK_COLOR[this.rank] || '#ffffff';
+      var rankWord = S.T('ending.ranks.' + this.rank + '.word', '');
+      var rankSub = S.T('ending.ranks.' + this.rank + '.sub', '');
       r.vgradient(0, 0, S.W, S.H, '#101a3a', '#2a1a4a');
 
       for (var i = 0; i < this.parts.length; i++) {
@@ -57,19 +58,19 @@
         r.rect(p.x + Math.sin(this.t * 2 + p.p) * 6, p.y, p.w + 1, p.w + 1, p.c);
       }
 
-      r.text('M I S S I O N   C O M P L E T E', S.W / 2, 18,
+      r.text(S.T('ending.header', ''), S.W / 2, 18,
         { size: 13, color: '#ffffff', align: 'center' });
       r.rect(S.W / 2 - 120, 38, 240, 1, '#5a76b8');
 
       // 랭크
       var pop = Math.min(1, this.t * 3);
       var size = Math.round(40 * pop) + 8;
-      r.text(this.rank, S.W / 2, 56, { size: size, color: R.color, align: 'center' });
-      r.text('R A N K', S.W / 2, 50, { size: 9, color: '#9fb4d8', align: 'center' });
+      r.text(this.rank, S.W / 2, 56, { size: size, color: rankColor, align: 'center' });
+      r.text(S.T('ending.rank', ''), S.W / 2, 50, { size: 9, color: '#9fb4d8', align: 'center' });
 
       if (this.t > 0.6) {
-        r.text(R.word, S.W / 2, 112, { size: 15, color: R.color, align: 'center' });
-        r.text(R.sub, S.W / 2, 134, { size: 10, color: C.text, align: 'center' });
+        r.text(rankWord, S.W / 2, 112, { size: 15, color: rankColor, align: 'center' });
+        r.text(rankSub, S.W / 2, 134, { size: 10, color: C.text, align: 'center' });
       }
 
       if (this.t > 0.9) {
@@ -79,10 +80,14 @@
         var acc = total ? Math.round(S.State.quizOk / total * 100) : 0;
         var el = Math.round(S.State.elapsed());
         var mm = Math.floor(el / 60), ss = el % 60;
+        var F = S.Text.fmt;
         var rows = [
-          ['정답률', S.State.quizOk + ' / ' + total + '   (' + acc + '%)'],
-          ['걸린 시간', mm + '분 ' + (ss < 10 ? '0' : '') + ss + '초'],
-          ['도감 수집', S.State.dexCount() + ' / ' + S.PARTS.length + ' 종']
+          [S.T('ending.rowAccuracy', ''),
+           F(S.T('ending.accFmt', ''), { ok: S.State.quizOk, total: total, pct: acc })],
+          [S.T('ending.rowTime', ''),
+           F(S.T('ending.timeFmt', ''), { m: mm, s: (ss < 10 ? '0' : '') + ss })],
+          [S.T('ending.rowDex', ''),
+           F(S.T('ending.dexFmt', ''), { n: S.State.dexCount(), total: S.PARTS.length })]
         ];
         for (var k = 0; k < rows.length; k++) {
           r.text(rows[k][0], bx + 18, 164 + k * 20, { size: 11, color: C.textHi });

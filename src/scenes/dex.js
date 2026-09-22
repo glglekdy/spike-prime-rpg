@@ -8,6 +8,9 @@
   var Dex = {
     idx: 0, scroll: 0, t: 0,
 
+    /* 필드를 페이드로 덮는다 — 엔진이 뒤 배경을 정지 화면으로 재사용해도 된다 */
+    freezeBase: true,
+
     enter: function () { this.t = 0; S.Audio.se('ok'); },
     exit: function () { S.Audio.se('cancel'); },
 

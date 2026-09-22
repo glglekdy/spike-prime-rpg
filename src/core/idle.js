@@ -32,7 +32,7 @@
       r.window(bx, by, bw, bh);
       r.text(S.T('idle.title', ''), bx + bw / 2, by + 12,
         { size: 13, color: S.C.textHi, align: 'center' });
-      r.text(left + '초 후 처음 화면으로 돌아갑니다', bx + bw / 2, by + 34,
+      r.text(S.Text.fmt(S.T('idle.countdown', ''), { n: left }), bx + bw / 2, by + 34,
         { size: 10, color: S.C.text, align: 'center' });
       r.text(S.T('idle.hint', ''), bx + bw / 2, by + 54,
         { size: 10, color: S.C.textDim, align: 'center' });

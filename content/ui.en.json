@@ -72,7 +72,21 @@
     "bossReady": "Prove the teardown order",
     "bossDone": "Wake the Hub King!"
   },
+  "exits": {
+    "gate": "The Gatekeeper blocks the way.\nPass the trial first.",
+    "mission": "Your first golem is not finished yet.",
+    "locked": "You cannot go there yet."
+  },
   "guide": {
+    "wait": {
+      "title": "Hands-on build",
+      "body": [
+        "This panel is your build guide.",
+        "Talk to the Robot Maker",
+        "to open page one."
+      ],
+      "hint": "Talk to the Robot Maker"
+    },
     "find": {
       "title": "Find the parts",
       "goal": "Pick out 7 parts",
@@ -183,8 +197,21 @@
     "correct": "Correct!",
     "wrong": "So close!",
     "why": "Why",
-    "hint": "↑↓ or mouse to choose,  Z / click",
-    "skip": "X — Skip"
+    "hint": "Arrow keys or mouse to choose,  Z/click",
+    "skip": "X — Skip",
+    "actTitle": "Do it for real now",
+    "actNext": "Press Z / click when done",
+    "retry": "Skip a step and the real build goes wrong.\nSame question again!",
+    "revive": "Not yet, apprentice.\nTake some of my power!",
+    "appear": "{name} appears!\nAnswer correctly to defeat it!",
+    "answerIs": "The answer is “{a}”.",
+    "actLabel": "Do it now",
+    "actNow": "On the real robot → {act}",
+    "win": "Victory!",
+    "defeated": "You defeated {name}!",
+    "score": "{ok} correct / {ng} wrong\nRemember what you learned.",
+    "unknownEnemy": "A Suspicious Shadow",
+    "downed": "You are out of health..."
   },
   "dex": {
     "title": "PART CODEX",
@@ -222,7 +249,15 @@
         "word": "Well done!",
         "sub": "The hands-on feel is what really sticks."
       }
-    }
+    },
+    "accFmt": "{ok} / {total}   ({pct}%)"
+  },
+  "gameover": {
+    "title": "You collapsed...",
+    "sub": "The Hub King still sleeps.",
+    "score": "You got {ok} of {total} right",
+    "hint": "What you learned stays with you. Try again!",
+    "press": "Press any key to return to the title"
   },
   "hotkeys": {
     "title": "Controls",

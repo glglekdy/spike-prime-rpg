@@ -257,10 +257,12 @@
     x0: S.W - PW,
     active: false,
     hover: '',
+    _t: 0,          // 대기 화면 애니메이션용 (Mission.pageT 는 시작 전엔 안 돈다)
 
     enter: function () {
       this.x0 = S.W - PW;
       this.active = true;
+      this._t = 0;
       if (S.Mission && !S.Mission.steps.length) S.Mission.reset();
     },
 
@@ -275,6 +277,9 @@
     /* fd = 필드 씬. allowInput = 대화창이 안 떠 있을 때만 true */
     update: function (dt, allowInput, fd) {
       if (!this.active || !S.Mission) return;
+      this._t += dt;
+      // 아직 장인에게 말을 걸지 않았다 — 안내만 띄우고 조작도 재촉도 없다
+      if (!S.Mission.started()) { this.hover = ''; return; }
       S.Mission.update(dt);
       S.Mission.checkLate(fd);
       if (!allowInput) { this.hover = ''; return; }
@@ -289,7 +294,7 @@
 
     /* field 의 onKey 에서 호출 — Q 이전 / E 다음 */
     onKey: function (code, fd) {
-      if (!this.active || !S.Mission) return false;
+      if (!this.active || !S.Mission || !S.Mission.started()) return false;
       if (code === 'KeyQ') { S.Mission.prev(); return true; }
       if (code === 'KeyE') { S.Mission.next(fd); return true; }
       return false;
@@ -306,6 +311,8 @@
 
       r.window(x0, 0, PW, S.H, { alpha: 0.96 });
       r.rect(x0, 0, 1, S.H, C.winEdge2);
+
+      if (!S.Mission.started()) { this._waiting(r, x0, C); return; }
 
       if (!p) {
         r.text('…', x0 + PW / 2, S.H / 2, { size: 11, color: C.textDim, align: 'center' });
@@ -328,6 +335,45 @@
       if (!p.full) this._body(r, x0, p, C);
       this._footer(r, x0, C);
       this._toast(r, x0, C);
+    },
+
+    /* ------------------------------------------------------------
+     *  대기 화면 — 장인에게 말을 걸기 전.
+     *  "누구에게 말을 걸어야 하는지"를 그림으로 바로 보여 준다.
+     * ---------------------------------------------------------- */
+    _waiting: function (r, x0, C) {
+      r.rect(x0 + 2, 2, PW - 4, HEAD_H - 2, '#0a1436');
+      r.text(S.T('guide.wait.title', ''), x0 + PW / 2, 6,
+        { size: 11, color: C.textHi, align: 'center' });
+      r.rect(x0 + 2, HEAD_H, PW - 4, 1, C.winEdge2);
+
+      // 말을 걸 상대 (필드의 ! 표시와 같은 연출)
+      var sp = S.Sprites.get('maker_down_0');
+      if (sp) {
+        var bob = Math.round(Math.sin(this._t * 3) * 2);
+        var dx = x0 + (PW - sp.width * 2) / 2;
+        r.ctx.drawImage(sp, 0, 0, sp.width, sp.height, dx, 74 + bob, sp.width * 2, sp.height * 2);
+        r.sprite('o_excl', x0 + PW / 2 - 4, 54 + bob);
+      }
+
+      var body = S.TL('guide.wait.body');
+      var y = 140;
+      for (var i = 0; i < body.length; i++) {
+        r.text(body[i], x0 + PW / 2, y, { size: 10, color: C.text, align: 'center' });
+        y += 15;
+      }
+
+      if ((this._t % 1.2) < 0.75) {
+        r.text(S.T('guide.wait.hint', ''), x0 + PW / 2, 206,
+          { size: 10, color: C.textHi, align: 'center' });
+      }
+
+      // 분할 맵에서는 이 패널이 유일한 타이머 표시다 — 대기 중에도 보여 준다
+      r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
+      var late = S.State.remaining() < 120;
+      r.text(S.State.clock(), x0 + PW / 2, FOOT_Y + 8,
+        { size: 11, align: 'center',
+          color: S.State.paused ? C.textDim : (late ? C.textNg : C.text) });
     },
 
     _header: function (r, x0, p, C) {

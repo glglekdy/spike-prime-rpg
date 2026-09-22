@@ -53,7 +53,7 @@ function draw() {
     SPIKE.Font.family = '"' + fam + '", monospace';
     SPIKE.Font.binarize = bin;
     SPIKE.Font.threshold = 96;
-    SPIKE.Font.cache.clear();
+    SPIKE.Font.clear();
     SAMPLES.forEach(function (s, i) {
       ctx.drawImage(SPIKE.Font.get(s, size, '#ffffff', true), 4, 4 + i * (size + 6));
     });

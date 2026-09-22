@@ -38,8 +38,34 @@
       return this.steps[S.State.missionStep] || null;
     },
 
+    /* ------------------------------------------------------------
+     *  실습은 장인에게 말을 걸어야 시작된다.
+     *  그 전까지 패널은 안내만 띄우고 페이지 넘김도 받지 않는다
+     *  (예전에는 방에 들어서자마자 1페이지가 펼쳐져 있었다).
+     * ---------------------------------------------------------- */
+    started: function () { return !!S.State.flags.missionStarted; },
+
+    start: function (fd) {
+      if (this.started()) return false;
+      S.State.flags.missionStarted = true;
+      if (!this.steps.length) this.steps = S.GUIDE_PAGES || [];
+      S.State.missionStep = 0;
+      this.pageT = 0;
+      this.lateSaid = false;
+      S.Audio.se('page');
+      this._learn();                      // 첫 페이지 부품을 도감에 올린다
+      if (fd) {
+        var who = maker();
+        fd.say(S.DL('workshop.maker.start').map(function (t) {
+          return { name: who, text: t };
+        }));
+      }
+      return true;
+    },
+
     /* 현재 페이지의 퀘스트 문구 (좌측 상단 HUD) */
     goal: function () {
+      if (!this.started()) return S.T('quest.maker', '로봇 장인에게 말을 걸자');
       var p = this.page();
       return p ? S.pageText.goal(p) : S.T('quest.maker', '로봇 장인에게 말을 걸자');
     },

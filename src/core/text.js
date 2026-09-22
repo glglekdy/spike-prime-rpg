@@ -97,7 +97,7 @@
       if (f.fallback) S.Font.fallback = f.fallback;
       if (typeof f.threshold === 'number') S.Font.threshold = f.threshold;
       if (typeof f.binarize === 'boolean') S.Font.binarize = f.binarize;
-      S.Font.cache.clear();
+      S.Font.clear();
     },
 
     /* ---------------- 언어 ---------------- */
@@ -108,7 +108,7 @@
       if (!this.has(lang) || lang === this.lang) return false;
       this.lang = lang;
       this._applyFont(this.ns('ui').font);
-      S.Font.cache.clear();
+      S.Font.clear();
       this._refresh();
       return true;
     },
@@ -212,7 +212,7 @@
             var kind = (obj.meta && obj.meta.kind) || g.kind;
             var lang = (obj.meta && obj.meta.lang) || g.lang || self.lang;
             self.apply(kind, obj, lang);
-            if (lang === self.lang) { S.Font.cache.clear(); self._refresh(); }
+            if (lang === self.lang) { S.Font.clear(); self._refresh(); }
             self.toast = kind + ' (' + lang + ') 교체: ' + file.name;
             self.toastT = 2.5;
             resolve(kind);

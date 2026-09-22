@@ -11,6 +11,7 @@
     this.ctx = canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     this.scale = 1;
+    this._grad = {};   // 세로 그라데이션 캐시 (아래 vgradient 참고)
     this.fit();
     window.addEventListener('resize', this.fit.bind(this));
   }
@@ -57,11 +58,23 @@
     this.rect(x + w - t, y, t, h, color);
   };
 
+  /* 세로 그라데이션.
+   * 창을 하나 그릴 때마다 CanvasGradient 를 새로 만들고 있었다 (프레임당 2~5개).
+   * 창 위치와 높이는 사실상 정해져 있으므로 y·높이·색으로 캐시한다.
+   * 그라데이션 좌표는 절대값이라 y 도 키에 들어가야 한다. */
   Renderer.prototype.vgradient = function (x, y, w, h, top, bottom) {
     var c = this.ctx;
-    var g = c.createLinearGradient(0, y, 0, y + h);
-    g.addColorStop(0, top);
-    g.addColorStop(1, bottom);
+    var key = (y | 0) + '|' + (h | 0) + '|' + top + '|' + bottom;
+    var g = this._grad[key];
+    if (!g) {
+      g = c.createLinearGradient(0, y, 0, y + h);
+      g.addColorStop(0, top);
+      g.addColorStop(1, bottom);
+      // 위치가 계속 변하는 연출이 생겨도 무한정 쌓이지 않게 한다
+      if (this._gradN > 200) { this._grad = {}; this._gradN = 0; }
+      this._grad[key] = g;
+      this._gradN = (this._gradN || 0) + 1;
+    }
     c.fillStyle = g;
     c.fillRect(x | 0, y | 0, w | 0, h | 0);
   };

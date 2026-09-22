@@ -16,6 +16,9 @@
     _fadeDir: 0,        // -1 어두워짐, +1 밝아짐
     _pending: null,
     shake: 0,
+    _snap: null,        // 오버레이 뒤에 깔 정지 화면
+    _snapCtx: null,
+    _snapValid: false,
 
     register: function (name, scene) { this.scenes[name] = scene; return this; },
 
@@ -23,9 +26,12 @@
     change: function (name, params) {
       if (this.scene && this.scene.exit) this.scene.exit();
       this.stack.length = 0;
+      this._snapValid = false;
       this.scene = this.scenes[name];
       this.sceneName = name;
       if (!this.scene) { console.error('없는 씬:', name); return; }
+      // 캔버스 바깥 배경색도 이 화면에 맞춰 천천히 넘어간다 (오버레이 push 는 제외)
+      if (S.Ambient) S.Ambient.apply(name, params || {});
       if (this.scene.enter) this.scene.enter(params || {});
     },
 
@@ -42,11 +48,35 @@
       var sc = this.scenes[name];
       if (!sc) return;
       this.stack.push(sc);
+      this._snapValid = false;
       if (sc.enter) sc.enter(params || {});
     },
     pop: function () {
       var sc = this.stack.pop();
+      this._snapValid = false;
       if (sc && sc.exit) sc.exit();
+    },
+
+    /* ------------------------------------------------------------
+     *  오버레이 뒤 배경을 정지 화면으로 떠 둔다 (freezeBase 씬 전용)
+     *
+     *  도감·카드는 반투명 페이드로 필드를 거의 다 가린다. 그런데도 매 프레임
+     *  필드를 통째로 다시 그리고 있었다 — 안 보이는 타일 433장을 포함해서.
+     *  오버레이가 뜬 뒤 첫 프레임만 제대로 그리고, 그 결과를 떠서 재사용한다.
+     *
+     *  캔버스에서 픽셀을 읽는 것이라 ctx 변환(흔들림)과 무관하게 안전하다.
+     * ---------------------------------------------------------- */
+    _capture: function () {
+      if (!this._snap) {
+        this._snap = document.createElement('canvas');
+        this._snap.width = S.W;
+        this._snap.height = S.H;
+        this._snapCtx = this._snap.getContext('2d');
+        this._snapCtx.imageSmoothingEnabled = false;
+      }
+      this._snapCtx.clearRect(0, 0, S.W, S.H);
+      this._snapCtx.drawImage(this.renderer.canvas, 0, 0);
+      this._snapValid = true;
     },
     top: function () {
       return this.stack.length ? this.stack[this.stack.length - 1] : this.scene;
@@ -92,13 +122,22 @@
 
       // --- 그리기 ---
       var r = this.renderer;
+      // 맨 위 오버레이가 화면을 덮는다고 선언했으면 바닥 씬은 한 번만 그린다
+      var top = this.stack.length ? this.stack[this.stack.length - 1] : null;
+      var freeze = !!(top && top.freezeBase);
+
       r.ctx.save();
       if (this.shake > 0) {
         this.shake -= dt * 40;
         var s = Math.max(0, this.shake);
         r.ctx.translate((Math.random() - 0.5) * s, (Math.random() - 0.5) * s);
       }
-      if (this.scene && this.scene.draw) this.scene.draw(r);
+      if (freeze && this._snapValid) {
+        r.ctx.drawImage(this._snap, 0, 0);
+      } else {
+        if (this.scene && this.scene.draw) this.scene.draw(r);
+        if (freeze) this._capture();     // 오버레이를 얹기 전에 떠야 한다
+      }
       for (var i = 0; i < this.stack.length; i++) {
         if (this.stack[i].draw) this.stack[i].draw(r);
       }

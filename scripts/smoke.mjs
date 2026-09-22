@@ -192,17 +192,61 @@ scene('퀴즈 배틀 — 관문', () => {
   frames(420, { ok: 14 });
 });
 
-scene('퀴즈 배틀 — 보스', () => {
+/* 보스전은 strict 모드 — 오답이면 같은 문제를 다시 내고, 정답이면 해체 카드를
+   1.5초 띄운다. 카드 대기 때문에 일반 전투보다 프레임이 많이 든다. */
+scene('퀴즈 배틀 — 보스 (strict)', () => {
   S.Game.change('battle', {
     enemy: 'e_cable', enemyName: '혼선 케이블', quizSet: 'boss', bgm: 'boss',
-    back: { map: 'hubroom' }, onWin: () => {}
+    strict: true,
+    back: { map: 'hubroom', at: { x: 11, y: 11, dir: 'up' } }, onWin: () => {}
   });
-  frames(520, { ok: 14 });
+  frames(1400, { ok: 14 });
 });
 
+/* 해체의 방: 보스에게 부딪혀 전투가 걸리고, 쓰러뜨리면 제단까지 길이 열린다 */
+scene('해체의 방 — 보스 조우 → 제단', () => {
+  S.State.reset();
+  S.State.chapter = 3;
+  S.State.flags.gatePassed = true;
+  S.State.flags.missionDone = true;
+  S.Game.change('field', { map: 'hubroom' });
+  frames(60, { dir: 'up' });                       // 보스에 부딪힘
+  if (!S.Game.scene.mw.active && S.Game.sceneName === 'field') {
+    throw new Error('보스에 부딪혔는데 아무 일도 없다');
+  }
+  frames(200, { ok: 12 });                          // 대사 넘기고 전투 진입
+  if (S.Game.sceneName !== 'battle') throw new Error('보스전이 시작되지 않았다: ' + S.Game.sceneName);
+
+  // 전부 정답으로 밀어 격파
+  const B = S.Game.scene;
+  for (let i = 0; i < 3000 && S.Game.sceneName === 'battle'; i++) {
+    if (B.phase === 1) B.sel = B.qs[B.qi].ans;
+    frames(1, { ok: 1 });
+  }
+  if (!S.State.flags.bossDone) throw new Error('bossDone 이 서지 않았다');
+  const boss = S.obj('hubroom', 'boss');
+  if (!boss.hidden) throw new Error('쓰러뜨린 보스가 안 사라졌다');
+
+  frames(200, { ok: 12 });                          // 승리 대사 → 방으로 복귀
+  if (S.Game.sceneName !== 'field') throw new Error('방으로 안 돌아왔다: ' + S.Game.sceneName);
+  if (!S.Game.scene.passable(11, 10)) throw new Error('보스가 사라졌는데 길이 막혀 있다');
+});
+
+/* 실습은 장인에게 말을 걸어야 시작된다 — 그 전까지 패널은 안내 화면이다 */
 scene('필드 — 조립 공방 (분할)', () => {
+  S.State.reset();
+  S.State.chapter = 2;
   S.State.flags.gatePassed = true;
   S.Game.change('field', { map: 'workshop' });
+
+  frames(30);                                       // 대기 화면이 그려지는지
+  if (S.Mission.started()) throw new Error('말도 안 걸었는데 실습이 시작됐다');
+  frames(60, { ok: 10 });                           // Z 를 눌러도 안 넘어가야 한다
+  if (S.State.missionStep !== 0) throw new Error('시작 전에 페이지가 넘어갔다');
+
+  S.Dialogue.talk('workshop', 'maker', S.Game.scene);
+  if (!S.Mission.started()) throw new Error('말을 걸었는데 시작되지 않았다');
+  frames(300, { ok: 12 });                          // 시작 대사 넘기기
   frames(40, { dir: 'up' });
   frames(60, { ok: 15 });
 });
@@ -214,6 +258,32 @@ scene('필드 — 해체의 방', () => {
 });
 
 scene('엔딩', () => { S.Game.change('ending'); frames(200, { ok: 40 }); });
+
+/* 체력이 0 이 되면 게임오버 (DESIGN.md §0 의 "게임오버 없음"은 운영 요청으로 뒤집혔다).
+   비보스 문제는 관문 3 + 케이블 2 = 5개, 체력도 5 라 전부 틀리면 마지막에 0 이 된다. */
+scene('게임오버 — 체력 소진', () => {
+  S.State.reset();
+  const allWrong = (set, back) => {
+    S.Game._pending = null; S.Game._fade = 0; S.Game._fadeDir = 0;
+    S.Game.change('battle', { enemy: 'e_pin', enemyName: 'T', quizSet: set, back, onWin: () => {} });
+    const B = S.Game.scene;
+    for (let i = 0; i < 3000 && S.Game.sceneName === 'battle'; i++) {
+      if (B.phase === 1) B.sel = (B.qs[B.qi].ans + 1) % B.qs[B.qi].choices.length;
+      frames(1, { ok: 1 });
+    }
+  };
+  allWrong('gate', { map: 'village' });
+  if (S.State.hp !== 2) throw new Error('관문 3문제 오답 후 체력이 2 가 아니다: ' + S.State.hp);
+  allWrong('mission', { map: 'workshop' });
+  if (S.State.hp !== 0) throw new Error('체력이 0 이 아니다: ' + S.State.hp);
+  if (S.Game.sceneName !== 'gameover') throw new Error('게임오버로 안 갔다: ' + S.Game.sceneName);
+  // 게임오버 화면은 1초 뒤에야 입력을 받는다. 한 번만 누르고 페이드가 끝나길 기다린다
+  // (계속 누르면 타이틀에서 또 먹혀 오프닝까지 가 버린다)
+  frames(80);
+  frames(1, { ok: 1 });
+  for (let i = 0; i < 200 && S.Game.sceneName === 'gameover'; i++) frames(1);
+  if (S.Game.sceneName !== 'attract') throw new Error('게임오버 → 타이틀로 안 갔다: ' + S.Game.sceneName);
+});
 
 scene('무인 자동복귀 (Idle)', () => {
   S.Game.change('field', { map: 'village' });
@@ -241,7 +311,7 @@ scene('강사 단축키', () => {
 scene('전체 재시작 (다음 학생)', () => {
   S.State.reset();
   const g = S.npc('village', 'guard');
-  if (!g || g.tx !== 11 || g.ty !== 12) throw new Error('맵 원상복구 실패: 문지기 위치 ' + (g && g.tx + ',' + g.ty));
+  if (!g || g.tx !== 11 || g.ty !== 16) throw new Error('맵 원상복구 실패: 문지기 위치 ' + (g && g.tx + ',' + g.ty));
   if (S.State.dexCount() !== 0) throw new Error('도감이 초기화되지 않음');
   S.Game.change('attract'); frames(30);
 });

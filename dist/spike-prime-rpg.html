@@ -3,7 +3,7 @@
   SPIKE 마스터 ~잠든 허브 왕~
   중학생 학과체험용 SPIKE Prime 안내 RPG
   단일 파일 배포본 — 인터넷 없이 더블클릭으로 실행됩니다.
-  빌드: 2026-09-21 15:19
+  빌드: 2026-09-22 03:04
 -->
 <html lang="ko">
 <head>
@@ -33,11 +33,39 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #05070f;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   cursor: default;
+}
+
+/* ------------------------------------------------------------
+ *  앰비언트 색 — 지금 보고 있는 화면에 따라 core/ambient.js 가 갈아끼운다.
+ *
+ *  @property 로 등록해야 색이 "섞이면서" 넘어간다.
+ *  등록하지 않으면 transition 이 먹지 않고 색이 툭 바뀐다
+ *  (@property 미지원 브라우저에서도 그렇게 동작 — 보기엔 덜 곱지만 깨지진 않는다).
+ * ---------------------------------------------------------- */
+@property --amb1 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1b2a5e;
+}
+@property --amb2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #16305f;
+}
+
+/* 바탕색은 html 에만 둔다.
+   body 에도 칠하면 아래 body::before/::after(z-index -1)가 그 밑에 깔려 안 보인다.
+   (음수 z-index 요소는 부모의 "내용"보다는 뒤, "배경"보다도 뒤에 그려진다) */
+html {
+  background: #05070f;
+  --amb1: #1b2a5e;
+  --amb2: #16305f;
+  --amb-fade: 1.8s;
+  transition: --amb1 var(--amb-fade) ease, --amb2 var(--amb-fade) ease;
 }
 
 body {
@@ -45,6 +73,72 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'Mona12', 'Mona10', Dotum, '돋움', monospace;
+}
+
+/* ============================================================
+ *  캔버스 바깥 여백 — 아주 느리게 흐르는 밤하늘
+ *
+ *  색은 게임 안 타이틀 하늘(attract.js 의 #0a0f2a → #1b2a5e)과
+ *  메시지 윈도우(#0b1b50 → #2b4fa8) 계열에서 가져왔다.
+ *
+ *  ⚠ transform 만 움직인다.
+ *    background-position 을 애니메이션하면 매 프레임 화면 전체를 다시 칠해
+ *    게임 루프와 CPU를 다투게 된다. transform 은 합성 단계에서 처리돼
+ *    메인 스레드를 거의 쓰지 않는다.
+ *
+ *  두 겹의 주기를 서로 안 나누어떨어지게(38s / 53s) 두어
+ *  같은 무늬가 반복되는 게 눈에 띄지 않는다.
+ * ============================================================ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  /* 화면보다 조금 크게 — 최대 배율 1.16 에 이동 5% 라 이만큼이면 덮는다.
+     더 키우면 합성 레이어 메모리만 커진다 (1920x1080 기준 -40% 는 레이어당 27MB). */
+  inset: -15%;
+  z-index: -1;                 /* 캔버스 뒤, html 바탕색 위 */
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* 두 겹이 같은 두 색을 자리만 바꿔 쓴다 — 겹치면서 색이 섞여 보인다.
+ *
+ * 중간 정지점(22%)을 두어 중심 색을 한동안 유지한 뒤 옅어지게 한다.
+ * 0% 에서 바로 옅어지기 시작하면 색이 실린 면적이 좁아 거의 안 보인다. */
+body::before {
+  opacity: 0.9;
+  background:
+    radial-gradient(54% 48% at 28% 26%, var(--amb1) 0%, var(--amb1) 22%, transparent 80%),
+    radial-gradient(48% 54% at 76% 70%, var(--amb2) 0%, var(--amb2) 22%, transparent 80%);
+  animation: skyDriftA 38s ease-in-out infinite alternate;
+}
+
+body::after {
+  opacity: 0.75;
+  background:
+    radial-gradient(46% 52% at 74% 22%, var(--amb2) 0%, var(--amb2) 22%, transparent 80%),
+    radial-gradient(54% 46% at 22% 78%, var(--amb1) 0%, var(--amb1) 22%, transparent 80%);
+  animation: skyDriftB 53s ease-in-out infinite alternate;
+}
+
+@keyframes skyDriftA {
+  from { transform: translate3d(-4%, -3%, 0) scale(1.04); }
+  to   { transform: translate3d( 5%,  4%, 0) scale(1.16); }
+}
+
+@keyframes skyDriftB {
+  from { transform: translate3d( 4%,  3%, 0) scale(1.14); }
+  to   { transform: translate3d(-5%, -4%, 0) scale(1.02); }
+}
+
+/* 움직임을 줄여 달라고 설정한 환경에서는 멈춘 상태로 둔다.
+   애니메이션이 없으면 레이어로 올려 둘 이유도 없으므로 will-change 도 뗀다. */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 #game {
@@ -148,7 +242,21 @@ body {
     "bossReady": "해체의 순서를 증명하라",
     "bossDone": "허브 왕을 깨워라!"
   },
+  "exits": {
+    "gate": "문지기가 길을 막고 있다.\n시험을 통과해야 한다.",
+    "mission": "아직 첫 번째 골렘이 완성되지 않았다.",
+    "locked": "아직 갈 수 없다."
+  },
   "guide": {
+    "wait": {
+      "title": "조립 실습",
+      "body": [
+        "오른쪽은 조립 안내서다.",
+        "로봇 장인에게 말을 걸면",
+        "첫 장이 펼쳐진다."
+      ],
+      "hint": "장인에게 말을 걸자"
+    },
     "find": {
       "title": "부품 찾기",
       "goal": "부품 7종을 꺼내자",
@@ -258,8 +366,21 @@ body {
     "correct": "정답!",
     "wrong": "아깝다!",
     "why": "해설",
-    "hint": "↑↓ 또는 마우스로 고르고  Z/클릭",
-    "skip": "X — 건너뛰기"
+    "hint": "↑↓←→ 또는 마우스로 고르고  Z/클릭",
+    "skip": "X — 건너뛰기",
+    "actTitle": "지금 실제로 해보자",
+    "actNext": "다 했으면  Z / 클릭",
+    "retry": "순서가 어긋나면 실물이 꼬인다.\n같은 문제를 다시 낸다!",
+    "revive": "아직 쓰러질 때가 아니다.\n내 힘을 나눠 주마!",
+    "appear": "{name}이(가) 나타났다!\n문제를 맞혀서 물리쳐라!",
+    "answerIs": "정답은 「{a}」.",
+    "actLabel": "실제 행동",
+    "actNow": "지금 실물에서 → {act}",
+    "win": "승리!",
+    "defeated": "{name}을(를) 물리쳤다!",
+    "score": "정답 {ok}개 / 오답 {ng}개\n배운 것을 잊지 말자.",
+    "unknownEnemy": "수상한 그림자",
+    "downed": "체력이 다 떨어졌다…"
   },
   "dex": {
     "title": "부 품 도 감",
@@ -297,7 +418,15 @@ body {
         "word": "수고했다!",
         "sub": "오늘 만져본 감각이 진짜 실력이 된다."
       }
-    }
+    },
+    "accFmt": "{ok} / {total}   ({pct}%)"
+  },
+  "gameover": {
+    "title": "쓰러졌다…",
+    "sub": "허브 왕은 아직 잠들어 있다.",
+    "score": "여기까지 정답 {ok} / {total}",
+    "hint": "괜찮다. 배운 건 남는다 — 다시 도전하자!",
+    "press": "아무 키나 누르면 처음 화면으로"
   },
   "hotkeys": {
     "title": "조작법",
@@ -445,10 +574,21 @@ body {
     "sign": [
       "『 허브 마을 』\n방향키 — 이동 / Z·Enter — 말 걸기 / X — 도감",
       "남쪽 문 → 조립 공방\n먼저 마을 사람들에게 배우자."
-    ]
+    ],
+    "desk": "조립하다 만 물건들이 잔뜩 쌓여 있다.\n주인은 대체 어디 간 걸까…",
+    "shelf": "SPIKE 관련 책이 빼곡히 꽂혀 있다.\n『모터가 안 돌 때 보는 책』이 제일 닳았다.",
+    "tree": "평범한 나무다.\n네 개쯤 모으면 작업대를 만들 수 있을 것 같다.",
+    "bush": "으악, 벌레가 있다…!\n…자세히 보니 검정 핀이었다.",
+    "fence": "낮은 울타리다. 넘어갈 수는 없다.\n생긴 건 넘을 수 있게 생겼는데."
   },
   "workshop": {
     "maker": {
+      "start": [
+        "왔구나.\n여기부터는 손으로 한다.",
+        "오른쪽에 안내서를 폈다.\nQ·E 로 넘겨라.",
+        "나는 채점하지 않는다.\n맞는지는 네 눈으로 봐라.",
+        "막히면 나를 불러라.\n자, 첫 장이다."
+      ],
       "find": "필요한 건 일곱 가지다.\n오른쪽 그림과 같은 걸 꺼내라.",
       "motor": "구멍이 두 종류다 — 십자와 동그라미.\n축은 십자에만 들어간다.",
       "beam": "검정은 거칠거칠 — 안 돌아간다.\n잘 안 들어가는 게 정상이다.",
@@ -457,8 +597,10 @@ body {
       "code": "오른쪽 주문서를 보고\nSPIKE 앱에 똑같이 옮겨 적어라.",
       "afterDone": "북쪽 문이 열렸다.\n해체의 방으로 가라.",
       "finish": [
-        "해냈구나.\n네 주문대로 골렘이 깃발을 흔든다!",
-        "하지만 마지막 관문이 남았다.\n북쪽 문으로 가라 — 해체의 방이다."
+        "해냈구나.\n네 주문대로 골렘이\n깃발을 흔든다!",
+        "부품 이름도, 순서도,\n포트도 네 손이 외웠다.",
+        "허나 아직 끝이 아니다.\n만든 것은 되돌려야 한다.",
+        "북쪽 문이 열렸다.\n해체의 방으로 가라."
       ]
     },
     "late": {
@@ -469,13 +611,26 @@ body {
       "cable": "포트 글자를 눈으로 확인했나? A다.",
       "code": "블록 색을 보면 어느 서랍인지 바로 안다."
     },
-    "bench": "작업대다. 부품이 가지런히 놓여 있다.\n여기서 실제 로봇을 조립한다.",
-    "quizEnemyName": "꼬인 케이블"
+    "bench": "작업대다.\n부품이 가지런히 놓여 있다.\n여기서 로봇을 조립한다.",
+    "quizEnemyName": "꼬인 케이블",
+    "shelf": "설명서가 꽂혀 있다.\n아무도 안 펴 본\n그 설명서다.",
+    "crate": "SPIKE 택배가\n산더미로 쌓여 있다.\n…귀찮아서 안 깐 모양이다.",
+    "torch": "횃불이다.\n이거면 몬스터는\n안 나오겠지."
   },
   "hubroom": {
     "altarLocked": "허브 왕이 아직 잠들어 있다.\n뒤엉킨 케이블이 왕을 감고 있다…",
-    "altarAwake": "…고맙다, 견습 메카닉.\n브릭시티가 다시 움직인다!",
-    "bossName": "혼선 케이블"
+    "altarUntangle": "뒤엉킨 케이블이 스르륵 풀려 내린다.\n5×5의 눈에 하나씩 불이 들어온다.",
+    "altarAwake": [
+      "…아아, 긴 잠이었다.\n네가 나를 깨웠구나. 견습 메카닉.",
+      "정령들의 이름을 외우고, 제 손으로\n뼈대를 세우고, 주문을 엮었지.",
+      "검정 핀은 고정, 회색 핀은 회전.\n주문에 적은 포트와 꽂은 포트는 같게.\n그 둘만 지켜도 기계는 숨을 쉰다.",
+      "그리고 너는 마지막까지 해냈다.\n조립의 역순으로, 케이블부터, 도구로.\n제자리에 돌려놓는 것까지가 기술이다.",
+      "브릭시티가 다시 움직인다.\n고맙다, 메카닉. 다음 골렘도 기대하마."
+    ],
+    "bossName": "혼선 케이블",
+    "bossIntro": "지이익… 내가 왕을 감고 있는 한\n누구도 해체할 수 없다!\n순서를 증명해 봐라.",
+    "bossGone": "풀린 케이블이 얌전히 감겨 있다.",
+    "torch": "횃불이 조용히 타고 있다.\n이 정도 밝으면 몬스터는 안 나오겠지…\n…라고 생각했었다."
   },
   "battle": {
     "appear": "{name}이(가) 나타났다!\n문제를 맞혀서 물리쳐라!",
@@ -861,7 +1016,21 @@ body {
     "bossReady": "Prove the teardown order",
     "bossDone": "Wake the Hub King!"
   },
+  "exits": {
+    "gate": "The Gatekeeper blocks the way.\nPass the trial first.",
+    "mission": "Your first golem is not finished yet.",
+    "locked": "You cannot go there yet."
+  },
   "guide": {
+    "wait": {
+      "title": "Hands-on build",
+      "body": [
+        "This panel is your build guide.",
+        "Talk to the Robot Maker",
+        "to open page one."
+      ],
+      "hint": "Talk to the Robot Maker"
+    },
     "find": {
       "title": "Find the parts",
       "goal": "Pick out 7 parts",
@@ -972,8 +1141,21 @@ body {
     "correct": "Correct!",
     "wrong": "So close!",
     "why": "Why",
-    "hint": "↑↓ or mouse to choose,  Z / click",
-    "skip": "X — Skip"
+    "hint": "Arrow keys or mouse to choose,  Z/click",
+    "skip": "X — Skip",
+    "actTitle": "Do it for real now",
+    "actNext": "Press Z / click when done",
+    "retry": "Skip a step and the real build goes wrong.\nSame question again!",
+    "revive": "Not yet, apprentice.\nTake some of my power!",
+    "appear": "{name} appears!\nAnswer correctly to defeat it!",
+    "answerIs": "The answer is “{a}”.",
+    "actLabel": "Do it now",
+    "actNow": "On the real robot → {act}",
+    "win": "Victory!",
+    "defeated": "You defeated {name}!",
+    "score": "{ok} correct / {ng} wrong\nRemember what you learned.",
+    "unknownEnemy": "A Suspicious Shadow",
+    "downed": "You are out of health..."
   },
   "dex": {
     "title": "PART CODEX",
@@ -1011,7 +1193,15 @@ body {
         "word": "Well done!",
         "sub": "The hands-on feel is what really sticks."
       }
-    }
+    },
+    "accFmt": "{ok} / {total}   ({pct}%)"
+  },
+  "gameover": {
+    "title": "You collapsed...",
+    "sub": "The Hub King still sleeps.",
+    "score": "You got {ok} of {total} right",
+    "hint": "What you learned stays with you. Try again!",
+    "press": "Press any key to return to the title"
   },
   "hotkeys": {
     "title": "Controls",
@@ -1159,10 +1349,21 @@ body {
     "sign": [
       "\" Hub Village \"\nArrows — move / Z·Enter — talk / X — codex",
       "South gate → Assembly Workshop\nLearn from the villagers first."
-    ]
+    ],
+    "desk": "Half-finished builds are piled up here.\nWhere did the owner go?",
+    "shelf": "Shelves packed with SPIKE books.\n\"What To Do When The Motor Won't Turn\" is the most worn.",
+    "tree": "An ordinary tree.\nFour of these and you could craft a workbench, surely.",
+    "bush": "Eek, there is a bug in there...!\n...on a closer look, it was a black pin.",
+    "fence": "A low fence. You cannot climb it.\nIt really looks like you could, though."
   },
   "workshop": {
     "maker": {
+      "start": [
+        "There you are.\nNow you work by hand.",
+        "The guide is on your right.\nFlip pages with Q and E.",
+        "I do not grade your work.\nYour own eyes do that.",
+        "Call me if you get stuck.\nNow — page one."
+      ],
       "find": "You need seven things.\nPull out what matches the picture.",
       "motor": "Two kinds of holes — cross and round.\nAn axle only fits the cross one.",
       "beam": "Black pins feel rough — they don't turn.\nStiff is normal. That's the point.",
@@ -1171,8 +1372,10 @@ body {
       "code": "Read the spell book on the right\nand copy it into the SPIKE app.",
       "afterDone": "The north door is open.\nHead to the Teardown Room.",
       "finish": [
-        "You did it.\nThe golem waves its flag, just as you wrote!",
-        "But one gate remains.\nGo north — the Teardown Room."
+        "You did it.\nThe golem waves its flag,\njust as you wrote.",
+        "Part names, order, port —\nyour hands know them now.",
+        "But this is not the end.\nWhat you build, you undo.",
+        "The north door is open.\nGo to the Teardown Room."
       ]
     },
     "late": {
@@ -1183,13 +1386,26 @@ body {
       "cable": "Did you read the port letter? It's A.",
       "code": "The block colour tells you which drawer."
     },
-    "bench": "A workbench. Parts are laid out neatly.\nThis is where you build the real robot.",
-    "quizEnemyName": "Tangled Cable"
+    "bench": "A workbench.\nParts are laid out neatly.\nBuild the real robot here.",
+    "quizEnemyName": "Tangled Cable",
+    "shelf": "Manuals, neatly filed.\nNobody has ever\nopened one.",
+    "crate": "SPIKE parcels,\npiled sky high.\nToo lazy to open them.",
+    "torch": "A torch.\nNothing spawns\nwhile this is lit."
   },
   "hubroom": {
     "altarLocked": "The Hub King still sleeps.\nTangled cables coil around him…",
-    "altarAwake": "…Thank you, apprentice mechanic.\nBrixity moves again!",
-    "bossName": "Tangled Cable"
+    "altarUntangle": "The tangled cable slides loose and falls away.\nOne by one, the 5x5 eyes light up.",
+    "altarAwake": [
+      "…Ah. A long sleep it was.\nYou woke me, apprentice mechanic.",
+      "You learned the spirits' names, raised\nthe frame yourself, and wove the spell.",
+      "Black pins hold fast, grey pins turn.\nThe port in the code and the port you\nplugged in must match. Keep those two.",
+      "And you saw it through to the end —\nreverse order, cable first, tool in hand.\nPutting it back is part of the craft.",
+      "Brixity moves again.\nThank you, mechanic. Build me another."
+    ],
+    "bossName": "Tangled Cable",
+    "bossIntro": "Zzzt... While I coil the King,\nno one takes anything apart!\nProve you know the order.",
+    "bossGone": "The untangled cable lies neatly coiled.",
+    "torch": "A torch burns quietly.\nNothing spawns where it is this bright...\n...or so you thought."
   },
   "battle": {
     "appear": "{name} appeared!\nAnswer correctly to drive it back!",
@@ -1571,8 +1787,20 @@ SPIKE.BLOCK_CATS = [
     threshold: 96,      // binarize 가 켜졌을 때만 쓰인다
     binarize: false,    // 진짜 픽셀 폰트라 이진화하면 오히려 획이 깨진다 (실측)
                         //   ui.ko.json 의 font.{ladder,fallback,threshold,binarize} 로 바꾼다
-    cache: new Map(),
+    cache: new Map(),   // 글자 캔버스
+    _measureCache: new Map(),
+    _wrapCache: new Map(),
     _measureCtx: null,
+    gen: 0,             // 캐시 세대 — 사다리가 바뀔 때마다 오른다.
+                        //   폭을 따로 들고 있는 쪽(HUD 등)이 갱신 시점을 알 수 있다.
+
+    /* 사다리·폴백이 바뀌면 렌더 결과도 폭도 전부 달라진다. 세 캐시를 함께 비운다 */
+    clear: function () {
+      this.cache.clear();
+      this._measureCache.clear();
+      this._wrapCache.clear();
+      this.gen++;
+    },
 
     /* ------------------------------------------------------------
      *  웹폰트 선로딩
@@ -1599,44 +1827,60 @@ SPIKE.BLOCK_CATS = [
 
       var loaded = Promise.all(jobs)
         .then(function () { return document.fonts.ready; })
-        .then(function () { self.cache.clear(); });
+        .then(function () { self.clear(); });
 
       var timeout = new Promise(function (res) { setTimeout(res, 3000); });
-      return Promise.race([loaded, timeout]).then(function () { self.cache.clear(); });
+      return Promise.race([loaded, timeout]).then(function () { self.clear(); });
     },
 
-    /* 요청 크기 → { css, px } */
+    /* ------------------------------------------------------------
+     *  요청 크기 → { css, px, i }
+     *
+     *  i 는 사다리 칸 번호다. 9·10·11 은 전부 Mona10@10 으로 똑같이 그려지므로
+     *  캐시 키를 요청 크기로 잡으면 같은 그림을 세 번 만들어 세 번 들고 있게 된다.
+     *  키는 반드시 이 칸 번호로 잡는다.
+     * ---------------------------------------------------------- */
     snap: function (size) {
       var L = this.ladder;
       for (var i = 0; i < L.length; i++) {
         if (size <= L[i].max) {
-          return { css: "'" + L[i].family + "'," + this.fallback, px: L[i].px };
+          return { css: "'" + L[i].family + "'," + this.fallback, px: L[i].px, i: i };
         }
       }
-      var last = L[L.length - 1];
-      return { css: "'" + last.family + "'," + this.fallback, px: last.px };
+      var last = L.length - 1;
+      return { css: "'" + L[last].family + "'," + this.fallback, px: L[last].px, i: last };
     },
 
-    /* 문자열 픽셀 폭 (그림자 1px 포함). 스냅된 실제 크기로 잰다 */
-    measure: function (text, size) {
+    /* 스냅된 칸으로 재는 내부용 — measure / wrap / _render 가 공유한다.
+       measureText 는 비싸고 같은 문자열을 매 프레임 다시 재는 곳이 많아 캐시한다. */
+    _measureF: function (text, f) {
+      var key = f.i + '|' + text;
+      var hit = this._measureCache.get(key);
+      if (hit !== undefined) return hit;
       if (!this._measureCtx) {
         var c = document.createElement('canvas');
         this._measureCtx = c.getContext('2d');
       }
-      var f = this.snap(size);
       var ctx = this._measureCtx;
       ctx.font = f.px + 'px ' + f.css;
-      return Math.ceil(ctx.measureText(text).width) + 1;
+      var w = Math.ceil(ctx.measureText(text).width) + 1;
+      if (this._measureCache.size > 4000) this._measureCache.clear();
+      this._measureCache.set(key, w);
+      return w;
     },
+
+    /* 문자열 픽셀 폭 (그림자 1px 포함). 스냅된 실제 크기로 잰다 */
+    measure: function (text, size) { return this._measureF(text, this.snap(size)); },
 
     lineHeight: function (size) { return size + 4; },
 
     /* 캐시된 도트 텍스트 캔버스 얻기 */
     get: function (text, size, color, shadow) {
-      var key = size + '|' + color + '|' + (shadow ? 1 : 0) + '|' + text;
+      var f = this.snap(size);
+      var key = f.i + '|' + color + '|' + (shadow ? 1 : 0) + '|' + text;
       var hit = this.cache.get(key);
       if (hit) return hit;
-      var made = this._render(text, size, color, shadow);
+      var made = this._render(text, f, color, shadow);
       // 캐시가 너무 커지면 앞쪽부터 버린다 (순환형이라 문자열 종류는 유한)
       if (this.cache.size > 1200) {
         var firstKey = this.cache.keys().next().value;
@@ -1646,10 +1890,9 @@ SPIKE.BLOCK_CATS = [
       return made;
     },
 
-    _render: function (text, size, color, shadow) {
+    _render: function (text, f, color, shadow) {
       var pad = 2;
-      var f = this.snap(size);
-      var w = this.measure(text, size) + pad * 2;
+      var w = this._measureF(text, f) + pad * 2;
       var h = f.px + pad * 2 + 4;
 
       // --- 1) 흰색으로 글자만 그린다 ---
@@ -1703,22 +1946,41 @@ SPIKE.BLOCK_CATS = [
       return out;
     },
 
-    /* 줄바꿈: 우선 공백에서 끊고, 한 덩어리가 너무 길면 글자 단위로 끊는다 */
+    /* ------------------------------------------------------------
+     *  줄바꿈: 우선 공백에서 끊고, 한 덩어리가 너무 길면 글자 단위로 끊는다.
+     *
+     *  도감·가이드 패널은 같은 문단을 매 프레임 다시 접는다 (내용은 그대로인데).
+     *  한 번 접은 결과를 캐시한다.
+     *
+     *  ⚠ 돌려주는 배열은 캐시가 들고 있는 것과 같은 객체다. 부르는 쪽에서
+     *    push/splice 로 고치면 안 된다. 잘라 쓰려면 slice/concat 으로 복사할 것.
+     * ---------------------------------------------------------- */
     wrap: function (text, size, maxWidth) {
+      var f = this.snap(size);
+      var key = f.i + '|' + (maxWidth | 0) + '|' + text;
+      var hit = this._wrapCache.get(key);
+      if (hit) return hit;
+      var lines = this._wrap(String(text), f, maxWidth);
+      if (this._wrapCache.size > 600) this._wrapCache.clear();
+      this._wrapCache.set(key, lines);
+      return lines;
+    },
+
+    _wrap: function (text, f, maxWidth) {
       var lines = [];
-      var paragraphs = String(text).split('\n');
+      var paragraphs = text.split('\n');
       for (var p = 0; p < paragraphs.length; p++) {
         var words = paragraphs[p].split(' ');
         var line = '';
         for (var i = 0; i < words.length; i++) {
           var test = line ? line + ' ' + words[i] : words[i];
-          if (this.measure(test, size) <= maxWidth) { line = test; continue; }
+          if (this._measureF(test, f) <= maxWidth) { line = test; continue; }
           if (line) { lines.push(line); line = ''; }
           // 단어 자체가 넘치면 글자 단위 분할
           var chunk = words[i];
-          while (this.measure(chunk, size) > maxWidth) {
+          while (this._measureF(chunk, f) > maxWidth) {
             var cut = chunk.length;
-            while (cut > 1 && this.measure(chunk.slice(0, cut), size) > maxWidth) cut--;
+            while (cut > 1 && this._measureF(chunk.slice(0, cut), f) > maxWidth) cut--;
             lines.push(chunk.slice(0, cut));
             chunk = chunk.slice(cut);
           }
@@ -1833,7 +2095,7 @@ SPIKE.BLOCK_CATS = [
       if (f.fallback) S.Font.fallback = f.fallback;
       if (typeof f.threshold === 'number') S.Font.threshold = f.threshold;
       if (typeof f.binarize === 'boolean') S.Font.binarize = f.binarize;
-      S.Font.cache.clear();
+      S.Font.clear();
     },
 
     /* ---------------- 언어 ---------------- */
@@ -1844,7 +2106,7 @@ SPIKE.BLOCK_CATS = [
       if (!this.has(lang) || lang === this.lang) return false;
       this.lang = lang;
       this._applyFont(this.ns('ui').font);
-      S.Font.cache.clear();
+      S.Font.clear();
       this._refresh();
       return true;
     },
@@ -1948,7 +2210,7 @@ SPIKE.BLOCK_CATS = [
             var kind = (obj.meta && obj.meta.kind) || g.kind;
             var lang = (obj.meta && obj.meta.lang) || g.lang || self.lang;
             self.apply(kind, obj, lang);
-            if (lang === self.lang) { S.Font.cache.clear(); self._refresh(); }
+            if (lang === self.lang) { S.Font.clear(); self._refresh(); }
             self.toast = kind + ' (' + lang + ') 교체: ' + file.name;
             self.toastT = 2.5;
             resolve(kind);
@@ -2027,6 +2289,7 @@ SPIKE.BLOCK_CATS = [
     this.ctx = canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     this.scale = 1;
+    this._grad = {};   // 세로 그라데이션 캐시 (아래 vgradient 참고)
     this.fit();
     window.addEventListener('resize', this.fit.bind(this));
   }
@@ -2073,11 +2336,23 @@ SPIKE.BLOCK_CATS = [
     this.rect(x + w - t, y, t, h, color);
   };
 
+  /* 세로 그라데이션.
+   * 창을 하나 그릴 때마다 CanvasGradient 를 새로 만들고 있었다 (프레임당 2~5개).
+   * 창 위치와 높이는 사실상 정해져 있으므로 y·높이·색으로 캐시한다.
+   * 그라데이션 좌표는 절대값이라 y 도 키에 들어가야 한다. */
   Renderer.prototype.vgradient = function (x, y, w, h, top, bottom) {
     var c = this.ctx;
-    var g = c.createLinearGradient(0, y, 0, y + h);
-    g.addColorStop(0, top);
-    g.addColorStop(1, bottom);
+    var key = (y | 0) + '|' + (h | 0) + '|' + top + '|' + bottom;
+    var g = this._grad[key];
+    if (!g) {
+      g = c.createLinearGradient(0, y, 0, y + h);
+      g.addColorStop(0, top);
+      g.addColorStop(1, bottom);
+      // 위치가 계속 변하는 연출이 생겨도 무한정 쌓이지 않게 한다
+      if (this._gradN > 200) { this._grad = {}; this._gradN = 0; }
+      this._grad[key] = g;
+      this._gradN = (this._gradN || 0) + 1;
+    }
     c.fillStyle = g;
     c.fillRect(x | 0, y | 0, w | 0, h | 0);
   };
@@ -2289,6 +2564,7 @@ SPIKE.BLOCK_CATS = [
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       this.ctx = new AC();
+      this._noiseBuf = {};          // 버퍼는 만든 컨텍스트에 묶인다
       this.master = this.ctx.createGain();
       this.master.gain.value = 0.35;
       this.master.connect(this.ctx.destination);
@@ -2322,15 +2598,29 @@ SPIKE.BLOCK_CATS = [
       o.start(t); o.stop(t + dur + 0.02);
     },
 
+    /* 길이별 노이즈 버퍼.
+     * BGM 드럼과 page 효과음이 부를 때마다 수천 샘플을 Math.random() 으로
+     * 새로 채우고 있었다. 쓰는 길이는 두세 가지뿐이라 만들어 두고 재사용한다.
+     * 같은 파형이 반복되지만 50ms 짜리 하이햇이라 귀로는 구분되지 않는다. */
+    _noiseBuf: {},
+
+    _noise: function (dur) {
+      var key = Math.round(dur * 1000);
+      var buf = this._noiseBuf[key];
+      if (buf) return buf;
+      var len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+      buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      this._noiseBuf[key] = buf;
+      return buf;
+    },
+
     noise: function (dur, vol, hp) {
       if (!this.ctx || this.muted) return;
       var t = this.ctx.currentTime;
-      var len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
-      var buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
-      var d = buf.getChannelData(0);
-      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
       var src = this.ctx.createBufferSource();
-      src.buffer = buf;
+      src.buffer = this._noise(dur);
       var g = this.ctx.createGain();
       g.gain.value = vol == null ? 0.2 : vol;
       var f = this.ctx.createBiquadFilter();
@@ -3412,12 +3702,97 @@ SPIKE.BLOCK_CATS = [
       r.window(bx, by, bw, bh);
       r.text(S.T('idle.title', ''), bx + bw / 2, by + 12,
         { size: 13, color: S.C.textHi, align: 'center' });
-      r.text(left + '초 후 처음 화면으로 돌아갑니다', bx + bw / 2, by + 34,
+      r.text(S.Text.fmt(S.T('idle.countdown', ''), { n: left }), bx + bw / 2, by + 34,
         { size: 10, color: S.C.text, align: 'center' });
       r.text(S.T('idle.hint', ''), bx + bw / 2, by + 54,
         { size: 10, color: S.C.textDim, align: 'center' });
     }
   };
+})(SPIKE);
+
+</script>
+<script>
+/* ==== src/core/ambient.js ==== */
+/* ============================================================
+ *  SPIKE.Ambient — 캔버스 바깥 배경색을 게임 진행에 맞춰 바꾼다
+ *
+ *  유튜브 앰비언트 모드처럼, 지금 보고 있는 화면의 색이
+ *  캔버스 밖으로 은은하게 번져 나가게 한다.
+ *
+ *  역할 분담
+ *    style.css  그라데이션 모양과 느린 흐름 (transform 애니메이션)
+ *    여기       CSS 변수 --amb1 / --amb2 두 개만 갈아끼운다
+ *    @property  두 색 사이를 1.8초에 걸쳐 부드럽게 섞어 준다
+ *
+ *  색은 각 화면에서 실제로 쓰는 색에서 뽑았다 (아래 표의 주석 참고).
+ *  0.5~0.6 투명도로 #05070f 위에 깔리므로 원색보다 살짝 진하게 잡는다.
+ * ============================================================ */
+(function (S) {
+  'use strict';
+
+  var FADE = 1.8;   // 초 — style.css 의 transition 과 맞춘다
+
+  /* 씬(또는 field:맵) → [--amb1, --amb2] */
+  var TONE = {
+    attract:          ['#1b2a5e', '#16305f'],   // 타이틀 밤하늘
+    opening:          ['#141a34', '#101a3a'],   // 잠든 왕국 — 가장 어둡다
+    /* 잔디 #4a8b3a 계열. 녹색은 같은 값이라도 눈에 더 밝게 들어와서
+       다른 화면과 균형을 맞추려고 한 단계 낮췄다 (체감 밝기 83 → 71). */
+    'field:village':  ['#1f4629', '#26523c'],
+    'field:workshop': ['#4d3820', '#5f4628'],   // 나무 바닥 #8a6a44
+    'field:hubroom':  ['#2b2440', '#4a2a18'],   // 어두운 돌 + 횃불 불빛
+    battle:           ['#3a2050', '#241640'],   // 전투 배경 보라
+    'battle:boss':    ['#4a1c38', '#3a1424'],   // 보스전은 더 붉게
+    gameover:         ['#4a1420', '#2a0e16'],   // 체력 소진 — 어두운 붉은색
+    ending:           ['#2f1f52', '#4d3a1c'],   // 보라 + 팡파레 금색
+    _default:         ['#1b2a5e', '#16305f']
+  };
+
+  var Ambient = S.Ambient = {
+    TONE: TONE,
+    enabled: true,
+    key: '',
+
+    /* 스타일을 만질 수 있는 환경인가 (헤드리스 테스트에서는 없다) */
+    _root: function () {
+      if (typeof document === 'undefined') return null;
+      var el = document.documentElement;
+      if (!el || !el.style || !el.style.setProperty) return null;
+      return el;
+    },
+
+    /* 씬 이름 + 진입 파라미터 → 색 고르기 */
+    keyFor: function (scene, params) {
+      params = params || {};
+      if (scene === 'field' && params.map) return 'field:' + params.map;
+      if (scene === 'battle' && params.quizSet === 'boss') return 'battle:boss';
+      return scene;
+    },
+
+    apply: function (scene, params) {
+      this.set(this.keyFor(scene, params));
+    },
+
+    set: function (key) {
+      if (!this.enabled) return false;
+      var tone = TONE[key] || TONE._default;
+      this.key = key;
+      var root = this._root();
+      if (!root) return false;
+      root.style.setProperty('--amb1', tone[0]);
+      root.style.setProperty('--amb2', tone[1]);
+      return true;
+    },
+
+    /* 전환 시간(초)을 바꾼다 — 부스에서 취향대로 */
+    setFade: function (sec) {
+      var root = this._root();
+      if (!root) return;
+      root.style.setProperty('--amb-fade', sec + 's');
+    }
+  };
+
+  Ambient.FADE = FADE;
 })(SPIKE);
 
 </script>
@@ -3441,6 +3816,9 @@ SPIKE.BLOCK_CATS = [
     _fadeDir: 0,        // -1 어두워짐, +1 밝아짐
     _pending: null,
     shake: 0,
+    _snap: null,        // 오버레이 뒤에 깔 정지 화면
+    _snapCtx: null,
+    _snapValid: false,
 
     register: function (name, scene) { this.scenes[name] = scene; return this; },
 
@@ -3448,9 +3826,12 @@ SPIKE.BLOCK_CATS = [
     change: function (name, params) {
       if (this.scene && this.scene.exit) this.scene.exit();
       this.stack.length = 0;
+      this._snapValid = false;
       this.scene = this.scenes[name];
       this.sceneName = name;
       if (!this.scene) { console.error('없는 씬:', name); return; }
+      // 캔버스 바깥 배경색도 이 화면에 맞춰 천천히 넘어간다 (오버레이 push 는 제외)
+      if (S.Ambient) S.Ambient.apply(name, params || {});
       if (this.scene.enter) this.scene.enter(params || {});
     },
 
@@ -3467,11 +3848,35 @@ SPIKE.BLOCK_CATS = [
       var sc = this.scenes[name];
       if (!sc) return;
       this.stack.push(sc);
+      this._snapValid = false;
       if (sc.enter) sc.enter(params || {});
     },
     pop: function () {
       var sc = this.stack.pop();
+      this._snapValid = false;
       if (sc && sc.exit) sc.exit();
+    },
+
+    /* ------------------------------------------------------------
+     *  오버레이 뒤 배경을 정지 화면으로 떠 둔다 (freezeBase 씬 전용)
+     *
+     *  도감·카드는 반투명 페이드로 필드를 거의 다 가린다. 그런데도 매 프레임
+     *  필드를 통째로 다시 그리고 있었다 — 안 보이는 타일 433장을 포함해서.
+     *  오버레이가 뜬 뒤 첫 프레임만 제대로 그리고, 그 결과를 떠서 재사용한다.
+     *
+     *  캔버스에서 픽셀을 읽는 것이라 ctx 변환(흔들림)과 무관하게 안전하다.
+     * ---------------------------------------------------------- */
+    _capture: function () {
+      if (!this._snap) {
+        this._snap = document.createElement('canvas');
+        this._snap.width = S.W;
+        this._snap.height = S.H;
+        this._snapCtx = this._snap.getContext('2d');
+        this._snapCtx.imageSmoothingEnabled = false;
+      }
+      this._snapCtx.clearRect(0, 0, S.W, S.H);
+      this._snapCtx.drawImage(this.renderer.canvas, 0, 0);
+      this._snapValid = true;
     },
     top: function () {
       return this.stack.length ? this.stack[this.stack.length - 1] : this.scene;
@@ -3517,13 +3922,22 @@ SPIKE.BLOCK_CATS = [
 
       // --- 그리기 ---
       var r = this.renderer;
+      // 맨 위 오버레이가 화면을 덮는다고 선언했으면 바닥 씬은 한 번만 그린다
+      var top = this.stack.length ? this.stack[this.stack.length - 1] : null;
+      var freeze = !!(top && top.freezeBase);
+
       r.ctx.save();
       if (this.shake > 0) {
         this.shake -= dt * 40;
         var s = Math.max(0, this.shake);
         r.ctx.translate((Math.random() - 0.5) * s, (Math.random() - 0.5) * s);
       }
-      if (this.scene && this.scene.draw) this.scene.draw(r);
+      if (freeze && this._snapValid) {
+        r.ctx.drawImage(this._snap, 0, 0);
+      } else {
+        if (this.scene && this.scene.draw) this.scene.draw(r);
+        if (freeze) this._capture();     // 오버레이를 얹기 전에 떠야 한다
+      }
       for (var i = 0; i < this.stack.length; i++) {
         if (this.stack[i].draw) this.stack[i].draw(r);
       }
@@ -3795,26 +4209,29 @@ SPIKE.BLOCK_CATS = [
       ],
       objects: [
         { sprite: 'o_altar',     tx: 11, ty: 3,  solid: [[11,2],[12,2],[11,3],[12,3]], id: 'altar' },
-        { sprite: 'o_shelf',     tx: 4,  ty: 6,  solid: [[4,6]] },
-        { sprite: 'o_workbench', tx: 15, ty: 6,  solid: [[15,6],[16,6]] },
+        { sprite: 'o_shelf',     tx: 4,  ty: 6,  solid: [[4,6]], id: 'shelf' },
+        { sprite: 'o_workbench', tx: 15, ty: 6,  solid: [[15,6],[16,6]], id: 'desk' },
         { sprite: 'o_sign',      tx: 9,  ty: 10, solid: [[9,10]], id: 'sign' },
-        { sprite: 'o_tree',      tx: 3,  ty: 12, solid: [[3,12]] },
-        { sprite: 'o_tree',      tx: 19, ty: 12, solid: [[19,12]] },
-        { sprite: 'o_tree',      tx: 6,  ty: 3,  solid: [[6,3]] },
-        { sprite: 'o_tree',      tx: 17, ty: 3,  solid: [[17,3]] },
-        { sprite: 'o_bush',      tx: 8,  ty: 14, solid: [[8,14]] },
-        { sprite: 'o_bush',      tx: 14, ty: 14, solid: [[14,14]] },
-        { sprite: 'o_fence',     tx: 5,  ty: 16, solid: [[5,16]] },
-        { sprite: 'o_fence',     tx: 18, ty: 16, solid: [[18,16]] }
+        { sprite: 'o_tree',      tx: 3,  ty: 12, solid: [[3,12]], id: 'tree' },
+        { sprite: 'o_tree',      tx: 19, ty: 12, solid: [[19,12]], id: 'tree' },
+        { sprite: 'o_tree',      tx: 6,  ty: 3,  solid: [[6,3]], id: 'tree' },
+        { sprite: 'o_tree',      tx: 17, ty: 3,  solid: [[17,3]], id: 'tree' },
+        { sprite: 'o_bush',      tx: 8,  ty: 14, solid: [[8,14]], id: 'bush' },
+        { sprite: 'o_bush',      tx: 14, ty: 14, solid: [[14,14]], id: 'bush' },
+        { sprite: 'o_fence',     tx: 5,  ty: 16, solid: [[5,16]], id: 'fence' },
+        { sprite: 'o_fence',     tx: 18, ty: 16, solid: [[18,16]], id: 'fence' }
       ],
       npcs: [
         { id: 'gran',  char: 'gran',  tx: 5,  ty: 7, dir: 'down',  name: '도감 할머니', mark: true },
         { id: 'smith', char: 'smith', tx: 15, ty: 7, dir: 'down',  name: '대장장이',   mark: true },
-        { id: 'guard', char: 'guard', tx: 11, ty: 12, dir: 'down', name: '문지기',     mark: true }
+        /* 문 바로 앞칸. 예전엔 (11,12) 라 문(11,17)과 5칸이나 떨어져 있었고,
+           플레이어 시작 지점(11,15)이 그 사이라 길을 막지 못했다.
+           이기면 dialogue.js 의 onWin 이 (10,16) 으로 비켜 준다. */
+        { id: 'guard', char: 'guard', tx: 11, ty: 16, dir: 'up',   name: '문지기',     mark: true }
       ],
       exits: [
         { tx: 11, ty: 17, to: 'workshop', need: 'gatePassed',
-          deny: '문지기가 길을 막고 있다. 시험을 통과해야 한다.' }
+          denyKey: 'exits.gate' }
       ]
     },
 
@@ -3846,11 +4263,11 @@ SPIKE.BLOCK_CATS = [
       ],
       objects: [
         { sprite: 'o_workbench', tx: 3, ty: 3,  solid: [[3,3],[4,3]], id: 'bench' },
-        { sprite: 'o_shelf',     tx: 1, ty: 2,  solid: [[1,2]] },
-        { sprite: 'o_crate',     tx: 9, ty: 2,  solid: [[9,2]] },
-        { sprite: 'o_crate',     tx: 10, ty: 3, solid: [[10,3]] },
-        { sprite: 'o_torch',     tx: 1, ty: 8,  solid: [[1,8]] },
-        { sprite: 'o_torch',     tx: 10, ty: 8, solid: [[10,8]] }
+        { sprite: 'o_shelf',     tx: 1, ty: 2,  solid: [[1,2]], id: 'shelf' },
+        { sprite: 'o_crate',     tx: 9, ty: 2,  solid: [[9,2]], id: 'crate' },
+        { sprite: 'o_crate',     tx: 10, ty: 3, solid: [[10,3]], id: 'crate' },
+        { sprite: 'o_torch',     tx: 1, ty: 8,  solid: [[1,8]], id: 'torch' },
+        { sprite: 'o_torch',     tx: 10, ty: 8, solid: [[10,8]], id: 'torch' }
       ],
       npcs: [
         { id: 'maker', char: 'maker', tx: 6, ty: 4, dir: 'down', name: '로봇 장인', mark: true }
@@ -3858,7 +4275,7 @@ SPIKE.BLOCK_CATS = [
       exits: [
         { tx: 5, ty: 16, to: 'village' },
         { tx: 6, ty: 1, to: 'hubroom', need: 'missionDone',
-          deny: '아직 첫 번째 골렘이 완성되지 않았다.' }
+          denyKey: 'exits.mission' }
       ]
     },
 
@@ -3889,10 +4306,15 @@ SPIKE.BLOCK_CATS = [
       ],
       objects: [
         { sprite: 'o_altar', tx: 11, ty: 5, solid: [[11,4],[12,4],[11,5],[12,5]], id: 'altar' },
-        { sprite: 'o_torch', tx: 3,  ty: 7,  solid: [] },
-        { sprite: 'o_torch', tx: 19, ty: 7,  solid: [] },
-        { sprite: 'o_torch', tx: 3,  ty: 11, solid: [] },
-        { sprite: 'o_torch', tx: 19, ty: 11, solid: [] }
+        /* 해체 보스 — 제단으로 가는 길 한가운데를 막고 있다 (64x56 = 4x3.5칸).
+           부딪히거나(bump) 말을 걸면 보스전이 시작되고, 쓰러뜨리면 hidden 이 서서
+           사라진다. 시작 지점 (11,15) 에서 위로 걸어오면 (11,11) 에서 막힌다. */
+        { sprite: 'e_cable', tx: 10, ty: 10, id: 'boss', bump: true,
+          solid: [[10,9],[11,9],[12,9],[13,9],[10,10],[11,10],[12,10],[13,10]] },
+        { sprite: 'o_torch', tx: 3,  ty: 7,  solid: [[3,7]],   id: 'torch' },
+        { sprite: 'o_torch', tx: 19, ty: 7,  solid: [[19,7]],  id: 'torch' },
+        { sprite: 'o_torch', tx: 3,  ty: 11, solid: [[3,11]],  id: 'torch' },
+        { sprite: 'o_torch', tx: 19, ty: 11, solid: [[19,11]], id: 'torch' }
       ],
       npcs: [],
       exits: [
@@ -3939,6 +4361,12 @@ SPIKE.BLOCK_CATS = [
   S.npc = function (mapId, npcId) {
     var list = (S.MAPS[mapId] || {}).npcs || [];
     for (var i = 0; i < list.length; i++) if (list[i].id === npcId) return list[i];
+    return null;
+  };
+
+  S.obj = function (mapId, objId) {
+    var list = (S.MAPS[mapId] || {}).objects || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === objId) return list[i];
     return null;
   };
 })(SPIKE);
@@ -4051,7 +4479,7 @@ SPIKE.BLOCK_CATS = [
               F().gatePassed = true;
               F().talked_guard = true;
               var g = S.npc('village', 'guard');   // 길을 비켜준다
-              if (g) { g.tx = 9; g.ty = 12; g.dir = 'right'; }
+              if (g) { g.tx = 10; g.ty = 16; g.dir = 'right'; }
             }
           });
         });
@@ -4071,8 +4499,10 @@ SPIKE.BLOCK_CATS = [
 
     /* ===== 조립 공방 ===== */
     'workshop:maker': function (fd) {
-      if (S.Mission) S.Mission.talk(fd);
-      else fd.say({ name: N('maker'), text: '…' });
+      if (!S.Mission) { fd.say({ name: N('maker'), text: '…' }); return; }
+      // 첫 대화가 곧 실습 시작이다
+      if (!S.Mission.started()) { S.Mission.start(fd); return; }
+      S.Mission.talk(fd);
     },
 
     'workshop:bench': function (fd) {
@@ -4080,15 +4510,66 @@ SPIKE.BLOCK_CATS = [
     },
 
     /* ===== 해체의 방 ===== */
+    /* 해체 보스 (DESIGN.md §9).
+       문제 4개 = 실물 해체 4단계라, 오답이면 다음으로 넘어가지 않는다 (strict). */
+    'hubroom:boss': function (fd) {
+      if (S.State.flags.bossDone) {
+        fd.say({ text: S.D('hubroom.bossGone', '') });
+        return;
+      }
+      fd.busy = true;                       // 대사 끝날 때까지 다시 부딪혀도 무시
+      fd.say({ name: S.D('hubroom.bossName', ''), text: S.D('hubroom.bossIntro', ''), icon: 'p_cable' },
+        function () {
+          S.Game.transition('battle', {
+            enemy: 'e_cable',
+            enemyName: S.D('hubroom.bossName', ''),
+            bgm: 'boss',
+            quizSet: 'boss',
+            strict: true,                   // 오답 = 같은 문제 재출제, 정답 = 해체 카드
+            back: { map: 'hubroom', at: { x: 11, y: 11, dir: 'up' } },
+            onWin: function () {
+              S.State.flags.bossDone = true;
+              var b = S.obj('hubroom', 'boss');
+              if (b) b.hidden = true;       // 길이 열린다 (_buildSolid 가 다시 돈다)
+            }
+          });
+        });
+    },
+
     'hubroom:altar': function (fd) {
       if (S.State.flags.bossDone) {
-        fd.say({ name: N('hub'), text: S.D('hubroom.altarAwake', ''), icon: 'p_hub' });
-        S.Game.transition('ending');
+        /* 각성 연출: 케이블이 풀리는 장면(무명) → 허브 왕의 대사 여러 장.
+           다 읽은 뒤에 엔딩으로 간다. transition 을 say 밖에서 부르면
+           페이드가 바로 시작되는데, 엔진이 페이드 중에는 씬 update 를 멈추므로
+           대사창이 한 글자도 타이핑되지 못한 채 0.25초 만에 넘어가 버린다 (실측). */
+        var msgs = [{ text: S.D('hubroom.altarUntangle', ''), icon: 'p_hub' }];
+        S.DL('hubroom.altarAwake').forEach(function (t) {
+          msgs.push({ name: N('hub'), text: t, icon: 'p_hub' });
+        });
+        fd.say(msgs, function () { S.Game.transition('ending'); });
       } else {
         fd.say({ text: S.D('hubroom.altarLocked', ''), icon: 'p_hub' });
       }
     }
   };
+
+  /* ------------------------------------------------------------
+   *  조사하면 한마디 하는 배경 오브젝트 (관찰 대사).
+   *  이름표 없이 내레이션으로 띄운다 — 표지판·제단과 같은 형식.
+   *
+   *  대사는 dialogue.<언어>.json 의 <맵>.<id>. 배열로 쓰면 여러 장이 된다.
+   *  키가 맵별이라 같은 id(예: torch) 라도 맵마다 다른 문구를 쓸 수 있다.
+   *  ⚠ 공방은 분할 화면이라 대사창 글 폭이 164px 뿐이다 (다른 맵은 348px).
+   *    거기 문구는 한 줄 13자 안쪽으로 끊어 둘 것.
+   * ---------------------------------------------------------- */
+  ['village:desk', 'village:shelf', 'village:tree', 'village:bush', 'village:fence',
+   'workshop:shelf', 'workshop:crate', 'workshop:torch',
+   'hubroom:torch'].forEach(function (key) {
+    var dkey = key.replace(':', '.');
+    TALK[key] = function (fd) {
+      fd.say(S.DL(dkey).map(function (t) { return { text: t }; }));
+    };
+  });
 
   S.Dialogue = {
     talk: function (mapId, id, fd) {
@@ -4306,11 +4787,28 @@ SPIKE.BLOCK_CATS = [
     this._showPage();
   };
 
+  /* ------------------------------------------------------------
+   *  타이핑은 글자 수로 세지만 그리기는 픽셀 폭으로 자른다.
+   *  줄마다 "n글자까지의 폭"을 페이지 진입 때 한 번만 재 둔다 (0글자 = 0).
+   *  draw() 가 이 표를 보고 클립 폭만 넓히면 되므로,
+   *  글자가 하나 늘 때마다 새 문자열을 렌더할 필요가 없어진다.
+   *
+   *  Font.measure 는 그림자 몫 1px 을 더해 주는데, 그 값을 그대로 클립 경계로
+   *  쓰면 아직 나오면 안 되는 다음 글자의 첫 세로줄이 비친다. 글자 폭만 쓴다.
+   *  (대신 맨 끝 글자의 그림자 한 줄이 잘린다 — 어두운 창 위라 눈에 안 띈다)
+   * ---------------------------------------------------------- */
   MessageWindow.prototype._showPage = function () {
     this.lines = this.pages[this.pageIdx];
     this.total = this.lines.join('').length;
     this.shown = 0;
     this.done = false;
+
+    this.widths = [];
+    for (var i = 0; i < this.lines.length; i++) {
+      var ln = this.lines[i], w = [0];
+      for (var c = 1; c <= ln.length; c++) w.push(S.Font.measure(ln.slice(0, c), FONT) - 1);
+      this.widths.push(w);
+    }
   };
 
   MessageWindow.prototype.update = function (dt) {
@@ -4391,15 +4889,28 @@ SPIKE.BLOCK_CATS = [
       r.text(this.cur.name, this.x + 11, this.y - 13, { size: FONT, color: this.cur.color || C.textHi });
     }
 
-    // 본문 (타이핑 중이면 잘라서)
+    /* 본문 (타이핑 중이면 잘라서)
+     *
+     * 예전에는 ln.slice(0, left) 를 그대로 넘겼다. 접두사가 매번 다른 문자열이라
+     * 폰트 캐시가 전부 빗나가고, 글자 하나 늘 때마다 캔버스 3장이 새로 생겼다
+     * (대사 하나에 159장 — 실측). 줄 전체를 한 번 그리고 클립으로 폭만 연다.
+     * 부분적으로 보이는 줄은 한 번에 하나뿐이라 클립도 프레임당 최대 1회다. */
     var left = Math.floor(this.shown);
     for (var i = 0; i < this.lines.length; i++) {
-      var ln = this.lines[i];
-      var part = ln;
-      if (left < ln.length) part = ln.slice(0, Math.max(0, left));
-      if (part) r.text(part, tx, ty + i * LINE, { size: FONT, color: C.text });
-      left -= ln.length;
       if (left <= 0) break;
+      var ln = this.lines[i];
+      var ly = ty + i * LINE;
+      if (left >= ln.length) {
+        if (ln) r.text(ln, tx, ly, { size: FONT, color: C.text });
+      } else {
+        r.ctx.save();
+        r.ctx.beginPath();
+        r.ctx.rect(tx, ly - 4, this.widths[i][left], LINE + 8);
+        r.ctx.clip();
+        r.text(ln, tx, ly, { size: FONT, color: C.text });
+        r.ctx.restore();
+      }
+      left -= ln.length;
     }
 
     // ▼ 커서
@@ -4699,10 +5210,12 @@ SPIKE.BLOCK_CATS = [
     x0: S.W - PW,
     active: false,
     hover: '',
+    _t: 0,          // 대기 화면 애니메이션용 (Mission.pageT 는 시작 전엔 안 돈다)
 
     enter: function () {
       this.x0 = S.W - PW;
       this.active = true;
+      this._t = 0;
       if (S.Mission && !S.Mission.steps.length) S.Mission.reset();
     },
 
@@ -4717,6 +5230,9 @@ SPIKE.BLOCK_CATS = [
     /* fd = 필드 씬. allowInput = 대화창이 안 떠 있을 때만 true */
     update: function (dt, allowInput, fd) {
       if (!this.active || !S.Mission) return;
+      this._t += dt;
+      // 아직 장인에게 말을 걸지 않았다 — 안내만 띄우고 조작도 재촉도 없다
+      if (!S.Mission.started()) { this.hover = ''; return; }
       S.Mission.update(dt);
       S.Mission.checkLate(fd);
       if (!allowInput) { this.hover = ''; return; }
@@ -4731,7 +5247,7 @@ SPIKE.BLOCK_CATS = [
 
     /* field 의 onKey 에서 호출 — Q 이전 / E 다음 */
     onKey: function (code, fd) {
-      if (!this.active || !S.Mission) return false;
+      if (!this.active || !S.Mission || !S.Mission.started()) return false;
       if (code === 'KeyQ') { S.Mission.prev(); return true; }
       if (code === 'KeyE') { S.Mission.next(fd); return true; }
       return false;
@@ -4748,6 +5264,8 @@ SPIKE.BLOCK_CATS = [
 
       r.window(x0, 0, PW, S.H, { alpha: 0.96 });
       r.rect(x0, 0, 1, S.H, C.winEdge2);
+
+      if (!S.Mission.started()) { this._waiting(r, x0, C); return; }
 
       if (!p) {
         r.text('…', x0 + PW / 2, S.H / 2, { size: 11, color: C.textDim, align: 'center' });
@@ -4770,6 +5288,45 @@ SPIKE.BLOCK_CATS = [
       if (!p.full) this._body(r, x0, p, C);
       this._footer(r, x0, C);
       this._toast(r, x0, C);
+    },
+
+    /* ------------------------------------------------------------
+     *  대기 화면 — 장인에게 말을 걸기 전.
+     *  "누구에게 말을 걸어야 하는지"를 그림으로 바로 보여 준다.
+     * ---------------------------------------------------------- */
+    _waiting: function (r, x0, C) {
+      r.rect(x0 + 2, 2, PW - 4, HEAD_H - 2, '#0a1436');
+      r.text(S.T('guide.wait.title', ''), x0 + PW / 2, 6,
+        { size: 11, color: C.textHi, align: 'center' });
+      r.rect(x0 + 2, HEAD_H, PW - 4, 1, C.winEdge2);
+
+      // 말을 걸 상대 (필드의 ! 표시와 같은 연출)
+      var sp = S.Sprites.get('maker_down_0');
+      if (sp) {
+        var bob = Math.round(Math.sin(this._t * 3) * 2);
+        var dx = x0 + (PW - sp.width * 2) / 2;
+        r.ctx.drawImage(sp, 0, 0, sp.width, sp.height, dx, 74 + bob, sp.width * 2, sp.height * 2);
+        r.sprite('o_excl', x0 + PW / 2 - 4, 54 + bob);
+      }
+
+      var body = S.TL('guide.wait.body');
+      var y = 140;
+      for (var i = 0; i < body.length; i++) {
+        r.text(body[i], x0 + PW / 2, y, { size: 10, color: C.text, align: 'center' });
+        y += 15;
+      }
+
+      if ((this._t % 1.2) < 0.75) {
+        r.text(S.T('guide.wait.hint', ''), x0 + PW / 2, 206,
+          { size: 10, color: C.textHi, align: 'center' });
+      }
+
+      // 분할 맵에서는 이 패널이 유일한 타이머 표시다 — 대기 중에도 보여 준다
+      r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
+      var late = S.State.remaining() < 120;
+      r.text(S.State.clock(), x0 + PW / 2, FOOT_Y + 8,
+        { size: 11, align: 'center',
+          color: S.State.paused ? C.textDim : (late ? C.textNg : C.text) });
     },
 
     _header: function (r, x0, p, C) {
@@ -5095,8 +5652,34 @@ SPIKE.BLOCK_CATS = [
       return this.steps[S.State.missionStep] || null;
     },
 
+    /* ------------------------------------------------------------
+     *  실습은 장인에게 말을 걸어야 시작된다.
+     *  그 전까지 패널은 안내만 띄우고 페이지 넘김도 받지 않는다
+     *  (예전에는 방에 들어서자마자 1페이지가 펼쳐져 있었다).
+     * ---------------------------------------------------------- */
+    started: function () { return !!S.State.flags.missionStarted; },
+
+    start: function (fd) {
+      if (this.started()) return false;
+      S.State.flags.missionStarted = true;
+      if (!this.steps.length) this.steps = S.GUIDE_PAGES || [];
+      S.State.missionStep = 0;
+      this.pageT = 0;
+      this.lateSaid = false;
+      S.Audio.se('page');
+      this._learn();                      // 첫 페이지 부품을 도감에 올린다
+      if (fd) {
+        var who = maker();
+        fd.say(S.DL('workshop.maker.start').map(function (t) {
+          return { name: who, text: t };
+        }));
+      }
+      return true;
+    },
+
     /* 현재 페이지의 퀘스트 문구 (좌측 상단 HUD) */
     goal: function () {
+      if (!this.started()) return S.T('quest.maker', '로봇 장인에게 말을 걸자');
       var p = this.page();
       return p ? S.pageText.goal(p) : S.T('quest.maker', '로봇 장인에게 말을 걸자');
     },
@@ -5244,6 +5827,10 @@ SPIKE.BLOCK_CATS = [
      10분 안에 세 맵을 도는 체험이라 이동에 시간을 쓰면 안 된다.
      0.16 은 초당 6칸으로 굼떠서 0.12(초당 8칸)로 올렸다. */
   var STEP = 0.12;
+  /* 이동 중에 들어온 방향키를 들고 있는 시간(초).
+     한 칸이 0.12초라, 그 사이에 눌렀다 뗀 키는 예전엔 통째로 사라졌다.
+     (도착 시점에 "지금 눌려 있는 키"만 봤다 — 톡 누르면 반응이 없었다) */
+  var BUFFER = 0.18;
   var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
   var Field = {
@@ -5255,6 +5842,13 @@ SPIKE.BLOCK_CATS = [
     mw: null,
     animT: 0,
     busy: false,
+
+    _ground: {},      // mapId → 미리 구운 바닥 캔버스
+    _groundCv: null,  // 지금 맵의 것
+    _exits: null,     // ▼ 를 그릴 칸들 (글자라 굽지 않는다)
+    _hudGoal: null,   // HUD 목표 문구 캐시
+    _buf: null,       // 이동 중에 눌린 방향 (선입력)
+    _bufT: 0,
 
     enter: function (p) {
       this.mapId = p.map || 'village';
@@ -5269,6 +5863,10 @@ SPIKE.BLOCK_CATS = [
       else this.mw = new S.MessageWindow();
 
       this._buildSolid();
+      this._groundCv = this._bakeGround();
+      this._hudGoal = null;
+      this._buf = null;
+      this._bufT = 0;
 
       var st = (p.at) ? p.at : this.map.start;
       this.player = {
@@ -5300,12 +5898,53 @@ SPIKE.BLOCK_CATS = [
       }
       for (var i = 0; i < (m.objects || []).length; i++) {
         var o = m.objects[i];
+        if (o.hidden) continue;        // 사라진 오브젝트가 벽으로 남으면 안 된다
         for (var j = 0; j < (o.solid || []).length; j++) {
           var c = o.solid[j];
           if (grid[c[1]]) grid[c[1]][c[0]] = true;
         }
       }
       this.solid = grid;
+    },
+
+    /* ------------------------------------------------------------
+     *  바닥을 캔버스 한 장에 미리 구워 둔다.
+     *
+     *  맵은 24x18 = 정확히 한 화면이고 지형은 애니메이션도 변화도 없다.
+     *  그런데 예전에는 매 프레임 타일 433장을 drawImage 로 다시 붙이고 있었다.
+     *  (60fps 면 초당 2만 7천 회 — 프레임 예산을 여기서 다 썼다)
+     *  한 번 구워 두면 프레임당 drawImage 1회로 끝난다.
+     *
+     *  resetMaps 는 NPC·오브젝트만 되돌리고 ground 는 건드리지 않으므로
+     *  맵별로 한 번만 굽고 계속 쓴다.
+     *  ▼(출구 표시)는 글자라 폰트가 바뀌면 달라진다 — 굽지 않고 따로 그린다.
+     * ---------------------------------------------------------- */
+    _bakeGround: function () {
+      var m = this.map;
+
+      this._exits = [];
+      for (var ey = 0; ey < this.gh; ey++) {
+        for (var ex = 0; ex < this.gw; ex++) {
+          if (m.ground[ey][ex] === 'D') this._exits.push([ex * T, ey * T]);
+        }
+      }
+
+      var hit = this._ground[this.mapId];
+      if (hit) return hit;
+
+      var cv = document.createElement('canvas');
+      cv.width = this.gw * T;
+      cv.height = this.gh * T;
+      var ctx = cv.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      for (var y = 0; y < this.gh; y++) {
+        for (var x = 0; x < this.gw; x++) {
+          var sp = S.Sprites.get(S.TERRAIN[m.ground[y][x]] || 't_grass');
+          if (sp) ctx.drawImage(sp, x * T, y * T);
+        }
+      }
+      this._ground[this.mapId] = cv;
+      return cv;
     },
 
     passable: function (tx, ty) {
@@ -5329,10 +5968,19 @@ SPIKE.BLOCK_CATS = [
         S.MissionPanel.update(dt, !this.mw.active && !this.busy, this);
       }
 
-      if (this.mw.active) { this.mw.update(dt); return; }
+      if (this.mw.active) { this.mw.update(dt); this._buf = null; this._bufT = 0; return; }
       if (this.busy) return;
 
       var pl = this.player, I = S.Input;
+
+      /* 한 칸 가는 동안 눌린 방향은 버리지 않고 잠깐 들고 있는다.
+         도착할 때 이걸 먼저 본다 — 톡 누른 입력이 사라지지 않게. */
+      var np = this._pressedDir();
+      if (np) { this._buf = np; this._bufT = BUFFER; }
+      else if (this._bufT > 0) {
+        this._bufT -= dt;
+        if (this._bufT <= 0) { this._buf = null; this._bufT = 0; }
+      }
 
       // 이동 보간
       if (pl.moving) {
@@ -5349,7 +5997,7 @@ SPIKE.BLOCK_CATS = [
           // 도착 처리가 대화나 맵 이동을 시작했으면 여기서 멈춘다
           var blocked = this.mw.active || this.busy || S.Game._pending;
           if (!blocked) {
-            var nd = this._heldDir();
+            var nd = this._takeDir();
             if (nd && this._tryStep(nd)) {
               pl.t = Math.min(0.99, carry / STEP);
               this._lerp();
@@ -5361,16 +6009,30 @@ SPIKE.BLOCK_CATS = [
         pl.animT += dt;
 
       } else {
-        var d = this._heldDir();
+        var d = this._takeDir();
         if (d) {
-          if (!this._tryStep(d)) pl.frame = 0;
+          /* 출발하는 프레임도 이번 dt 만큼 나아가게 한다.
+             예전엔 t=0 으로만 두고 보간을 안 해서 첫 프레임은 제자리였다 (17ms 손해).
+             도착 후 이어 걷는 쪽은 원래부터 carry 로 이렇게 하고 있었다. */
+          if (this._tryStep(d)) {
+            pl.t = Math.min(0.99, dt / STEP);
+            this._lerp();
+            pl.animT += dt;
+          } else {
+            pl.frame = 0;
+            this._bump();
+          }
         } else {
           pl.frame = 0;
           pl.animT = 0;
         }
         if (I.pressed.ok) {
           // 정면에 말 걸 대상이 없으면 가이드 페이지를 넘긴다
-          if (!this._interact() && this.map.split && S.Mission) S.Mission.next(this);
+          // (실습 시작 전에는 넘기지 않는다 — 장인에게 말을 걸어야 시작된다)
+          if (!this._interact() && this.map.split &&
+              S.Mission && S.Mission.started()) {
+            S.Mission.next(this);
+          }
         }
         if (I.pressed.cancel) S.Game.push('dex');
       }
@@ -5386,6 +6048,25 @@ SPIKE.BLOCK_CATS = [
       if (I.down.left) return 'left';
       if (I.down.right) return 'right';
       return null;
+    },
+
+    /* 이번 프레임에 새로 눌린 방향 (없으면 null) */
+    _pressedDir: function () {
+      var P = S.Input.pressed;
+      if (P.up) return 'up';
+      if (P.down) return 'down';
+      if (P.left) return 'left';
+      if (P.right) return 'right';
+      return null;
+    },
+
+    /* 지금 가야 할 방향. 이동 중에 눌러 둔 것이 있으면 그것을 먼저 쓴다.
+       한 번 쓰면 비운다 — 안 그러면 다음 칸에서 또 먹는다. */
+    _takeDir: function () {
+      var d = this._buf || this._heldDir();
+      this._buf = null;
+      this._bufT = 0;
+      return d;
     },
 
     /* 그 방향으로 한 칸 시작. 막혀 있으면 방향만 바꾸고 false */
@@ -5425,7 +6106,7 @@ SPIKE.BLOCK_CATS = [
         var e = ex[i];
         if (e.tx === pl.tx && e.ty === pl.ty) {
           if (e.need && !S.State.flags[e.need]) {
-            this.mw.show(e.deny || '아직 갈 수 없다.');
+            this.mw.show(e.denyKey ? S.T(e.denyKey, '') : S.T('exits.locked', ''));
             // 되돌려 세운다
             var v = DIRV[pl.dir];
             pl.tx -= v[0]; pl.ty -= v[1];
@@ -5438,6 +6119,28 @@ SPIKE.BLOCK_CATS = [
           return;
         }
       }
+    },
+
+    /* ------------------------------------------------------------
+     *  막힌 칸에 부딪혔을 때 스스로 반응하는 오브젝트 (bump: true).
+     *  보스처럼 "지나칠 수 없는" 대상용 — Z 를 안 눌러도 걸어가면 걸린다.
+     *  말 걸기와 같은 대화 테이블을 탄다.
+     * ---------------------------------------------------------- */
+    _bump: function () {
+      var pl = this.player, v = DIRV[pl.dir];
+      var fx = pl.tx + v[0], fy = pl.ty + v[1];
+      var o = this.map.objects || [];
+      for (var i = 0; i < o.length; i++) {
+        if (!o[i].id || !o[i].bump || o[i].hidden) continue;
+        var cells = o[i].solid || [];
+        for (var k = 0; k < cells.length; k++) {
+          if (cells[k][0] === fx && cells[k][1] === fy) {
+            S.Dialogue.talk(this.mapId, o[i].id, this);
+            return true;
+          }
+        }
+      }
+      return false;
     },
 
     /* 정면 칸의 대상과 상호작용. 말 건 대상이 있으면 true */
@@ -5456,7 +6159,7 @@ SPIKE.BLOCK_CATS = [
       }
       var o = this.map.objects || [];
       for (var j = 0; j < o.length; j++) {
-        if (!o[j].id) continue;
+        if (!o[j].id || o[j].hidden) continue;   // 사라진 오브젝트에 말을 걸면 안 된다
         var cells = o[j].solid || [];
         for (var k = 0; k < cells.length; k++) {
           if (cells[k][0] === fx && cells[k][1] === fy) {
@@ -5503,101 +6206,115 @@ SPIKE.BLOCK_CATS = [
     },
 
     _drawGround: function (r) {
-      var m = this.map;
-      var x0 = Math.floor(this.cam.x / T), x1 = Math.ceil((this.cam.x + this.viewW) / T);
-      var y0 = Math.floor(this.cam.y / T), y1 = Math.ceil((this.cam.y + this.viewH) / T);
-      for (var y = y0; y < y1 && y < this.gh; y++) {
-        for (var x = x0; x < x1 && x < this.gw; x++) {
-          if (x < 0 || y < 0) continue;
-          var ch = m.ground[y][x];
-          var tile = S.TERRAIN[ch] || 't_grass';
-          var sp = S.Sprites.get(tile);
-          if (sp) r.ctx.drawImage(sp, x * T, y * T);
-          if (ch === 'D') {
-            // 출구 표시
-            r.rect(x * T + 2, y * T + 2, T - 4, T - 4, '#00000044');
-            r.text('▼', x * T + T / 2, y * T + 3, { size: 10, color: '#ffe066', align: 'center' });
-          }
-        }
+      // ctx 는 이미 -cam 만큼 밀려 있다. 분할 맵은 draw() 의 clip 이 잘라 준다.
+      if (this._groundCv) r.ctx.drawImage(this._groundCv, 0, 0);
+
+      // 출구 표시 — 맵당 1~2칸뿐이라 매 프레임 그려도 부담이 없다
+      var ex = this._exits;
+      for (var i = 0; i < ex.length; i++) {
+        r.rect(ex[i][0] + 2, ex[i][1] + 2, T - 4, T - 4, '#00000044');
+        r.text('▼', ex[i][0] + T / 2, ex[i][1] + 3, { size: 10, color: '#ffe066', align: 'center' });
       }
     },
 
+    /* ------------------------------------------------------------
+     *  y 순으로 겹쳐 그리기.
+     *
+     *  예전에는 프레임마다 배열 하나와 엔티티 수만큼의 클로저를 새로 만들고
+     *  비교 함수까지 넘겨 sort() 했다 (초당 800개 남짓 할당).
+     *  목록 슬롯을 재사용하고, 20개 남짓이라 삽입 정렬로 바꿨다.
+     *  두 방식 다 안정 정렬이라 y 가 같을 때 순서(오브젝트→NPC→주인공)는 그대로다.
+     * ---------------------------------------------------------- */
     _drawEntities: function (r) {
-      var list = [];
-      var m = this.map, i;
+      var list = this._ents || (this._ents = []);
+      var m = this.map, n = 0, i;
 
       for (i = 0; i < (m.objects || []).length; i++) {
         var o = m.objects[i];
-        if (o.hidden) continue;
-        var sp = S.Sprites.get(o.sprite);
-        if (!sp) continue;
-        list.push({
-          y: (o.ty + 1) * T,
-          draw: function (o, sp) {
-            return function () {
-              r.ctx.drawImage(sp, o.tx * T, (o.ty + 1) * T - sp.height);
-            };
-          }(o, sp)
-        });
+        if (o.hidden || !S.Sprites.get(o.sprite)) continue;
+        n = this._put(list, n, (o.ty + 1) * T, 'obj', o);
       }
 
       for (i = 0; i < (m.npcs || []).length; i++) {
-        var n = m.npcs[i];
-        if (n.hidden) continue;
-        list.push({ y: (n.ty + 1) * T, draw: this._npcDrawer(r, n) });
+        var np = m.npcs[i];
+        if (np.hidden) continue;
+        n = this._put(list, n, (np.ty + 1) * T, 'npc', np);
       }
 
-      list.push({ y: this.player.py + T, draw: this._playerDrawer(r) });
+      n = this._put(list, n, this.player.py + T, 'hero', this.player);
 
-      list.sort(function (a, b) { return a.y - b.y; });
-      for (i = 0; i < list.length; i++) list[i].draw();
+      for (i = 1; i < n; i++) {
+        var cur = list[i], j = i - 1;
+        while (j >= 0 && list[j].y > cur.y) { list[j + 1] = list[j]; j--; }
+        list[j + 1] = cur;
+      }
+      for (i = 0; i < n; i++) this._drawEnt(r, list[i]);
     },
 
-    _npcDrawer: function (r, n) {
-      var self = this;
-      return function () {
-        var s = S.Sprites.charSprite(n.char, n.dir || 'down', 0);
-        var sp = S.Sprites.get(s.id);
-        if (!sp) return;
+    /* 슬롯을 덮어쓴다 — 새 객체를 만들지 않는다 */
+    _put: function (list, n, y, kind, ref) {
+      var e = list[n] || (list[n] = { y: 0, kind: '', ref: null });
+      e.y = y; e.kind = kind; e.ref = ref;
+      return n + 1;
+    },
+
+    _drawEnt: function (r, e) {
+      if (e.kind === 'obj') {
+        var o = e.ref, osp = S.Sprites.get(o.sprite);
+        if (osp) r.ctx.drawImage(osp, o.tx * T, (o.ty + 1) * T - osp.height);
+        return;
+      }
+
+      if (e.kind === 'npc') {
+        var n = e.ref;
+        var ns = S.Sprites.charSprite(n.char, n.dir || 'down', 0);
+        var nsp = S.Sprites.get(ns.id);
+        if (!nsp) return;
         var dx = n.tx * T + (T - 16) / 2;
-        var dy = (n.ty + 1) * T - sp.height + 4;
-        r.sprite(s.id, dx, dy, { flipX: s.flip });
+        var dy = (n.ty + 1) * T - nsp.height + 4;
+        r.sprite(ns.id, dx, dy, { flipX: ns.flip });
         // 아직 말 안 건 NPC 머리 위 !
         if (n.mark && !S.State.flags['talked_' + n.id]) {
-          var bob = Math.sin(self.animT * 5) * 2;
-          r.sprite('o_excl', dx + 4, dy - 12 + bob);
+          r.sprite('o_excl', dx + 4, dy - 12 + Math.sin(this.animT * 5) * 2);
         }
-      };
-    },
+        return;
+      }
 
-    _playerDrawer: function (r) {
-      var pl = this.player;
-      return function () {
-        var frame = pl.moving ? (Math.floor(pl.animT * 8) % 2 === 0 ? 1 : 2) : 0;
-        var s = S.Sprites.charSprite('hero', pl.dir, frame);
-        var bob = (pl.moving && frame !== 0) ? -1 : 0;
-        var sp = S.Sprites.get(s.id);
-        if (!sp) return;
-        r.sprite(s.id, Math.round(pl.px) + (T - 16) / 2,
-          Math.round(pl.py) + T - sp.height + 4 + bob, { flipX: s.flip });
-      };
+      var pl = e.ref;
+      var frame = pl.moving ? (Math.floor(pl.animT * 8) % 2 === 0 ? 1 : 2) : 0;
+      var ps = S.Sprites.charSprite('hero', pl.dir, frame);
+      var psp = S.Sprites.get(ps.id);
+      if (!psp) return;
+      var bob = (pl.moving && frame !== 0) ? -1 : 0;
+      r.sprite(ps.id, Math.round(pl.px) + (T - 16) / 2,
+        Math.round(pl.py) + T - psp.height + 4 + bob, { flipX: ps.flip });
     },
 
     _drawHUD: function (r) {
       var C = S.C;
       var obj = S.Quest.current();
-
-      // 좌측 목표 — 분할 맵에서는 폭이 좁으므로 넘치면 잘라낸다
       var maxW = this.viewW - 8;
-      var label = '◆ ' + obj;
-      if (r.textWidth(label, 10) + 18 > maxW) {
-        while (label.length > 4 && r.textWidth(label + '…', 10) + 18 > maxW) {
-          label = label.slice(0, -1);
+
+      /* 좌측 목표 — 분할 맵에서는 폭이 좁으므로 넘치면 잘라낸다.
+         목표 문구는 플래그가 바뀔 때만 달라지는데 자르기 루프가 글자마다
+         폭을 재므로, 문구(또는 폰트 세대)가 그대로면 계산을 건너뛴다. */
+      if (obj !== this._hudGoal || maxW !== this._hudMaxW || S.Font.gen !== this._hudGen) {
+        this._hudGoal = obj;
+        this._hudMaxW = maxW;
+        this._hudGen = S.Font.gen;
+        var label = '◆ ' + obj;
+        if (r.textWidth(label, 10) + 18 > maxW) {
+          while (label.length > 4 && r.textWidth(label + '…', 10) + 18 > maxW) {
+            label = label.slice(0, -1);
+          }
+          label += '…';
         }
-        label += '…';
+        this._hudLabel = label;
+        this._hudW = Math.min(r.textWidth(label, 10) + 18, maxW);
       }
-      r.window(4, 4, Math.min(r.textWidth(label, 10) + 18, maxW), 20, { alpha: 0.85 });
-      r.text(label, 11, 9, { size: 10, color: C.textHi });
+
+      r.window(4, 4, this._hudW, 20, { alpha: 0.85 });
+      r.text(this._hudLabel, 11, 9, { size: 10, color: C.textHi });
 
       // 우측 타이머 (분할 맵에서는 패널이 담당)
       if (!this.map.split) {
@@ -5629,9 +6346,12 @@ SPIKE.BLOCK_CATS = [
     ids: [], i: 0, title: '', onDone: null,
     t: 0, slide: 0,
 
+    /* 필드를 페이드로 덮는다 — 엔진이 뒤 배경을 정지 화면으로 재사용해도 된다 */
+    freezeBase: true,
+
     enter: function (p) {
       this.ids = p.ids || [];
-      this.title = p.title || '부품 도감';
+      this.title = p.title || S.T('dex.title', '');
       this.onDone = p.onDone || null;
       this.i = 0; this.t = 0; this.slide = 1;
       this._register();
@@ -5676,9 +6396,11 @@ SPIKE.BLOCK_CATS = [
       var part = S.partById(this.ids[this.i]);
       if (!part) return;
 
-      var bw = 344, bh = 196;
+      /* 설명이 도감과 같은 예산(글칸 214px · 6줄)을 쓰도록 세로를 키웠다.
+         예전 196 에서는 4줄만 들어가 hub·dist 설명이 문장 중간에서 잘렸다. */
+      var bw = 344, bh = 216;
       var bx = Math.round((S.W - bw) / 2);
-      var by = 44 + Math.round(this.slide * 10);
+      var by = 36 + Math.round(this.slide * 10);
 
       r.window(bx, by, bw, bh);
 
@@ -5688,8 +6410,8 @@ SPIKE.BLOCK_CATS = [
       r.text((this.i + 1) + ' / ' + this.ids.length, bx + bw - 12, by + 8,
         { size: 10, color: C.textDim, align: 'right' });
 
-      // 아이콘 (3배 확대)
-      var ix = bx + 18, iy = by + 34;
+      // 아이콘 (3배 확대) — 글칸을 넓히려고 왼쪽으로 붙였다
+      var ix = bx + 10, iy = by + 34;
       r.rect(ix, iy, 100, 100, '#0a1230');
       r.frame(ix, iy, 100, 100, C.winEdge2, 1);
       var sp = S.Sprites.get(part.icon);
@@ -5700,16 +6422,33 @@ SPIKE.BLOCK_CATS = [
       }
       r.text('NEW', ix + 50, iy + 104, { size: 9, color: C.textOk, align: 'center' });
 
-      // 텍스트
-      var tx = bx + 132;
+      /* 텍스트
+       *
+       * 예전에는 part.lines 를 접지 않고 그대로 그렸다. JSON 이 조금만 길어도
+       * 오른쪽 테두리를 뚫고 나갔고, 4줄 고정이라 5줄짜리는 문장 중간에서 끊겼다.
+       * 도감(dex)과 같은 규칙으로 바꾼다 — 칸 폭에 맞춰 접고, 남은 높이만큼 그린다. */
+      var tx = bx + 120;
+      var tw = bw - 120 - 10;          // 214 — 도감 우측 패널과 같은 폭
+      var bottom = by + bh - 38;       // TIP 박스 위
+
       r.text(part.title, tx, by + 34, { size: 14, color: C.textHi });
       r.text(part.real, tx, by + 53, { size: 10, color: C.textDim });
-      r.rect(tx, by + 68, bw - 150, 1, C.winEdge2);
-      r.text(part.one, tx, by + 74, { size: 11, color: C.white });
+      r.rect(tx, by + 68, tw, 1, C.winEdge2);
 
-      var maxLines = 4;
-      for (var i = 0; i < part.lines.length && i < maxLines; i++) {
-        r.text(part.lines[i], tx, by + 94 + i * 14, { size: 10, color: C.text });
+      var y = by + 74;
+      var head = S.Font.wrap(part.one, 11, tw);
+      for (var h = 0; h < head.length && y + 13 <= bottom; h++) {
+        r.text(head[h], tx, y, { size: 11, color: C.white });
+        y += 16;
+      }
+
+      /* 설명은 산문이다. 작성자가 끊어 놓은 위치를 그대로 쓰면 언어나 폰트가
+         바뀔 때 고아 단어가 생기므로, 이어 붙인 뒤 칸 폭에 맞춰 다시 끊는다. */
+      y += 4;
+      var desc = S.Font.wrap(part.lines.join(' '), 10, tw);
+      for (var i = 0; i < desc.length && y + 12 <= bottom; i++) {
+        r.text(desc[i], tx, y, { size: 10, color: C.text });
+        y += 14;
       }
 
       // 팁
@@ -5743,6 +6482,9 @@ SPIKE.BLOCK_CATS = [
 
   var Dex = {
     idx: 0, scroll: 0, t: 0,
+
+    /* 필드를 페이드로 덮는다 — 엔진이 뒤 배경을 정지 화면으로 재사용해도 된다 */
+    freezeBase: true,
 
     enter: function () { this.t = 0; S.Audio.se('ok'); },
     exit: function () { S.Audio.se('cancel'); },
@@ -5870,23 +6612,36 @@ SPIKE.BLOCK_CATS = [
 (function (S) {
   'use strict';
 
-  var PH = { INTRO: 0, ASK: 1, JUDGE: 2, WHY: 3, WIN: 4 };
+  var PH = { INTRO: 0, ASK: 1, JUDGE: 2, WHY: 3, WIN: 4, ACT: 5 };
+
+  /* 해체 카드를 못 넘기는 시간(초). 실물을 실제로 만질 틈을 준다 (DESIGN.md §9-1) */
+  var ACT_HOLD = 1.5;
+
+  /* 보기 배치 열 수 — _choiceRect 와 _pick 이 같은 값을 봐야 한다 */
+  var COLS = 2;
 
   var Battle = {
     enemy: '', enemyName: '', qs: [], qi: 0, sel: 0,
     phase: 0, t: 0, back: null, onWin: null,
     hpMax: 0, hp: 0, shake: 0, lastOk: false, dmgPop: null,
     mw: null, flash: 0, act: '',
+    strict: false, src: null,
 
     enter: function (p) {
       this.enemy = p.enemy || 'e_pin';
-      this.enemyName = p.enemyName || '수상한 그림자';
+      this.enemyName = p.enemyName || S.T('battle.unknownEnemy', '');
       this.back = p.back || null;
       this.onWin = p.onWin || null;
       this.act = '';
 
+      /* strict = 보스전. 문제가 곧 실물 해체 절차라 순서를 건너뛸 수 없다.
+         오답이면 같은 문제를 다시 내고, 정답이면 해체 지시 카드를 띄운다. */
+      this.strict = !!p.strict;
+
+
       var set = S.QUIZ[p.quizSet] || S.QUIZ.gate;
-      this.qs = set.map(S.shuffleQuiz);
+      this.src = set;                       // 재출제할 때 원본에서 다시 섞는다
+      this.qs = set.map(function (q) { return S.shuffleQuiz(q); });
       this.qi = 0; this.sel = 0;
       this.hpMax = this.qs.length; this.hp = this.qs.length;
       this.phase = PH.INTRO; this.t = 0; this.shake = 0; this.flash = 0;
@@ -5895,7 +6650,8 @@ SPIKE.BLOCK_CATS = [
       // 해설이 3줄까지 나온다 — 높이를 그만큼 준다 (maxLines 참조)
       this.mw = new S.MessageWindow({ h: 74, y: S.H - 82 });
       var self = this;
-      this.mw.show({ name: this.enemyName, text: this.enemyName + '이(가) 나타났다!\n문제를 맞혀서 물리쳐라!' },
+      this.mw.show({ name: this.enemyName,
+        text: S.Text.fmt(S.T('battle.appear', ''), { name: this.enemyName }) },
         function () { self.phase = PH.ASK; });
 
       S.Audio.playBGM(p.bgm || 'battle');
@@ -5920,8 +6676,10 @@ SPIKE.BLOCK_CATS = [
       if (this.phase === PH.ASK) {
         var q = this.qs[this.qi];
         var n = q.choices.length;
-        if (I.pressed.up) { this.sel = (this.sel + n - 1) % n; S.Audio.se('cursor'); }
-        if (I.pressed.down) { this.sel = (this.sel + 1) % n; S.Audio.se('cursor'); }
+        if (I.pressed.left) this._pick(-1, 0);
+        if (I.pressed.right) this._pick(1, 0);
+        if (I.pressed.up) this._pick(0, -1);
+        if (I.pressed.down) this._pick(0, 1);
         for (var i = 0; i < n; i++) {
           var b = this._choiceRect(i);
           if (I.hover(b[0], b[1], b[2], b[3])) this.sel = i;
@@ -5936,17 +6694,65 @@ SPIKE.BLOCK_CATS = [
         return;
       }
 
+      /* 해체 지시 카드 — ACT_HOLD 동안은 넘기지 못한다 */
+      if (this.phase === PH.ACT) {
+        if (this.t < ACT_HOLD) return;
+        if (I.pressed.ok || I.mouse.pressed) {
+          S.Audio.se('ok');
+          this._advance();
+        }
+        return;
+      }
+
       if (this.phase === PH.WIN) {
         this.mw.update(dt);
         return;
       }
     },
 
+    /* 다음 문제로. 다 풀었으면 승리 */
+    _advance: function () {
+      this.qi++;
+      this.sel = 0;
+      if (this.qi >= this.qs.length) this._win();
+      else this.phase = PH.ASK;
+    },
+
     _choiceRect: function (i) {
       var w = (S.W - 24) / 2 | 0;
-      var x = 8 + (i % 2) * (w + 8);
-      var y = 152 + Math.floor(i / 2) * 26;
+      var x = 8 + (i % COLS) * (w + 8);
+      var y = 152 + Math.floor(i / COLS) * 26;
       return [x, y, w, 22];
+    },
+
+    /* ------------------------------------------------------------
+     *  보기 고르기 — 화면이 2열 격자이므로 방향키 네 개를 다 받는다.
+     *    좌우 : 목록 순서대로 한 칸 (끝에서 돈다)
+     *    위아래 : 같은 열에서 윗줄·아랫줄로 (빈 자리는 건너뛴다)
+     *  예전에는 위아래만 받았고 그마저 목록 순서라, 위를 눌렀는데
+     *  커서가 오른쪽 칸으로 가는 것처럼 보였다.
+     * ---------------------------------------------------------- */
+    _pick: function (dx, dy) {
+      var n = this.qs[this.qi].choices.length;
+      if (n < 2) return;
+      var next = this.sel;
+
+      if (dx) {
+        next = (this.sel + dx + n) % n;
+      } else {
+        var rows = Math.ceil(n / COLS);
+        var col = this.sel % COLS;
+        var row = Math.floor(this.sel / COLS);
+        for (var k = 0; k < rows; k++) {
+          row = (row + dy + rows) % rows;
+          var cand = row * COLS + col;
+          if (cand < n) { next = cand; break; }
+        }
+      }
+
+      if (next === this.sel) return;
+      this.sel = next;
+      S.Audio.se('cursor');
     },
 
     _answer: function () {
@@ -5962,13 +6768,18 @@ SPIKE.BLOCK_CATS = [
         this.shake = 10;
         this.flash = 1;
         this.hp = Math.max(0, this.hp - 1);
-        this.dmgPop = { t: 0, v: '정답!', col: S.C.textOk };
+        this.dmgPop = { t: 0, v: S.T('battle.correct', ''), col: S.C.textOk };
       } else {
         S.State.quizNg++;
         S.Audio.se('wrong');
         S.State.hp = Math.max(0, S.State.hp - 1);
-        this.hp = Math.max(0, this.hp - 1);   // 진행은 반드시 된다
-        this.dmgPop = { t: 0, v: '아쉽다…', col: S.C.textNg };
+        this.dmgPop = { t: 0, v: S.T('battle.wrong', ''), col: S.C.textNg };
+
+        /* 보스전에서는 보스 HP 를 줄이지 않는다 — 맞혀야만 한 단계가 해체된다.
+           체력이 0 이 되면 해설을 보여 준 뒤 게임오버로 간다 (_explain 참조).
+           ※ 예전에는 여기서 정령이 체력을 채워 줬다 (DESIGN.md §9-2).
+             게임오버를 넣기로 하면서 그 구제책은 뺐다. */
+        if (!this.strict) this.hp = Math.max(0, this.hp - 1);
       }
     },
 
@@ -5977,20 +6788,43 @@ SPIKE.BLOCK_CATS = [
       var self = this;
       this.phase = PH.WHY;
       var msgs = [{
-        name: this.lastOk ? '정답!' : '해설',
+        name: S.T(this.lastOk ? 'battle.correct' : 'battle.why', ''),
         color: this.lastOk ? S.C.textOk : S.C.textNg,
-        text: (this.lastOk ? '' : '정답은 「' + q.choices[q.ans] + '」.\n') + q.why,
+        text: (this.lastOk ? ''
+              : S.Text.fmt(S.T('battle.answerIs', ''), { a: q.choices[q.ans] }) + '\n') + q.why,
         icon: q.icon
       }];
-      if (q.act) {
-        this.act = q.act;
-        msgs.push({ name: '실제 행동', color: S.C.textHi, text: '지금 실물에서 → ' + q.act });
+      if (q.act) this.act = q.act;
+
+      /* 체력이 바닥났다 — 해설은 끝까지 보여 주고 그다음에 게임오버로 */
+      var dead = S.State.hp <= 0;
+      if (dead) {
+        msgs.push({ name: this.enemyName, color: S.C.textNg, text: S.T('battle.downed', '') });
+      }
+
+      if (this.strict) {
+        /* 보스전: 오답이면 순서가 어긋나므로 되돌린다. 정답이면 해체 카드로. */
+        if (!this.lastOk && !dead) {
+          msgs.push({ name: this.enemyName, color: S.C.textNg, text: S.T('battle.retry', '') });
+        }
+        this.mw.show(msgs, function () {
+          if (dead) { S.Game.transition('gameover'); return; }
+          self.sel = 0;
+          if (self.lastOk) { self.phase = PH.ACT; self.t = 0; S.Audio.se('item'); return; }
+          // 같은 문제를 보기만 다시 섞어 낸다
+          self.qs[self.qi] = S.shuffleQuiz(self.src[self.qi]);
+          self.phase = PH.ASK;
+        });
+        return;
+      }
+
+      if (q.act && !dead) {
+        msgs.push({ name: S.T('battle.actLabel', ''), color: S.C.textHi,
+          text: S.Text.fmt(S.T('battle.actNow', ''), { act: q.act }) });
       }
       this.mw.show(msgs, function () {
-        self.qi++;
-        self.sel = 0;
-        if (self.qi >= self.qs.length) self._win();
-        else self.phase = PH.ASK;
+        if (dead) { S.Game.transition('gameover'); return; }
+        self._advance();
       });
     },
 
@@ -6001,8 +6835,9 @@ SPIKE.BLOCK_CATS = [
       var self = this;
       var ok = S.State.quizOk, ng = S.State.quizNg;
       this.mw.show([
-        { name: '승리!', color: S.C.textHi, text: this.enemyName + '을(를) 물리쳤다!' },
-        { text: '정답 ' + ok + '개 / 오답 ' + ng + '개\n배운 것을 잊지 말자.' }
+        { name: S.T('battle.win', ''), color: S.C.textHi,
+          text: S.Text.fmt(S.T('battle.defeated', ''), { name: this.enemyName }) },
+        { text: S.Text.fmt(S.T('battle.score', ''), { ok: ok, ng: ng }) }
       ], function () {
         if (self.onWin) self.onWin();
         if (self.back) S.Game.transition('field', { map: self.back.map, at: self.back.at });
@@ -6111,6 +6946,54 @@ SPIKE.BLOCK_CATS = [
       if (this.phase === PH.INTRO || this.phase === PH.WHY || this.phase === PH.WIN) {
         this.mw.draw(r);
       }
+
+      if (this.phase === PH.ACT) this._drawAct(r);
+    },
+
+    /* ------------------------------------------------------------
+     *  해체 지시 카드 (DESIGN.md §9-1)
+     *  문제를 맞힐 때마다 "지금 실물에서 할 일"을 전체화면으로 크게 띄우고,
+     *  ACT_HOLD 동안은 넘기지 못하게 막는다.
+     * ---------------------------------------------------------- */
+    _drawAct: function (r) {
+      var C = S.C;
+      r.fade(0.82);
+
+      var bw = 300, bh = 152;
+      var bx = Math.round((S.W - bw) / 2), by = Math.round((S.H - bh) / 2);
+      r.window(bx, by, bw, bh);
+
+      r.text(S.T('battle.actTitle', ''), bx + bw / 2, by + 10,
+        { size: 11, color: C.textHi, align: 'center' });
+      r.rect(bx + 16, by + 30, bw - 32, 1, C.winEdge2);
+
+      var q = this.qs[this.qi];
+      var sp = q && q.icon && S.Sprites.get(q.icon);
+      if (sp) {
+        r.rect(bx + 16, by + 42, 52, 52, '#0a1230');
+        r.frame(bx + 16, by + 42, 52, 52, C.winEdge2, 1);
+        r.ctx.drawImage(sp, 0, 0, 32, 32, bx + 18, by + 44, 48, 48);
+      }
+
+      var tx = bx + 80, tw = bw - 80 - 16;
+      var lines = S.Font.wrap(this.act, 14, tw);
+      var y = by + 46;
+      for (var i = 0; i < lines.length && i < 3; i++) {
+        r.text(lines[i], tx, y, { size: 14, color: C.white });
+        y += 18;
+      }
+
+      if (this.t >= ACT_HOLD) {
+        if ((this.t % 1.2) < 0.75) {
+          r.text(S.T('battle.actNext', ''), bx + bw / 2, by + bh - 24,
+            { size: 10, color: C.textOk, align: 'center' });
+        }
+      } else {
+        // 남은 대기 시간 게이지 — 넘길 수 없다는 걸 보여 준다
+        var gw = bw - 80;
+        r.rect(bx + 40, by + bh - 22, gw, 4, '#0a1230');
+        r.rect(bx + 40, by + bh - 22, Math.round(gw * (this.t / ACT_HOLD)), 4, C.textHi);
+      }
     }
   };
 
@@ -6126,12 +7009,10 @@ SPIKE.BLOCK_CATS = [
 (function (S) {
   'use strict';
 
-  var RANKS = {
-    S: { color: '#ffe066', word: '완벽한 메카닉!', sub: '부품도 순서도 전부 정확했다.' },
-    A: { color: '#8fe3ff', word: '훌륭한 메카닉!', sub: '거의 다 맞혔다. 실전에서도 잘하겠다.' },
-    B: { color: '#b6ffcb', word: '좋은 출발!',     sub: '핵심은 잡았다. 도감을 다시 보면 완벽!' },
-    C: { color: '#ffc0c8', word: '수고했다!',       sub: '오늘 만져본 감각이 진짜 실력이 된다.' }
-  };
+  /* 랭크별 색만 코드에 둔다.
+     글자(word/sub)는 content/ui.<언어>.json 의 ending.ranks.* 에 있다 —
+     예전엔 여기 한국어가 박혀 있어서 영어로 바꿔도 그대로 나왔다. */
+  var RANK_COLOR = { S: '#ffe066', A: '#8fe3ff', B: '#b6ffcb', C: '#ffc0c8' };
 
   var Ending = {
     t: 0, rank: 'C', ready: false, parts: [],
@@ -6171,7 +7052,10 @@ SPIKE.BLOCK_CATS = [
     },
 
     draw: function (r) {
-      var C = S.C, R = RANKS[this.rank];
+      var C = S.C;
+      var rankColor = RANK_COLOR[this.rank] || '#ffffff';
+      var rankWord = S.T('ending.ranks.' + this.rank + '.word', '');
+      var rankSub = S.T('ending.ranks.' + this.rank + '.sub', '');
       r.vgradient(0, 0, S.W, S.H, '#101a3a', '#2a1a4a');
 
       for (var i = 0; i < this.parts.length; i++) {
@@ -6179,19 +7063,19 @@ SPIKE.BLOCK_CATS = [
         r.rect(p.x + Math.sin(this.t * 2 + p.p) * 6, p.y, p.w + 1, p.w + 1, p.c);
       }
 
-      r.text('M I S S I O N   C O M P L E T E', S.W / 2, 18,
+      r.text(S.T('ending.header', ''), S.W / 2, 18,
         { size: 13, color: '#ffffff', align: 'center' });
       r.rect(S.W / 2 - 120, 38, 240, 1, '#5a76b8');
 
       // 랭크
       var pop = Math.min(1, this.t * 3);
       var size = Math.round(40 * pop) + 8;
-      r.text(this.rank, S.W / 2, 56, { size: size, color: R.color, align: 'center' });
-      r.text('R A N K', S.W / 2, 50, { size: 9, color: '#9fb4d8', align: 'center' });
+      r.text(this.rank, S.W / 2, 56, { size: size, color: rankColor, align: 'center' });
+      r.text(S.T('ending.rank', ''), S.W / 2, 50, { size: 9, color: '#9fb4d8', align: 'center' });
 
       if (this.t > 0.6) {
-        r.text(R.word, S.W / 2, 112, { size: 15, color: R.color, align: 'center' });
-        r.text(R.sub, S.W / 2, 134, { size: 10, color: C.text, align: 'center' });
+        r.text(rankWord, S.W / 2, 112, { size: 15, color: rankColor, align: 'center' });
+        r.text(rankSub, S.W / 2, 134, { size: 10, color: C.text, align: 'center' });
       }
 
       if (this.t > 0.9) {
@@ -6201,10 +7085,14 @@ SPIKE.BLOCK_CATS = [
         var acc = total ? Math.round(S.State.quizOk / total * 100) : 0;
         var el = Math.round(S.State.elapsed());
         var mm = Math.floor(el / 60), ss = el % 60;
+        var F = S.Text.fmt;
         var rows = [
-          ['정답률', S.State.quizOk + ' / ' + total + '   (' + acc + '%)'],
-          ['걸린 시간', mm + '분 ' + (ss < 10 ? '0' : '') + ss + '초'],
-          ['도감 수집', S.State.dexCount() + ' / ' + S.PARTS.length + ' 종']
+          [S.T('ending.rowAccuracy', ''),
+           F(S.T('ending.accFmt', ''), { ok: S.State.quizOk, total: total, pct: acc })],
+          [S.T('ending.rowTime', ''),
+           F(S.T('ending.timeFmt', ''), { m: mm, s: (ss < 10 ? '0' : '') + ss })],
+          [S.T('ending.rowDex', ''),
+           F(S.T('ending.dexFmt', ''), { n: S.State.dexCount(), total: S.PARTS.length })]
         ];
         for (var k = 0; k < rows.length; k++) {
           r.text(rows[k][0], bx + 18, 164 + k * 20, { size: 11, color: C.textHi });
@@ -6220,6 +7108,104 @@ SPIKE.BLOCK_CATS = [
   };
 
   S.Game.register('ending', Ending);
+})(SPIKE);
+
+</script>
+<script>
+/* ==== src/scenes/gameover.js ==== */
+/* ============================================================
+ *  scenes/gameover — 체력 소진
+ *
+ *  ⚠ DESIGN.md §0 은 원래 "게임오버 없음"이 확정 사항이었다.
+ *    운영 요청으로 뒤집었다. 같은 이유로 보스전의 정령 부활(§9-2)도 뺐다.
+ *    부스에서 학생이 여기서 멈추면 강사가 Ctrl+R 로 바로 다음으로 넘긴다.
+ *
+ *  체력은 퀴즈 오답으로만 줄어든다 (battle.js). 5칸.
+ * ============================================================ */
+(function (S) {
+  'use strict';
+
+  var GameOver = {
+    t: 0, ready: false, shards: [],
+
+    enter: function () {
+      this.t = 0;
+      this.ready = false;
+      S.Audio.stopBGM();
+      S.Audio.se('wrong');
+
+      /* 꺼진 허브에서 떨어져 나온 조각 — 아래로 가라앉는다 */
+      this.shards = [];
+      for (var i = 0; i < 24; i++) {
+        this.shards.push({
+          x: Math.random() * S.W,
+          y: Math.random() * S.H,
+          v: 6 + Math.random() * 14,
+          w: Math.random() < 0.5 ? 1 : 2,
+          p: Math.random() * 6
+        });
+      }
+    },
+
+    update: function (dt) {
+      this.t += dt;
+      for (var i = 0; i < this.shards.length; i++) {
+        var s = this.shards[i];
+        s.y += s.v * dt;
+        if (s.y > S.H + 4) { s.y = -4; s.x = Math.random() * S.W; }
+      }
+      if (this.t > 1.0) this.ready = true;
+      if (this.ready && (S.Input.pressed.ok || S.Input.pressed.cancel || S.Input.mouse.pressed)) {
+        S.Game.transition('attract');
+      }
+    },
+
+    draw: function (r) {
+      var C = S.C;
+      r.vgradient(0, 0, S.W, S.H, '#2a0d12', '#0b0407');
+
+      for (var i = 0; i < this.shards.length; i++) {
+        var s = this.shards[i];
+        r.ctx.globalAlpha = 0.35;
+        r.rect(s.x + Math.sin(this.t + s.p) * 3, s.y, s.w, s.w, '#7a3a44');
+        r.ctx.globalAlpha = 1;
+      }
+
+      // 꺼진 허브
+      var hub = S.Sprites.get('p_hub');
+      if (hub) {
+        r.ctx.globalAlpha = 0.22;
+        r.ctx.drawImage(hub, 0, 0, 32, 32, (S.W - 72) / 2, 40, 72, 72);
+        r.ctx.globalAlpha = 1;
+      }
+
+      var pop = Math.min(1, this.t * 2.5);
+      r.text(S.T('gameover.title', ''), S.W / 2, 126,
+        { size: Math.round(6 * pop) + 12, color: '#ff8a96', align: 'center' });
+      r.rect(S.W / 2 - 90, 152, 180, 1, '#6a2a34');
+
+      if (this.t > 0.5) {
+        r.text(S.T('gameover.sub', ''), S.W / 2, 164,
+          { size: 11, color: C.text, align: 'center' });
+      }
+
+      if (this.t > 0.9) {
+        var total = S.State.quizOk + S.State.quizNg;
+        r.text(S.Text.fmt(S.T('gameover.score', ''),
+          { ok: S.State.quizOk, total: total }), S.W / 2, 194,
+          { size: 10, color: C.textDim, align: 'center' });
+        r.text(S.T('gameover.hint', ''), S.W / 2, 216,
+          { size: 10, color: C.textHi, align: 'center' });
+      }
+
+      if (this.ready && (this.t % 1.2) < 0.7) {
+        r.text(S.T('gameover.press', ''), S.W / 2, S.H - 26,
+          { size: 10, color: '#e0b8c0', align: 'center' });
+      }
+    }
+  };
+
+  S.Game.register('gameover', GameOver);
 })(SPIKE);
 
 </script>

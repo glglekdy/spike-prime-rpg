@@ -20,11 +20,39 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #05070f;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   cursor: default;
+}
+
+/* ------------------------------------------------------------
+ *  앰비언트 색 — 지금 보고 있는 화면에 따라 core/ambient.js 가 갈아끼운다.
+ *
+ *  @property 로 등록해야 색이 "섞이면서" 넘어간다.
+ *  등록하지 않으면 transition 이 먹지 않고 색이 툭 바뀐다
+ *  (@property 미지원 브라우저에서도 그렇게 동작 — 보기엔 덜 곱지만 깨지진 않는다).
+ * ---------------------------------------------------------- */
+@property --amb1 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1b2a5e;
+}
+@property --amb2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #16305f;
+}
+
+/* 바탕색은 html 에만 둔다.
+   body 에도 칠하면 아래 body::before/::after(z-index -1)가 그 밑에 깔려 안 보인다.
+   (음수 z-index 요소는 부모의 "내용"보다는 뒤, "배경"보다도 뒤에 그려진다) */
+html {
+  background: #05070f;
+  --amb1: #1b2a5e;
+  --amb2: #16305f;
+  --amb-fade: 1.8s;
+  transition: --amb1 var(--amb-fade) ease, --amb2 var(--amb-fade) ease;
 }
 
 body {
@@ -32,6 +60,72 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'Mona12', 'Mona10', Dotum, '돋움', monospace;
+}
+
+/* ============================================================
+ *  캔버스 바깥 여백 — 아주 느리게 흐르는 밤하늘
+ *
+ *  색은 게임 안 타이틀 하늘(attract.js 의 #0a0f2a → #1b2a5e)과
+ *  메시지 윈도우(#0b1b50 → #2b4fa8) 계열에서 가져왔다.
+ *
+ *  ⚠ transform 만 움직인다.
+ *    background-position 을 애니메이션하면 매 프레임 화면 전체를 다시 칠해
+ *    게임 루프와 CPU를 다투게 된다. transform 은 합성 단계에서 처리돼
+ *    메인 스레드를 거의 쓰지 않는다.
+ *
+ *  두 겹의 주기를 서로 안 나누어떨어지게(38s / 53s) 두어
+ *  같은 무늬가 반복되는 게 눈에 띄지 않는다.
+ * ============================================================ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  /* 화면보다 조금 크게 — 최대 배율 1.16 에 이동 5% 라 이만큼이면 덮는다.
+     더 키우면 합성 레이어 메모리만 커진다 (1920x1080 기준 -40% 는 레이어당 27MB). */
+  inset: -15%;
+  z-index: -1;                 /* 캔버스 뒤, html 바탕색 위 */
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* 두 겹이 같은 두 색을 자리만 바꿔 쓴다 — 겹치면서 색이 섞여 보인다.
+ *
+ * 중간 정지점(22%)을 두어 중심 색을 한동안 유지한 뒤 옅어지게 한다.
+ * 0% 에서 바로 옅어지기 시작하면 색이 실린 면적이 좁아 거의 안 보인다. */
+body::before {
+  opacity: 0.9;
+  background:
+    radial-gradient(54% 48% at 28% 26%, var(--amb1) 0%, var(--amb1) 22%, transparent 80%),
+    radial-gradient(48% 54% at 76% 70%, var(--amb2) 0%, var(--amb2) 22%, transparent 80%);
+  animation: skyDriftA 38s ease-in-out infinite alternate;
+}
+
+body::after {
+  opacity: 0.75;
+  background:
+    radial-gradient(46% 52% at 74% 22%, var(--amb2) 0%, var(--amb2) 22%, transparent 80%),
+    radial-gradient(54% 46% at 22% 78%, var(--amb1) 0%, var(--amb1) 22%, transparent 80%);
+  animation: skyDriftB 53s ease-in-out infinite alternate;
+}
+
+@keyframes skyDriftA {
+  from { transform: translate3d(-4%, -3%, 0) scale(1.04); }
+  to   { transform: translate3d( 5%,  4%, 0) scale(1.16); }
+}
+
+@keyframes skyDriftB {
+  from { transform: translate3d( 4%,  3%, 0) scale(1.14); }
+  to   { transform: translate3d(-5%, -4%, 0) scale(1.02); }
+}
+
+/* 움직임을 줄여 달라고 설정한 환경에서는 멈춘 상태로 둔다.
+   애니메이션이 없으면 레이어로 올려 둘 이유도 없으므로 will-change 도 뗀다. */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 #game {

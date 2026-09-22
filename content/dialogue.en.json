@@ -60,10 +60,21 @@
     "sign": [
       "\" Hub Village \"\nArrows — move / Z·Enter — talk / X — codex",
       "South gate → Assembly Workshop\nLearn from the villagers first."
-    ]
+    ],
+    "desk": "Half-finished builds are piled up here.\nWhere did the owner go?",
+    "shelf": "Shelves packed with SPIKE books.\n\"What To Do When The Motor Won't Turn\" is the most worn.",
+    "tree": "An ordinary tree.\nFour of these and you could craft a workbench, surely.",
+    "bush": "Eek, there is a bug in there...!\n...on a closer look, it was a black pin.",
+    "fence": "A low fence. You cannot climb it.\nIt really looks like you could, though."
   },
   "workshop": {
     "maker": {
+      "start": [
+        "There you are.\nNow you work by hand.",
+        "The guide is on your right.\nFlip pages with Q and E.",
+        "I do not grade your work.\nYour own eyes do that.",
+        "Call me if you get stuck.\nNow — page one."
+      ],
       "find": "You need seven things.\nPull out what matches the picture.",
       "motor": "Two kinds of holes — cross and round.\nAn axle only fits the cross one.",
       "beam": "Black pins feel rough — they don't turn.\nStiff is normal. That's the point.",
@@ -72,8 +83,10 @@
       "code": "Read the spell book on the right\nand copy it into the SPIKE app.",
       "afterDone": "The north door is open.\nHead to the Teardown Room.",
       "finish": [
-        "You did it.\nThe golem waves its flag, just as you wrote!",
-        "But one gate remains.\nGo north — the Teardown Room."
+        "You did it.\nThe golem waves its flag,\njust as you wrote.",
+        "Part names, order, port —\nyour hands know them now.",
+        "But this is not the end.\nWhat you build, you undo.",
+        "The north door is open.\nGo to the Teardown Room."
       ]
     },
     "late": {
@@ -84,13 +97,26 @@
       "cable": "Did you read the port letter? It's A.",
       "code": "The block colour tells you which drawer."
     },
-    "bench": "A workbench. Parts are laid out neatly.\nThis is where you build the real robot.",
-    "quizEnemyName": "Tangled Cable"
+    "bench": "A workbench.\nParts are laid out neatly.\nBuild the real robot here.",
+    "quizEnemyName": "Tangled Cable",
+    "shelf": "Manuals, neatly filed.\nNobody has ever\nopened one.",
+    "crate": "SPIKE parcels,\npiled sky high.\nToo lazy to open them.",
+    "torch": "A torch.\nNothing spawns\nwhile this is lit."
   },
   "hubroom": {
     "altarLocked": "The Hub King still sleeps.\nTangled cables coil around him…",
-    "altarAwake": "…Thank you, apprentice mechanic.\nBrixity moves again!",
-    "bossName": "Tangled Cable"
+    "altarUntangle": "The tangled cable slides loose and falls away.\nOne by one, the 5x5 eyes light up.",
+    "altarAwake": [
+      "…Ah. A long sleep it was.\nYou woke me, apprentice mechanic.",
+      "You learned the spirits' names, raised\nthe frame yourself, and wove the spell.",
+      "Black pins hold fast, grey pins turn.\nThe port in the code and the port you\nplugged in must match. Keep those two.",
+      "And you saw it through to the end —\nreverse order, cable first, tool in hand.\nPutting it back is part of the craft.",
+      "Brixity moves again.\nThank you, mechanic. Build me another."
+    ],
+    "bossName": "Tangled Cable",
+    "bossIntro": "Zzzt... While I coil the King,\nno one takes anything apart!\nProve you know the order.",
+    "bossGone": "The untangled cable lies neatly coiled.",
+    "torch": "A torch burns quietly.\nNothing spawns where it is this bright...\n...or so you thought."
   },
   "battle": {
     "appear": "{name} appeared!\nAnswer correctly to drive it back!",
