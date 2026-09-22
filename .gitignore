@@ -8,4 +8,6 @@ Thumbs.db
 src/font/*.ttf
 
 # 웹 배포용 사본 (내용은 dist/spike-prime-rpg.html 과 동일)
+# ⚠ 이 한 줄 때문에 .vercelignore 가 필요하다.
+#   .vercelignore 가 없으면 Vercel 이 이 파일을 배포에서 걸러 버린다.
 dist/index.html

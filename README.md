@@ -31,6 +31,21 @@ GitHub 저장소를 Vercel 에 Import 하면 `vercel.json` 을 읽어 그대로 
 > 외부 요청이 하나도 없는 단일 파일이라 CDN·빌드 캐시 설정이 필요 없다.
 > ⚠ 폰트가 HTML 에 임베드된 채 공개된다 — Mona 폰트의 재배포 조건을 확인할 것.
 
+### ⚠ `.vercelignore` 를 지우지 말 것
+
+`.vercelignore` 가 없으면 Vercel 이 `.gitignore` 를 대신 적용한다.
+`.gitignore` 에는 `dist/index.html` 이 들어 있는데(빌드로 생기는 사본이라
+저장소에는 안 올린다) 그게 바로 `/` 로 서빙될 파일이라, 배포 산출물에서
+걸러지면서 빌드가 이렇게 깨진다.
+
+```
+Error: No Output Directory named "dist" found after the Build completed.
+```
+
+빌드 로그에 `→ /vercel/path0/dist/index.html` 이 찍혔는데도 위 오류가 난다면
+`.vercelignore` 가 사라졌거나, Vercel 프로젝트 설정의 **Output Directory
+override** 가 `dist` 가 아닌 값으로 켜져 있는지 확인한다.
+
 ## 개발
 
 ```bash

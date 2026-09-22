@@ -1,0 +1,17 @@
+# ⚠ 이 파일을 지우지 마세요.
+#
+# .vercelignore 가 없으면 Vercel 이 .gitignore 를 대신 적용합니다.
+# .gitignore 에는 `dist/index.html` 이 들어 있는데(빌드로 생기는 사본이라
+# 저장소에는 안 올린다), 그게 바로 웹에서 / 로 서빙될 파일입니다.
+# 즉 배포 산출물에서 그 파일이 걸러져 "No Output Directory named dist found"
+# 로 빌드가 실패합니다.
+#
+# 여기서는 dist 를 건드리지 않아, 빌드가 만든 dist/ 전체가 그대로 배포됩니다.
+
+node_modules
+*.log
+.DS_Store
+Thumbs.db
+
+# Mona 원본 TTF (합계 30MB). 배포에는 서브셋 woff2 만 있으면 된다.
+src/font/*.ttf
