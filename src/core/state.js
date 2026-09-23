@@ -17,8 +17,10 @@
     flags: {},         // 진행 플래그
     quizOk: 0,
     quizNg: 0,
-    hp: 5,
-    maxHp: 5,
+    /* 체력 = 보스전 이전 문제 수 (관문 2 + 확인 1). 그 셋을 전부 틀리면 게임오버.
+       data/quiz.js 의 S.ASK 를 고치면 여기도 같이 고쳐야 한다. */
+    hp: 3,
+    maxHp: 3,
     missionStep: 0,    // MAP2 실습 스텝 인덱스
     missionChecks: {}, // 체크리스트 상태
     codeSolved: false,
@@ -35,8 +37,8 @@
       this.flags = {};
       this.quizOk = 0;
       this.quizNg = 0;
-      this.hp = 5;
-      this.maxHp = 5;
+      this.hp = 3;
+      this.maxHp = 3;
       this.missionStep = 0;
       this.missionChecks = {};
       this.codeSolved = false;

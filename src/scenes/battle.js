@@ -8,8 +8,9 @@
 
   var PH = { INTRO: 0, ASK: 1, JUDGE: 2, WHY: 3, WIN: 4, ACT: 5 };
 
-  /* 해체 카드를 못 넘기는 시간(초). 실물을 실제로 만질 틈을 준다 (DESIGN.md §9-1) */
-  var ACT_HOLD = 1.5;
+  /* 해체 카드를 못 넘기는 시간(초). 실물을 실제로 만질 틈을 준다 (DESIGN.md §9-1).
+     5분판이라 1.5 → 1.0. 이 밑으로는 카드를 읽기도 전에 넘어간다. */
+  var ACT_HOLD = 1.0;
 
   /* 보기 배치 열 수 — _choiceRect 와 _pick 이 같은 값을 봐야 한다 */
   var COLS = 2;
@@ -33,7 +34,8 @@
       this.strict = !!p.strict;
 
 
-      var set = S.QUIZ[p.quizSet] || S.QUIZ.gate;
+      /* 풀 전체가 아니라 S.ASK 가 정한 수만큼만 낸다 (data/quiz.js) */
+      var set = S.pickQuiz(p.quizSet);
       this.src = set;                       // 재출제할 때 원본에서 다시 섞는다
       this.qs = set.map(function (q) { return S.shuffleQuiz(q); });
       this.qi = 0; this.sel = 0;

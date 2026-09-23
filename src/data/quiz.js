@@ -38,6 +38,36 @@
     return S.QUIZ;
   };
 
+  /* ------------------------------------------------------------
+   *  세트별 출제 수 (5분판).
+   *
+   *  문제 풀(quiz.<언어>.json)은 9문제 그대로 두고, 몇 개를 낼지만 줄인다.
+   *  10분판으로 되돌리려면 이 표를 3 / 2 / 4 로 올리고
+   *  state.js 의 hp/maxHp 를 5 로 되돌리면 된다 (§10-1).
+   *
+   *  보스는 줄이지 않는다 — 4문제가 곧 실물 해체 4단계라, 하나라도 빠지면
+   *  트레이 정리까지 가지 못한다 (DESIGN.md §9-1).
+   * ---------------------------------------------------------- */
+  S.ASK = { gate: 2, mission: 1, boss: 4 };
+
+  /* 실제로 출제할 목록. 풀보다 적게 낼 때는 매번 다른 문제가 나온다
+     (부스에서 같은 학생이 두 번 앉기도 한다). 보스만 순서를 지킨다. */
+  S.pickQuiz = function (setName) {
+    var pool = S.QUIZ[setName] || S.QUIZ.gate || [];
+    var n = S.ASK[setName];
+    if (!n || n >= pool.length) return pool.slice();
+    if (setName === 'boss') return pool.slice(0, n);   // 해체 순서 고정
+
+    var idx = pool.map(function (_, i) { return i; });
+    for (var i = idx.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    return idx.slice(0, n)
+      .sort(function (a, b) { return a - b; })       // 고른 뒤 원래 순서로
+      .map(function (i) { return pool[i]; });
+  };
+
   /* 보기 섞기 (정답 공유 방지). 정답 인덱스를 다시 계산해 돌려준다. */
   S.shuffleQuiz = function (q) {
     var pairs = q.choices.map(function (c, i) { return { c: c, ok: i === q.ans }; });

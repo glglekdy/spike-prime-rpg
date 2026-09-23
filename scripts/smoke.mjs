@@ -260,9 +260,14 @@ scene('필드 — 해체의 방', () => {
 scene('엔딩', () => { S.Game.change('ending'); frames(200, { ok: 40 }); });
 
 /* 체력이 0 이 되면 게임오버 (DESIGN.md §0 의 "게임오버 없음"은 운영 요청으로 뒤집혔다).
-   비보스 문제는 관문 3 + 케이블 2 = 5개, 체력도 5 라 전부 틀리면 마지막에 0 이 된다. */
+   비보스 문제는 관문 + 케이블, 체력도 그 수와 같게 잡혀 있어(S.ASK / State.maxHp)
+   전부 틀리면 마지막 문제에서 0 이 된다. 5분판에서는 2 + 1 = 3 개다. */
 scene('게임오버 — 체력 소진', () => {
   S.State.reset();
+  const nonBoss = S.ASK.gate + S.ASK.mission;
+  if (S.State.maxHp !== nonBoss) {
+    throw new Error(`체력(${S.State.maxHp})이 비보스 문제 수(${nonBoss})와 다르다 — 전부 틀려도 게임오버가 안 나거나 너무 일찍 난다`);
+  }
   const allWrong = (set, back) => {
     S.Game._pending = null; S.Game._fade = 0; S.Game._fadeDir = 0;
     S.Game.change('battle', { enemy: 'e_pin', enemyName: 'T', quizSet: set, back, onWin: () => {} });
@@ -273,7 +278,9 @@ scene('게임오버 — 체력 소진', () => {
     }
   };
   allWrong('gate', { map: 'village' });
-  if (S.State.hp !== 2) throw new Error('관문 3문제 오답 후 체력이 2 가 아니다: ' + S.State.hp);
+  if (S.State.hp !== S.ASK.mission) {
+    throw new Error(`관문 ${S.ASK.gate}문제 오답 후 체력이 ${S.ASK.mission} 이 아니다: ` + S.State.hp);
+  }
   allWrong('mission', { map: 'workshop' });
   if (S.State.hp !== 0) throw new Error('체력이 0 이 아니다: ' + S.State.hp);
   if (S.Game.sceneName !== 'gameover') throw new Error('게임오버로 안 갔다: ' + S.Game.sceneName);
@@ -283,6 +290,22 @@ scene('게임오버 — 체력 소진', () => {
   frames(1, { ok: 1 });
   for (let i = 0; i < 200 && S.Game.sceneName === 'gameover'; i++) frames(1);
   if (S.Game.sceneName !== 'attract') throw new Error('게임오버 → 타이틀로 안 갔다: ' + S.Game.sceneName);
+});
+
+/* 5분판 예산 — 숫자가 슬금슬금 늘어나면 부스 회전이 무너진다 (DESIGN.md §4-1) */
+scene('5분 예산 검사', () => {
+  if (S.TOTAL_SECONDS !== 300) throw new Error('TOTAL_SECONDS 가 300 이 아니다: ' + S.TOTAL_SECONDS);
+  const guide = S.GUIDE_PAGES.reduce((n, p) => n + p.budget, 0);
+  if (guide > 160) throw new Error('가이드 예산 합계가 160초를 넘는다: ' + guide);
+  const asked = S.ASK.gate + S.ASK.mission + S.ASK.boss;
+  if (asked > 7) throw new Error('출제 수가 7문제를 넘는다: ' + asked);
+  if (S.ASK.boss !== S.QUIZ.boss.length) throw new Error('보스 문제는 줄일 수 없다 (해체 4단계)');
+  for (const set of Object.keys(S.ASK)) {
+    const got = S.pickQuiz(set);
+    if (got.length !== S.ASK[set]) throw new Error(set + ' 출제 수 불일치: ' + got.length);
+  }
+  process.stdout.write(`       타이머 ${S.TOTAL_SECONDS}초 · 가이드 ${guide}초 · 출제 ${asked}문제
+`);
 });
 
 scene('무인 자동복귀 (Idle)', () => {

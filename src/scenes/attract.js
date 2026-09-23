@@ -1,6 +1,6 @@
 /* ============================================================
  *  scenes/attract — 타이틀 & 어트랙트 (다음 학생 대기 화면)
- *  scenes/opening — 20초 오프닝 (Z로 스킵)
+ *  scenes/opening — 오프닝 내레이션 (X로 스킵). 5분판 예산 10초
  * ============================================================ */
 (function (S) {
   'use strict';
@@ -125,7 +125,7 @@
 
     enter: function () {
       this.page = 0; this.t = 0;
-      this.mw = new S.MessageWindow({ y: S.H - 90, h: 74, speed: 48 });
+      this.mw = new S.MessageWindow({ y: S.H - 90, h: 74, speed: 64 });
       S.Audio.playBGM('title');
       this._show();
     },

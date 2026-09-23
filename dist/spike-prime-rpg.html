@@ -3,7 +3,7 @@
   SPIKE 마스터 ~잠든 허브 왕~
   중학생 학과체험용 SPIKE Prime 안내 RPG
   단일 파일 배포본 — 인터넷 없이 더블클릭으로 실행됩니다.
-  빌드: 2026-09-22 03:04
+  빌드: 2026-09-23 01:22
 -->
 <html lang="ko">
 <head>
@@ -644,7 +644,7 @@ body::after {
     "그러나 어느 날, 뒤엉킨 케이블이 왕을 감쌌고\n5×5의 눈은 빛을 잃었다.",
     "멈춰버린 왕국. 남은 희망은 단 하나 —\n오늘 부임한 견습 메카닉, 바로 당신이다.",
     "부품을 익히고, 직접 손으로 조립하고,\n주문(코드)을 엮어 왕을 깨워라.",
-    "제한 시간은 10분.\n…시작하자."
+    "제한 시간은 5분.\n…시작하자."
   ]
 }
 
@@ -1419,7 +1419,7 @@ body::after {
     "Then one day tangled cables coiled around him\nand the 5x5 eyes went dark.",
     "A kingdom stopped. One hope remains —\nthe apprentice mechanic who started today. You.",
     "Learn the parts, build with your own hands,\nweave the spell — the code — and wake the king.",
-    "You have ten minutes.\n…Let us begin."
+    "You have five minutes.\n…Let us begin."
   ]
 }
 
@@ -1685,8 +1685,21 @@ SPIKE.W = 384;   // 논리 가로
 SPIKE.H = 288;   // 논리 세로
 SPIKE.TILE = 16; // 타일 한 변
 
-/* 전체 체험 제한시간 (초). 참고용 타이머 — 강제 진행은 하지 않는다. */
-SPIKE.TOTAL_SECONDS = 600;
+/* 전체 체험 제한시간 (초). 참고용 타이머 — 강제 진행은 하지 않는다.
+ *
+ *  5분판 타임라인 (DESIGN.md §4-1). 10분판에서 전 구간을 절반으로 줄였다.
+ *    0:00~0:10  오프닝
+ *    0:10~1:00  MAP1 허브 마을 (카드 + 관문 퀴즈 2문제)
+ *    1:00~3:45  MAP2 조립 공방 (가이드 6장 + 확인 퀴즈 1문제)
+ *    3:45~4:40  MAP3 해체의 방 (보스 4문제 = 해체 4단계)
+ *    4:40~5:00  엔딩
+ *
+ *  ⚠ 이 값만 바꾸면 10분판으로 못 돌아간다. 같이 봐야 하는 곳:
+ *    data/steps.js  S.GUIDE_PAGES 의 budget (가이드 6장 합계 150초)
+ *    data/quiz.js   S.ASK (세트별 출제 수)
+ *    core/state.js  hp/maxHp (= 비보스 문제 수)
+ */
+SPIKE.TOTAL_SECONDS = 300;
 
 /* 쯔꾸르풍 팔레트 */
 SPIKE.C = {
@@ -3475,8 +3488,10 @@ SPIKE.BLOCK_CATS = [
     flags: {},         // 진행 플래그
     quizOk: 0,
     quizNg: 0,
-    hp: 5,
-    maxHp: 5,
+    /* 체력 = 보스전 이전 문제 수 (관문 2 + 확인 1). 그 셋을 전부 틀리면 게임오버.
+       data/quiz.js 의 S.ASK 를 고치면 여기도 같이 고쳐야 한다. */
+    hp: 3,
+    maxHp: 3,
     missionStep: 0,    // MAP2 실습 스텝 인덱스
     missionChecks: {}, // 체크리스트 상태
     codeSolved: false,
@@ -3493,8 +3508,8 @@ SPIKE.BLOCK_CATS = [
       this.flags = {};
       this.quizOk = 0;
       this.quizNg = 0;
-      this.hp = 5;
-      this.maxHp = 5;
+      this.hp = 3;
+      this.maxHp = 3;
       this.missionStep = 0;
       this.missionChecks = {};
       this.codeSolved = false;
@@ -4138,6 +4153,36 @@ SPIKE.BLOCK_CATS = [
     return S.QUIZ;
   };
 
+  /* ------------------------------------------------------------
+   *  세트별 출제 수 (5분판).
+   *
+   *  문제 풀(quiz.<언어>.json)은 9문제 그대로 두고, 몇 개를 낼지만 줄인다.
+   *  10분판으로 되돌리려면 이 표를 3 / 2 / 4 로 올리고
+   *  state.js 의 hp/maxHp 를 5 로 되돌리면 된다 (§10-1).
+   *
+   *  보스는 줄이지 않는다 — 4문제가 곧 실물 해체 4단계라, 하나라도 빠지면
+   *  트레이 정리까지 가지 못한다 (DESIGN.md §9-1).
+   * ---------------------------------------------------------- */
+  S.ASK = { gate: 2, mission: 1, boss: 4 };
+
+  /* 실제로 출제할 목록. 풀보다 적게 낼 때는 매번 다른 문제가 나온다
+     (부스에서 같은 학생이 두 번 앉기도 한다). 보스만 순서를 지킨다. */
+  S.pickQuiz = function (setName) {
+    var pool = S.QUIZ[setName] || S.QUIZ.gate || [];
+    var n = S.ASK[setName];
+    if (!n || n >= pool.length) return pool.slice();
+    if (setName === 'boss') return pool.slice(0, n);   // 해체 순서 고정
+
+    var idx = pool.map(function (_, i) { return i; });
+    for (var i = idx.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    return idx.slice(0, n)
+      .sort(function (a, b) { return a - b; })       // 고른 뒤 원래 순서로
+      .map(function (i) { return pool[i]; });
+  };
+
   /* 보기 섞기 (정답 공유 방지). 정답 인덱스를 다시 계산해 돌려준다. */
   S.shuffleQuiz = function (q) {
     var pairs = q.choices.map(function (c, i) { return { c: c, ok: i === q.ans }; });
@@ -4419,11 +4464,16 @@ SPIKE.BLOCK_CATS = [
         fd.say({ name: N('gran'), text: S.D('village.gran.repeat', '') });
         return;
       }
+      /* 5분판이라 카드는 4장만 넘긴다 (10분판은 6장).
+         오늘 실제로 쓰는 허브·중형 모터에, 후킹용 센서 2종까지.
+         나머지는 대장장이 쪽과 같은 방식으로 도감에만 조용히 올린다 —
+         X(도감)로 언제든 볼 수 있고 수집률 100% 도 그대로다. */
       fd.say(lines('gran', 'village.gran.intro'), function () {
         S.Game.push('cards', {
           title: S.D('village.gran.cardsTitle', ''),
-          ids: ['hub', 'motorL', 'motorM', 'color', 'dist', 'force'],
+          ids: ['hub', 'motorM', 'dist', 'color'],
           onDone: function () {
+            ['motorL', 'force'].forEach(function (id) { S.State.learn(id); });
             f.talked_gran = true;
             fd.say(lines('gran', 'village.gran.afterCards'));
           }
@@ -4597,23 +4647,26 @@ SPIKE.BLOCK_CATS = [
 (function (S) {
   'use strict';
 
+  /* budget = 페이지당 예산(초). 페이스메이커 표시일 뿐 강제하지 않는다.
+     5분판 배분 — 합계 150초, 확인 퀴즈 1문제까지 더해 MAP2 가 2분 45초다.
+     (10분판은 40/50/60/40/40/100 = 330초였다. DESIGN.md §7-2) */
   S.GUIDE_PAGES = [
-    { id: 'find',  budget: 40,  diagram: 'd_parts',
+    { id: 'find',  budget: 20,  diagram: 'd_parts',
       learn: ['hub', 'motorM', 'cable', 'beam', 'connector', 'pinBlack', 'flag'] },
 
-    { id: 'motor', budget: 50,  diagram: 'd_motor',
+    { id: 'motor', budget: 25,  diagram: 'd_motor',
       learn: ['connector', 'motorM'] },
 
-    { id: 'beam',  budget: 60,  diagram: 'd_beam',
+    { id: 'beam',  budget: 25,  diagram: 'd_beam',
       learn: ['beam', 'pinBlack'] },
 
-    { id: 'flag',  budget: 40,  diagram: 'd_flag',
+    { id: 'flag',  budget: 15,  diagram: 'd_flag',
       learn: ['flag'], toast: 'guide.flag.toast' },
 
-    { id: 'cable', budget: 40,  diagram: 'd_cable',
+    { id: 'cable', budget: 20,  diagram: 'd_cable',
       learn: ['cable', 'hub'], onLeave: 'quiz:mission' },
 
-    { id: 'code',  budget: 100, diagram: 'd_code',
+    { id: 'code',  budget: 45,  diagram: 'd_code',
       learn: [], full: true, last: true }
   ];
 
@@ -4701,7 +4754,9 @@ SPIKE.BLOCK_CATS = [
     this.w = opt.w == null ? S.W - 16 : opt.w;
     this.h = opt.h == null ? 74 : opt.h;
     this.y = opt.y == null ? S.H - this.h - 8 : opt.y;
-    this.speed = opt.speed == null ? 42 : opt.speed;  // 글자/초
+    /* 글자/초. 타이핑은 연출일 뿐이라 (확인키로 즉시 완성) 빠를수록 좋다.
+       5분판에서 42 는 대사만으로 30초 넘게 잡아먹었다. */
+    this.speed = opt.speed == null ? 56 : opt.speed;
 
     this.queue = [];
     this.cur = null;
@@ -5323,7 +5378,7 @@ SPIKE.BLOCK_CATS = [
 
       // 분할 맵에서는 이 패널이 유일한 타이머 표시다 — 대기 중에도 보여 준다
       r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
-      var late = S.State.remaining() < 120;
+      var late = S.State.remaining() < 60;   // 남은 1분부터 빨강 (전체의 1/5)
       r.text(S.State.clock(), x0 + PW / 2, FOOT_Y + 8,
         { size: 11, align: 'center',
           color: S.State.paused ? C.textDim : (late ? C.textNg : C.text) });
@@ -5429,7 +5484,7 @@ SPIKE.BLOCK_CATS = [
 /* ==== src/scenes/attract.js ==== */
 /* ============================================================
  *  scenes/attract — 타이틀 & 어트랙트 (다음 학생 대기 화면)
- *  scenes/opening — 20초 오프닝 (Z로 스킵)
+ *  scenes/opening — 오프닝 내레이션 (X로 스킵). 5분판 예산 10초
  * ============================================================ */
 (function (S) {
   'use strict';
@@ -5554,7 +5609,7 @@ SPIKE.BLOCK_CATS = [
 
     enter: function () {
       this.page = 0; this.t = 0;
-      this.mw = new S.MessageWindow({ y: S.H - 90, h: 74, speed: 48 });
+      this.mw = new S.MessageWindow({ y: S.H - 90, h: 74, speed: 64 });
       S.Audio.playBGM('title');
       this._show();
     },
@@ -5745,7 +5800,8 @@ SPIKE.BLOCK_CATS = [
       if (from && from.toast) this.showToast(S.T(from.toast, ''));
     },
 
-    /* 케이블 페이지 → 확인 퀴즈 2문제 (기존 battle 씬 재사용, 추가 구현 0) */
+    /* 케이블 페이지 → 확인 퀴즈 (기존 battle 씬 재사용, 추가 구현 0).
+       몇 문제를 낼지는 data/quiz.js 의 S.ASK.mission 이 정한다. */
     _quiz: function () {
       var self = this;
       this.busy = true;
@@ -5799,11 +5855,12 @@ SPIKE.BLOCK_CATS = [
       fd.say({ name: who, text: S.pageText.maker(p) });
     },
 
-    /* 예산 초과 시 재촉 (페이지당 1회) */
+    /* 예산 초과 시 재촉 (페이지당 1회).
+       5분판이라 유예도 절반이다 — 예산 + 10초. */
     checkLate: function (fd) {
       var p = this.page();
       if (!p || this.lateSaid) return;
-      if (this.pageT < p.budget + 20) return;
+      if (this.pageT < p.budget + 10) return;
       this.lateSaid = true;
       var line = S.pageText.late(p);
       if (line && fd && !fd.mw.active) fd.say({ name: maker(), text: line });
@@ -6614,8 +6671,9 @@ SPIKE.BLOCK_CATS = [
 
   var PH = { INTRO: 0, ASK: 1, JUDGE: 2, WHY: 3, WIN: 4, ACT: 5 };
 
-  /* 해체 카드를 못 넘기는 시간(초). 실물을 실제로 만질 틈을 준다 (DESIGN.md §9-1) */
-  var ACT_HOLD = 1.5;
+  /* 해체 카드를 못 넘기는 시간(초). 실물을 실제로 만질 틈을 준다 (DESIGN.md §9-1).
+     5분판이라 1.5 → 1.0. 이 밑으로는 카드를 읽기도 전에 넘어간다. */
+  var ACT_HOLD = 1.0;
 
   /* 보기 배치 열 수 — _choiceRect 와 _pick 이 같은 값을 봐야 한다 */
   var COLS = 2;
@@ -6639,7 +6697,8 @@ SPIKE.BLOCK_CATS = [
       this.strict = !!p.strict;
 
 
-      var set = S.QUIZ[p.quizSet] || S.QUIZ.gate;
+      /* 풀 전체가 아니라 S.ASK 가 정한 수만큼만 낸다 (data/quiz.js) */
+      var set = S.pickQuiz(p.quizSet);
       this.src = set;                       // 재출제할 때 원본에서 다시 섞는다
       this.qs = set.map(function (q) { return S.shuffleQuiz(q); });
       this.qi = 0; this.sel = 0;
@@ -7120,7 +7179,7 @@ SPIKE.BLOCK_CATS = [
  *    운영 요청으로 뒤집었다. 같은 이유로 보스전의 정령 부활(§9-2)도 뺐다.
  *    부스에서 학생이 여기서 멈추면 강사가 Ctrl+R 로 바로 다음으로 넘긴다.
  *
- *  체력은 퀴즈 오답으로만 줄어든다 (battle.js). 5칸.
+ *  체력은 퀴즈 오답으로만 줄어든다 (battle.js). 3칸 (= 보스전 이전 문제 수).
  * ============================================================ */
 (function (S) {
   'use strict';

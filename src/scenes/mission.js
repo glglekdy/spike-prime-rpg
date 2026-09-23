@@ -131,7 +131,8 @@
       if (from && from.toast) this.showToast(S.T(from.toast, ''));
     },
 
-    /* 케이블 페이지 → 확인 퀴즈 2문제 (기존 battle 씬 재사용, 추가 구현 0) */
+    /* 케이블 페이지 → 확인 퀴즈 (기존 battle 씬 재사용, 추가 구현 0).
+       몇 문제를 낼지는 data/quiz.js 의 S.ASK.mission 이 정한다. */
     _quiz: function () {
       var self = this;
       this.busy = true;
@@ -185,11 +186,12 @@
       fd.say({ name: who, text: S.pageText.maker(p) });
     },
 
-    /* 예산 초과 시 재촉 (페이지당 1회) */
+    /* 예산 초과 시 재촉 (페이지당 1회).
+       5분판이라 유예도 절반이다 — 예산 + 10초. */
     checkLate: function (fd) {
       var p = this.page();
       if (!p || this.lateSaid) return;
-      if (this.pageT < p.budget + 20) return;
+      if (this.pageT < p.budget + 10) return;
       this.lateSaid = true;
       var line = S.pageText.late(p);
       if (line && fd && !fd.mw.active) fd.say({ name: maker(), text: line });

@@ -10,23 +10,26 @@
 (function (S) {
   'use strict';
 
+  /* budget = 페이지당 예산(초). 페이스메이커 표시일 뿐 강제하지 않는다.
+     5분판 배분 — 합계 150초, 확인 퀴즈 1문제까지 더해 MAP2 가 2분 45초다.
+     (10분판은 40/50/60/40/40/100 = 330초였다. DESIGN.md §7-2) */
   S.GUIDE_PAGES = [
-    { id: 'find',  budget: 40,  diagram: 'd_parts',
+    { id: 'find',  budget: 20,  diagram: 'd_parts',
       learn: ['hub', 'motorM', 'cable', 'beam', 'connector', 'pinBlack', 'flag'] },
 
-    { id: 'motor', budget: 50,  diagram: 'd_motor',
+    { id: 'motor', budget: 25,  diagram: 'd_motor',
       learn: ['connector', 'motorM'] },
 
-    { id: 'beam',  budget: 60,  diagram: 'd_beam',
+    { id: 'beam',  budget: 25,  diagram: 'd_beam',
       learn: ['beam', 'pinBlack'] },
 
-    { id: 'flag',  budget: 40,  diagram: 'd_flag',
+    { id: 'flag',  budget: 15,  diagram: 'd_flag',
       learn: ['flag'], toast: 'guide.flag.toast' },
 
-    { id: 'cable', budget: 40,  diagram: 'd_cable',
+    { id: 'cable', budget: 20,  diagram: 'd_cable',
       learn: ['cable', 'hub'], onLeave: 'quiz:mission' },
 
-    { id: 'code',  budget: 100, diagram: 'd_code',
+    { id: 'code',  budget: 45,  diagram: 'd_code',
       learn: [], full: true, last: true }
   ];
 

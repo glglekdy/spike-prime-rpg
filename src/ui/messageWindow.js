@@ -15,7 +15,9 @@
     this.w = opt.w == null ? S.W - 16 : opt.w;
     this.h = opt.h == null ? 74 : opt.h;
     this.y = opt.y == null ? S.H - this.h - 8 : opt.y;
-    this.speed = opt.speed == null ? 42 : opt.speed;  // 글자/초
+    /* 글자/초. 타이핑은 연출일 뿐이라 (확인키로 즉시 완성) 빠를수록 좋다.
+       5분판에서 42 는 대사만으로 30초 넘게 잡아먹었다. */
+    this.speed = opt.speed == null ? 56 : opt.speed;
 
     this.queue = [];
     this.cur = null;

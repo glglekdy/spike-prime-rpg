@@ -370,7 +370,7 @@
 
       // 분할 맵에서는 이 패널이 유일한 타이머 표시다 — 대기 중에도 보여 준다
       r.rect(x0 + 2, FOOT_Y, PW - 4, 1, C.winEdge2);
-      var late = S.State.remaining() < 120;
+      var late = S.State.remaining() < 60;   // 남은 1분부터 빨강 (전체의 1/5)
       r.text(S.State.clock(), x0 + PW / 2, FOOT_Y + 8,
         { size: 11, align: 'center',
           color: S.State.paused ? C.textDim : (late ? C.textNg : C.text) });

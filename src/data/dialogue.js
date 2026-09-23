@@ -43,11 +43,16 @@
         fd.say({ name: N('gran'), text: S.D('village.gran.repeat', '') });
         return;
       }
+      /* 5분판이라 카드는 4장만 넘긴다 (10분판은 6장).
+         오늘 실제로 쓰는 허브·중형 모터에, 후킹용 센서 2종까지.
+         나머지는 대장장이 쪽과 같은 방식으로 도감에만 조용히 올린다 —
+         X(도감)로 언제든 볼 수 있고 수집률 100% 도 그대로다. */
       fd.say(lines('gran', 'village.gran.intro'), function () {
         S.Game.push('cards', {
           title: S.D('village.gran.cardsTitle', ''),
-          ids: ['hub', 'motorL', 'motorM', 'color', 'dist', 'force'],
+          ids: ['hub', 'motorM', 'dist', 'color'],
           onDone: function () {
+            ['motorL', 'force'].forEach(function (id) { S.State.learn(id); });
             f.talked_gran = true;
             fd.say(lines('gran', 'village.gran.afterCards'));
           }
